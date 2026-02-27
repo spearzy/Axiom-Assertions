@@ -110,6 +110,19 @@ dotnet build Axiom.sln -c Release
 dotnet test Axiom.sln -c Release
 ```
 
+## Benchmarks
+
+Run the current benchmark suite:
+
+```bash
+dotnet run -c Release --project benchmarks/Axiom.Benchmarks/Axiom.Benchmarks.csproj
+```
+
+Current scenarios:
+- `StartWith_Pass_OutsideBatch`
+- `StartWith_Fail_OutsideBatch` (exception caught inside benchmark)
+- `StartWith_Fail_InsideBatch` (aggregated throw on batch dispose)
+
 ## Contributing
 
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
