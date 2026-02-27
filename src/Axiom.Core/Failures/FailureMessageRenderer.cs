@@ -4,7 +4,7 @@ public static class FailureMessageRenderer
 {
     public static string Render(Failure failure, IValueFormatter? formatter = null)
     {
-        var valueFormatter = formatter ?? DefaultValueFormatter.Instance;
+        var valueFormatter = formatter ?? AxiomServices.Configuration.ValueFormatter;
         var expectation = failure.Expectation;
 
         if (expectation.IncludeExpectedValue)
