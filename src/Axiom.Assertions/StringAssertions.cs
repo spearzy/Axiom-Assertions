@@ -37,7 +37,8 @@ public sealed class StringAssertions
     public AndContinuation<StringAssertions> EndWith(string expectedSuffix)
     {
         var subject = Subject;
-        if (subject is null) {
+        if (subject is null)
+        {
             Fail($"Expected {SubjectLabel()} to end with \"{expectedSuffix}\", but found <null>.");
             return new AndContinuation<StringAssertions>(this);
         }
