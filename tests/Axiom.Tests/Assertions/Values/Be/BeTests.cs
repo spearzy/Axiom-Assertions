@@ -22,4 +22,15 @@ public sealed class BeTests
         const string expected = "Expected value to be 7, but found 42.";
         Xunit.Assert.Equal(expected, ex.Message);
     }
+
+    [Fact]
+    public void Be_Throws_WithReason_WhenProvided()
+    {
+        var value = 42;
+
+        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+            value.Should().Be(7, "input should align with seeded data"));
+
+        Xunit.Assert.Contains("because input should align with seeded data", ex.Message);
+    }
 }

@@ -14,21 +14,22 @@ public sealed class StringAssertions
         SubjectExpression = subjectExpression;
     }
 
-    public AndContinuation<StringAssertions> NotBeNull()
+    public AndContinuation<StringAssertions> NotBeNull(string? because = null)
     {
         if (Subject is null)
         {
             var failure = new Failure(
                 SubjectLabel(),
                 new Expectation("to not be null", IncludeExpectedValue: false),
-                Subject);
+                Subject,
+                because);
             Fail(FailureMessageRenderer.Render(failure));
         }
 
         return new AndContinuation<StringAssertions>(this);
     }
 
-    public AndContinuation<StringAssertions> StartWith(string expectedPrefix)
+    public AndContinuation<StringAssertions> StartWith(string expectedPrefix, string? because = null)
     {
         var subject = Subject;
         if (subject is null)
@@ -36,7 +37,8 @@ public sealed class StringAssertions
             var failure = new Failure(
                 SubjectLabel(),
                 new Expectation("to start with", expectedPrefix),
-                subject);
+                subject,
+                because);
             Fail(FailureMessageRenderer.Render(failure));
             return new AndContinuation<StringAssertions>(this);
         }
@@ -46,14 +48,15 @@ public sealed class StringAssertions
             var failure = new Failure(
                 SubjectLabel(),
                 new Expectation("to start with", expectedPrefix),
-                subject);
+                subject,
+                because);
             Fail(FailureMessageRenderer.Render(failure));
         }
 
         return new AndContinuation<StringAssertions>(this);
     }
 
-    public AndContinuation<StringAssertions> EndWith(string expectedSuffix)
+    public AndContinuation<StringAssertions> EndWith(string expectedSuffix, string? because = null)
     {
         var subject = Subject;
         if (subject is null)
@@ -61,7 +64,8 @@ public sealed class StringAssertions
             var failure = new Failure(
                 SubjectLabel(),
                 new Expectation("to end with", expectedSuffix),
-                subject);
+                subject,
+                because);
             Fail(FailureMessageRenderer.Render(failure));
             return new AndContinuation<StringAssertions>(this);
         }
@@ -71,7 +75,8 @@ public sealed class StringAssertions
             var failure = new Failure(
                 SubjectLabel(),
                 new Expectation("to end with", expectedSuffix),
-                subject);
+                subject,
+                because);
             Fail(FailureMessageRenderer.Render(failure));
         }
 

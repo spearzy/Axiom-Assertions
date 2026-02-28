@@ -29,4 +29,19 @@ public sealed class FailureMessageRendererTests
         const string expected = "Expected value to not be null, but found <null>.";
         Xunit.Assert.Equal(expected, message);
     }
+
+    [Fact]
+    public void Render_WithReason_IncludesBecauseClause()
+    {
+        var failure = new Failure(
+            "value",
+            new Expectation("to be", 7),
+            42,
+            "input should match seeded data");
+
+        var message = FailureMessageRenderer.Render(failure);
+
+        const string expected = "Expected value to be 7 because input should match seeded data, but found 42.";
+        Xunit.Assert.Equal(expected, message);
+    }
 }

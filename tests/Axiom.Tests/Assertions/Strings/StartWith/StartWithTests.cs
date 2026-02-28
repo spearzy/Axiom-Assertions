@@ -25,4 +25,15 @@ public sealed class StartWithTests
         Xunit.Assert.Contains("ab", ex.Message);
         Xunit.Assert.Contains("test", ex.Message);
     }
+
+    [Fact]
+    public void StartWith_Throws_WithReason_WhenProvided()
+    {
+        string? value = "test";
+
+        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+            value.Should().StartWith("ab", "the ID prefix is required"));
+
+        Xunit.Assert.Contains("because the ID prefix is required", ex.Message);
+    }
 }
