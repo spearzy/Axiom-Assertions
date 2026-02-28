@@ -1,3 +1,5 @@
+using Axiom.Assertions.EntryPoints;
+
 namespace Axiom.Tests.Assertions.Values.Be;
 
 public sealed class BeTests

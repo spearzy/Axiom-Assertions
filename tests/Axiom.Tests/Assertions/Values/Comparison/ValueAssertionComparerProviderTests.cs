@@ -1,3 +1,5 @@
+using Axiom.Assertions.EntryPoints;
+
 namespace Axiom.Tests.Assertions.Values.Comparison;
 
 public sealed class ValueAssertionComparerProviderTests : IDisposable

@@ -1,3 +1,5 @@
+using Axiom.Assertions.EntryPoints;
+
 namespace Axiom.Tests.Assertions.Values.Chaining;
 
 public sealed class ValueChainingTests

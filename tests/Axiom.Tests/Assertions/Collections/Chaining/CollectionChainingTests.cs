@@ -1,3 +1,6 @@
+using Axiom.Assertions.EntryPoints;
+using Axiom.Assertions.Extensions;
+
 namespace Axiom.Tests.Assertions.Collections.Chaining;
 
 public sealed class CollectionChainingTests

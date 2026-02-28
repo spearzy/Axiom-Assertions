@@ -1,4 +1,5 @@
 using Axiom.Assertions;
+using Axiom.Assertions.EntryPoints;
 using Axiom.Core;
 using BenchmarkDotNet.Attributes;
 

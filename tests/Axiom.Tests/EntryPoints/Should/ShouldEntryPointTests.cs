@@ -1,4 +1,6 @@
 
+using Axiom.Assertions.EntryPoints;
+
 namespace Axiom.Tests.EntryPoints.Should;
 
 public sealed class ShouldEntryPointTests

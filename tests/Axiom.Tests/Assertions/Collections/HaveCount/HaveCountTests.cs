@@ -1,3 +1,6 @@
+using Axiom.Assertions.EntryPoints;
+using Axiom.Assertions.Extensions;
+
 namespace Axiom.Tests.Assertions.Collections.HaveCount;
 
 public sealed class HaveCountTests

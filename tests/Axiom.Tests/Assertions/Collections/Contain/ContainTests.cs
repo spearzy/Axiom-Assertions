@@ -1,3 +1,6 @@
+using Axiom.Assertions.EntryPoints;
+using Axiom.Assertions.Extensions;
+
 namespace Axiom.Tests.Assertions.Collections.Contain;
 
 public sealed class ContainTests

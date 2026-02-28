@@ -1,3 +1,5 @@
+using Axiom.Assertions.EntryPoints;
+
 namespace Axiom.Tests.Batch;
 
 public sealed class BatchAssertionRoutingTests

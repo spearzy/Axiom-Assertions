@@ -1,3 +1,5 @@
+using Axiom.Assertions.EntryPoints;
+
 namespace Axiom.Tests.Assertions.Strings.Chaining;
 
 public sealed class StringChainingTests
