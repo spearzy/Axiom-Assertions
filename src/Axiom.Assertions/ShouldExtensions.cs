@@ -13,4 +13,14 @@ public static class ShouldExtensions
         this Action subject,
         [CallerArgumentExpression("subject")] string? subjectExpression = null)
         => new(subject, subjectExpression);
+
+    public static AsyncActionAssertions Should(
+        this Func<Task> subject,
+        [CallerArgumentExpression("subject")] string? subjectExpression = null)
+        => new(() => new ValueTask(subject()), subjectExpression);
+
+    public static AsyncActionAssertions Should(
+        this Func<ValueTask> subject,
+        [CallerArgumentExpression("subject")] string? subjectExpression = null)
+        => new(subject, subjectExpression);
 }
