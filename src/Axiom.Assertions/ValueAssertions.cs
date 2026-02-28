@@ -1,3 +1,7 @@
+using Axiom.Core;
+using Axiom.Core.Configuration;
+using Axiom.Core.Failures;
+
 namespace Axiom.Assertions;
 
 public sealed class ValueAssertions<T>
@@ -13,11 +17,60 @@ public sealed class ValueAssertions<T>
 
     public AndContinuation<ValueAssertions<T>> Be(T expected)
     {
+        var comparer = GetComparer();
+        if (!comparer.Equals(Subject, expected))
+        {
+            var failure = new Failure(
+                SubjectLabel(),
+                new Expectation("to be", expected),
+                Subject);
+            Fail(FailureMessageRenderer.Render(failure));
+        }
+
         return new AndContinuation<ValueAssertions<T>>(this);
     }
 
     public AndContinuation<ValueAssertions<T>> NotBe(T unexpected)
     {
+        var comparer = GetComparer();
+        if (comparer.Equals(Subject, unexpected))
+        {
+            var failure = new Failure(
+                SubjectLabel(),
+                new Expectation("to not be", unexpected),
+                Subject);
+            Fail(FailureMessageRenderer.Render(failure));
+        }
+
         return new AndContinuation<ValueAssertions<T>>(this);
+    }
+
+    private string SubjectLabel()
+    {
+        return string.IsNullOrWhiteSpace(SubjectExpression) ? "<subject>" : SubjectExpression;
+    }
+
+    private static IEqualityComparer<T> GetComparer()
+    {
+        // Prefer configured provider; fall back to runtime default if provider declines.
+        if (AxiomServices.Configuration.ComparerProvider.TryGetEqualityComparer<T>(out var comparer) &&
+            comparer is not null)
+        {
+            return comparer;
+        }
+
+        return EqualityComparer<T>.Default;
+    }
+
+    private static void Fail(string message)
+    {
+        var batch = Batch.Current;
+        if (batch is not null)
+        {
+            batch.AddFailure(message);
+            return;
+        }
+
+        throw new InvalidOperationException(message);
     }
 }
