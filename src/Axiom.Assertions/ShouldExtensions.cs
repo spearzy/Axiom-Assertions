@@ -8,4 +8,9 @@ public static class ShouldExtensions
         this string? subject,
         [CallerArgumentExpression("subject")] string? subjectExpression = null)
         => new(subject, subjectExpression);
+
+    public static ActionAssertions Should(
+        this Action subject,
+        [CallerArgumentExpression("subject")] string? subjectExpression = null)
+        => new(subject, subjectExpression);
 }
