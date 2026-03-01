@@ -1,0 +1,63 @@
+namespace Axiom.Assertions.Equivalency;
+
+public enum EquivalencyCollectionOrder
+{
+    Strict,
+    Any,
+}
+
+public sealed class EquivalencyOptions
+{
+    private readonly HashSet<string> _ignoredMemberNames = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _ignoredPaths = new(StringComparer.Ordinal);
+
+    public EquivalencyCollectionOrder CollectionOrder { get; set; } = EquivalencyCollectionOrder.Strict;
+    public bool RequireStrictRuntimeTypes { get; set; } = true;
+    public int MaxDifferences { get; set; } = 20;
+    public StringComparison StringComparison { get; set; } = StringComparison.Ordinal;
+    public bool IncludePublicProperties { get; set; } = true;
+    public bool IncludePublicFields { get; set; } = true;
+
+    public IReadOnlySet<string> IgnoredMemberNames => _ignoredMemberNames;
+    public IReadOnlySet<string> IgnoredPaths => _ignoredPaths;
+
+    public EquivalencyOptions IgnoreMember(string memberName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(memberName);
+        _ignoredMemberNames.Add(memberName);
+        return this;
+    }
+
+    public EquivalencyOptions IgnorePath(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        _ignoredPaths.Add(path);
+        return this;
+    }
+
+    // Snapshot copy for deterministic comparison settings during one assertion run.
+    internal EquivalencyOptions Clone()
+    {
+        var clone = new EquivalencyOptions
+        {
+            CollectionOrder = CollectionOrder,
+            RequireStrictRuntimeTypes = RequireStrictRuntimeTypes,
+            MaxDifferences = MaxDifferences,
+            StringComparison = StringComparison,
+            IncludePublicProperties = IncludePublicProperties,
+            IncludePublicFields = IncludePublicFields,
+        };
+
+        foreach (var member in _ignoredMemberNames)
+        {
+            clone._ignoredMemberNames.Add(member);
+        }
+
+        foreach (var path in _ignoredPaths)
+        {
+            clone._ignoredPaths.Add(path);
+        }
+
+        return clone;
+    }
+}

@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Axiom.Assertions.Chaining;
+using Axiom.Assertions.Equivalency;
 using Axiom.Core;
 using Axiom.Core.Configuration;
 using Axiom.Core.Failures;
@@ -60,6 +61,31 @@ public sealed class ValueAssertions<T>
         return new AndContinuation<ValueAssertions<T>>(this);
     }
 
+    public AndContinuation<ValueAssertions<T>> BeEquivalentTo<TExpected>(
+        TExpected expected,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        var options = new EquivalencyOptions();
+        return BeEquivalentToInternal(expected, options, because, callerFilePath, callerLineNumber);
+    }
+
+    public AndContinuation<ValueAssertions<T>> BeEquivalentTo<TExpected>(
+        TExpected expected,
+        Action<EquivalencyOptions> configure,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+
+        var options = new EquivalencyOptions();
+        configure(options);
+        // Snapshot options so this assertion run is deterministic even if caller later mutates captured state.
+        return BeEquivalentToInternal(expected, options.Clone(), because, callerFilePath, callerLineNumber);
+    }
+
     private string SubjectLabel()
     {
         return string.IsNullOrWhiteSpace(SubjectExpression) ? "<subject>" : SubjectExpression;
@@ -75,6 +101,22 @@ public sealed class ValueAssertions<T>
         }
 
         return EqualityComparer<T>.Default;
+    }
+
+    private AndContinuation<ValueAssertions<T>> BeEquivalentToInternal<TExpected>(
+        TExpected expected,
+        EquivalencyOptions options,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        _ = expected;
+        _ = options;
+        _ = because;
+        _ = callerFilePath;
+        _ = callerLineNumber;
+
+        throw new NotSupportedException("BeEquivalentTo is not implemented yet.");
     }
 
     private static void Fail(string message, string? callerFilePath, int callerLineNumber)
