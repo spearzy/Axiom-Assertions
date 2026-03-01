@@ -34,6 +34,19 @@ jobs:
       - name: Test
         run: dotnet test Axiom.sln -c Release --no-build
 
+      - name: Coverage Gate
+        if: matrix.os == 'ubuntu-latest'
+        run: >
+          dotnet test tests/Axiom.Tests/Axiom.Tests.csproj
+          -c Release
+          --no-build
+          /p:CollectCoverage=true
+          /p:CoverletOutput=TestResults/Coverage/
+          /p:CoverletOutputFormat=cobertura
+          /p:Threshold=85
+          /p:ThresholdType=line
+          /p:ThresholdStat=total
+
   format:
     name: Format Check
     runs-on: ubuntu-latest

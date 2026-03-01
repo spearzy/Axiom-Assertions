@@ -12,7 +12,7 @@ public sealed class EndWithTests
         var baseAssertions = value.Should();
         var continuation = baseAssertions.EndWith("st");
 
-        Xunit.Assert.Same(baseAssertions, continuation.And);
+        Assert.Same(baseAssertions, continuation.And);
     }
 
     [Fact]
@@ -20,11 +20,11 @@ public sealed class EndWithTests
     {
         string value = "test";
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() => value.Should().EndWith("ab"));
+        var ex = Assert.Throws<InvalidOperationException>(() => value.Should().EndWith("ab"));
 
-        Xunit.Assert.Contains("value", ex.Message);
-        Xunit.Assert.Contains("end with", ex.Message);
-        Xunit.Assert.Contains("ab", ex.Message);
-        Xunit.Assert.Contains("test", ex.Message);
+        Assert.Contains("value", ex.Message);
+        Assert.Contains("end with", ex.Message);
+        Assert.Contains("ab", ex.Message);
+        Assert.Contains("test", ex.Message);
     }
 }

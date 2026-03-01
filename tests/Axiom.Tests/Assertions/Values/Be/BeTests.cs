@@ -9,9 +9,9 @@ public sealed class BeTests
     {
         var value = 42;
 
-        var ex = Xunit.Record.Exception(() => value.Should().Be(42));
+        var ex = Record.Exception(() => value.Should().Be(42));
 
-        Xunit.Assert.Null(ex);
+        Assert.Null(ex);
     }
 
     [Fact]
@@ -19,10 +19,10 @@ public sealed class BeTests
     {
         var value = 42;
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() => value.Should().Be(7));
+        var ex = Assert.Throws<InvalidOperationException>(() => value.Should().Be(7));
 
         const string expected = "Expected value to be 7, but found 42.";
-        Xunit.Assert.Equal(expected, ex.Message);
+        Assert.Equal(expected, ex.Message);
     }
 
     [Fact]
@@ -30,9 +30,9 @@ public sealed class BeTests
     {
         var value = 42;
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
             value.Should().Be(7, "input should align with seeded data"));
 
-        Xunit.Assert.Contains("because input should align with seeded data", ex.Message);
+        Assert.Contains("because input should align with seeded data", ex.Message);
     }
 }

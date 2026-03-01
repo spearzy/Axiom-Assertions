@@ -19,7 +19,7 @@ public sealed class AssertionOutputRendererTests
             options);
 
         const string expected = "PASS Contain values\n  at Sample.cs:12";
-        Xunit.Assert.Equal(expected, Normalise(message));
+        Assert.Equal(expected, Normalise(message));
     }
 
     [Fact]
@@ -42,7 +42,7 @@ public sealed class AssertionOutputRendererTests
                 options);
 
             var expectedPrefix = $"FAIL Expected values to contain 9, but found System.Int32[].\n  at {Path.GetFileName(tempFile)}:2\n  > second line";
-            Xunit.Assert.Equal(expectedPrefix, Normalise(message));
+            Assert.Equal(expectedPrefix, Normalise(message));
         }
         finally
         {
@@ -65,8 +65,8 @@ public sealed class AssertionOutputRendererTests
             0,
             options);
 
-        Xunit.Assert.Contains("\u001b[31m", message);
-        Xunit.Assert.Contains("FAIL", message);
+        Assert.Contains("\u001b[31m", message);
+        Assert.Contains("FAIL", message);
     }
 
     private static string Normalise(string value)

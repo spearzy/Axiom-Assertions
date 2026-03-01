@@ -8,7 +8,7 @@ public sealed class BatchReportRendererTests
         var report = BatchReportRenderer.Render("demo", ["first", "second"]);
 
         const string expected = "Batch 'demo' failed with 2 assertion failure(s):\n1) first\n2) second";
-        Xunit.Assert.Equal(expected, NormaliseNewLines(report));
+        Assert.Equal(expected, NormaliseNewLines(report));
     }
 
     [Fact]
@@ -17,7 +17,7 @@ public sealed class BatchReportRendererTests
         var report = BatchReportRenderer.Render(null, ["only"]);
 
         const string expected = "Batch failed with 1 assertion failure(s):\n1) only";
-        Xunit.Assert.Equal(expected, NormaliseNewLines(report));
+        Assert.Equal(expected, NormaliseNewLines(report));
     }
 
     private static string NormaliseNewLines(string value)

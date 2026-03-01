@@ -11,7 +11,7 @@ public sealed class ActionShouldEntryPointTests
 
         var assertions = action.Should();
 
-        Xunit.Assert.Same(action, assertions.Subject);
-        Xunit.Assert.Equal("action", assertions.SubjectExpression);
+        Assert.Same(action, assertions.Subject);
+        Assert.Equal("action", assertions.SubjectExpression);
     }
 }

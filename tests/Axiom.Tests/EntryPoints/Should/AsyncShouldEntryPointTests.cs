@@ -11,8 +11,8 @@ public sealed class AsyncShouldEntryPointTests
 
         var assertions = action.Should();
 
-        Xunit.Assert.NotNull(assertions.Subject);
-        Xunit.Assert.Equal("action", assertions.SubjectExpression);
+        Assert.NotNull(assertions.Subject);
+        Assert.Equal("action", assertions.SubjectExpression);
     }
 
     [Fact]
@@ -22,7 +22,7 @@ public sealed class AsyncShouldEntryPointTests
 
         var assertions = action.Should();
 
-        Xunit.Assert.Same(action, assertions.Subject);
-        Xunit.Assert.Equal("action", assertions.SubjectExpression);
+        Assert.Same(action, assertions.Subject);
+        Assert.Equal("action", assertions.SubjectExpression);
     }
 }

@@ -9,7 +9,7 @@ public sealed class ValueBatchRoutingTests
     {
         var value = 42;
 
-        Xunit.Assert.Throws<InvalidOperationException>(() => value.Should().Be(7));
+        Assert.Throws<InvalidOperationException>(() => value.Should().Be(7));
     }
 
     [Fact]
@@ -17,13 +17,13 @@ public sealed class ValueBatchRoutingTests
     {
         var value = 42;
 
-        var ex = Xunit.Record.Exception(() =>
+        var ex = Record.Exception(() =>
         {
             using var batch = new Axiom.Core.Batch();
             value.Should().Be(7);
         });
 
-        Xunit.Assert.NotNull(ex);
+        Assert.NotNull(ex);
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public sealed class ValueBatchRoutingTests
     {
         var value = 42;
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
         {
             using var batch = new Axiom.Core.Batch("values");
             value.Should().Be(7);
@@ -39,8 +39,8 @@ public sealed class ValueBatchRoutingTests
         });
 
         var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
-        Xunit.Assert.Contains("Batch 'values' failed with 2 assertion failure(s):", message);
-        Xunit.Assert.Contains("1) Expected value to be 7, but found 42.", message);
-        Xunit.Assert.Contains("2) Expected value to not be 42, but found 42.", message);
+        Assert.Contains("Batch 'values' failed with 2 assertion failure(s):", message);
+        Assert.Contains("1) Expected value to be 7, but found 42.", message);
+        Assert.Contains("2) Expected value to not be 42, but found 42.", message);
     }
 }

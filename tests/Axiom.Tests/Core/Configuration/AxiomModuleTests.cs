@@ -15,16 +15,16 @@ public sealed class AxiomModuleTests : IDisposable
 
         AxiomServices.UseModule(module);
 
-        Xunit.Assert.Same(formatter, AxiomServices.Configuration.ValueFormatter);
-        Xunit.Assert.Same(DefaultComparerProvider.Instance, AxiomServices.Configuration.ComparerProvider);
+        Assert.Same(formatter, AxiomServices.Configuration.ValueFormatter);
+        Assert.Same(DefaultComparerProvider.Instance, AxiomServices.Configuration.ComparerProvider);
     }
 
     [Fact]
     public void UseModule_ThrowsForNullModule()
     {
-        var ex = Xunit.Assert.Throws<ArgumentNullException>(() => AxiomServices.UseModule(null!));
+        var ex = Assert.Throws<ArgumentNullException>(() => AxiomServices.UseModule(null!));
 
-        Xunit.Assert.Equal("module", ex.ParamName);
+        Assert.Equal("module", ex.ParamName);
     }
 
     private sealed class TestModule : IAxiomModule

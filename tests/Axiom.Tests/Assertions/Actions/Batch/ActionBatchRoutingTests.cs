@@ -9,7 +9,7 @@ public sealed class ActionBatchRoutingTests
     {
         Action action = static () => { };
 
-        Xunit.Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<InvalidOperationException>(() =>
             action.Should().Throw<InvalidOperationException>());
     }
 
@@ -18,13 +18,13 @@ public sealed class ActionBatchRoutingTests
     {
         Action action = static () => { };
 
-        var ex = Xunit.Record.Exception(() =>
+        var ex = Record.Exception(() =>
         {
             using var batch = new Axiom.Core.Batch();
             action.Should().Throw<InvalidOperationException>();
         });
 
-        Xunit.Assert.NotNull(ex);
+        Assert.NotNull(ex);
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public sealed class ActionBatchRoutingTests
         Action noThrow = static () => { };
         Action wrongThrow = static () => throw new ArgumentException("bad");
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
         {
             using var batch = new Axiom.Core.Batch("actions");
             noThrow.Should().Throw<InvalidOperationException>();
@@ -41,8 +41,8 @@ public sealed class ActionBatchRoutingTests
         });
 
         var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
-        Xunit.Assert.Contains("Batch 'actions' failed with 2 assertion failure(s):", message);
-        Xunit.Assert.Contains($"1) Expected noThrow to throw {typeof(InvalidOperationException)}, but found <no exception>.", message);
-        Xunit.Assert.Contains($"2) Expected wrongThrow to throw {typeof(InvalidOperationException)}, but found {typeof(ArgumentException)}.", message);
+        Assert.Contains("Batch 'actions' failed with 2 assertion failure(s):", message);
+        Assert.Contains($"1) Expected noThrow to throw {typeof(InvalidOperationException)}, but found <no exception>.", message);
+        Assert.Contains($"2) Expected wrongThrow to throw {typeof(InvalidOperationException)}, but found {typeof(ArgumentException)}.", message);
     }
 }

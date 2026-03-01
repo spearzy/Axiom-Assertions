@@ -12,7 +12,7 @@ public sealed class StartWithTests
         var baseAssertions = value.Should();
         var continuation = baseAssertions.StartWith("te");
 
-        Xunit.Assert.Same(baseAssertions, continuation.And);
+        Assert.Same(baseAssertions, continuation.And);
     }
 
     [Fact]
@@ -20,12 +20,12 @@ public sealed class StartWithTests
     {
         string? value = "test";
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() => value.Should().StartWith("ab"));
+        var ex = Assert.Throws<InvalidOperationException>(() => value.Should().StartWith("ab"));
 
-        Xunit.Assert.Contains("value", ex.Message);
-        Xunit.Assert.Contains("start with", ex.Message);
-        Xunit.Assert.Contains("ab", ex.Message);
-        Xunit.Assert.Contains("test", ex.Message);
+        Assert.Contains("value", ex.Message);
+        Assert.Contains("start with", ex.Message);
+        Assert.Contains("ab", ex.Message);
+        Assert.Contains("test", ex.Message);
     }
 
     [Fact]
@@ -33,9 +33,9 @@ public sealed class StartWithTests
     {
         string? value = "test";
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
             value.Should().StartWith("ab", "the ID prefix is required"));
 
-        Xunit.Assert.Contains("because the ID prefix is required", ex.Message);
+        Assert.Contains("because the ID prefix is required", ex.Message);
     }
 }

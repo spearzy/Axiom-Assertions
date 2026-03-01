@@ -15,9 +15,9 @@ public sealed class ValueAssertionComparerProviderTests : IDisposable
         AxiomServices.Configure(c => c.ComparerProvider = new SameParityIntComparerProvider());
 
         var value = 3;
-        var ex = Xunit.Record.Exception(() => value.Should().Be(5));
+        var ex = Record.Exception(() => value.Should().Be(5));
 
-        Xunit.Assert.Null(ex);
+        Assert.Null(ex);
     }
 
     [Fact]
@@ -26,10 +26,10 @@ public sealed class ValueAssertionComparerProviderTests : IDisposable
         AxiomServices.Configure(c => c.ComparerProvider = new SameParityIntComparerProvider());
 
         var value = 3;
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() => value.Should().NotBe(7));
+        var ex = Assert.Throws<InvalidOperationException>(() => value.Should().NotBe(7));
 
         const string expected = "Expected value to not be 7, but found 3.";
-        Xunit.Assert.Equal(expected, ex.Message);
+        Assert.Equal(expected, ex.Message);
     }
 
     [Fact]
@@ -38,9 +38,9 @@ public sealed class ValueAssertionComparerProviderTests : IDisposable
         AxiomServices.Configure(c => c.ComparerProvider = new EmptyComparerProvider());
 
         var value = 42;
-        var ex = Xunit.Record.Exception(() => value.Should().Be(42));
+        var ex = Record.Exception(() => value.Should().Be(42));
 
-        Xunit.Assert.Null(ex);
+        Assert.Null(ex);
     }
 
     private sealed class SameParityIntComparerProvider : IComparerProvider

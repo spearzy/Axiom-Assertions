@@ -11,8 +11,8 @@ public sealed class GenericShouldEntryPointTests
 
         var assertions = value.Should();
 
-        Xunit.Assert.Equal(42, assertions.Subject);
-        Xunit.Assert.Equal("value", assertions.SubjectExpression);
+        Assert.Equal(42, assertions.Subject);
+        Assert.Equal("value", assertions.SubjectExpression);
     }
 
     [Fact]
@@ -22,7 +22,7 @@ public sealed class GenericShouldEntryPointTests
 
         var assertions = value.Should();
 
-        Xunit.Assert.True(assertions.Subject);
-        Xunit.Assert.Equal("value", assertions.SubjectExpression);
+        Assert.True(assertions.Subject);
+        Assert.Equal("value", assertions.SubjectExpression);
     }
 }

@@ -9,10 +9,10 @@ public sealed class ThrowAsyncTests
     {
         Func<Task> action = static () => Task.FromException(new InvalidOperationException("boom"));
 
-        var ex = await Xunit.Record.ExceptionAsync(async () =>
+        var ex = await Record.ExceptionAsync(async () =>
             await action.Should().ThrowAsync<InvalidOperationException>());
 
-        Xunit.Assert.Null(ex);
+        Assert.Null(ex);
     }
 
     [Fact]
@@ -20,10 +20,10 @@ public sealed class ThrowAsyncTests
     {
         Func<ValueTask> action = static () => ValueTask.FromException(new ArgumentNullException("value"));
 
-        var ex = await Xunit.Record.ExceptionAsync(async () =>
+        var ex = await Record.ExceptionAsync(async () =>
             await action.Should().ThrowAsync<ArgumentException>());
 
-        Xunit.Assert.Null(ex);
+        Assert.Null(ex);
     }
 
     [Fact]
@@ -31,11 +31,11 @@ public sealed class ThrowAsyncTests
     {
         Func<Task> action = static () => Task.CompletedTask;
 
-        var ex = await Xunit.Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             await action.Should().ThrowAsync<InvalidOperationException>());
 
         var expected = $"Expected action to throw {typeof(InvalidOperationException)}, but found <no exception>.";
-        Xunit.Assert.Equal(expected, ex.Message);
+        Assert.Equal(expected, ex.Message);
     }
 
     [Fact]
@@ -43,11 +43,11 @@ public sealed class ThrowAsyncTests
     {
         Func<Task> action = static () => Task.FromException(new ArgumentException("bad"));
 
-        var ex = await Xunit.Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             await action.Should().ThrowAsync<InvalidOperationException>());
 
         var expected = $"Expected action to throw {typeof(InvalidOperationException)}, but found {typeof(ArgumentException)}.";
-        Xunit.Assert.Equal(expected, ex.Message);
+        Assert.Equal(expected, ex.Message);
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public sealed class ThrowAsyncTests
     {
         Func<Task> action = static () => Task.CompletedTask;
 
-        var ex = await Xunit.Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             await action.Should().ThrowAsync<InvalidOperationException>("this code path must fail fast"));
 
         Assert.Contains("because this code path must fail fast", ex.Message);

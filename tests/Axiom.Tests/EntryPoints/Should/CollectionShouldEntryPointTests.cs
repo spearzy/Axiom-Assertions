@@ -12,8 +12,8 @@ public sealed class CollectionShouldEntryPointTests
 
         var continuation = values.Should().Contain(2);
 
-        Xunit.Assert.Same(values, continuation.And.Subject);
-        Xunit.Assert.Equal("values", continuation.And.SubjectExpression);
+        Assert.Same(values, continuation.And.Subject);
+        Assert.Equal("values", continuation.And.SubjectExpression);
     }
 
     [Fact]
@@ -21,9 +21,9 @@ public sealed class CollectionShouldEntryPointTests
     {
         IEnumerable<int>? values = null;
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() => values!.Should().Contain(1));
+        var ex = Assert.Throws<InvalidOperationException>(() => values!.Should().Contain(1));
 
         const string expected = "Expected values to contain 1, but found <null>.";
-        Xunit.Assert.Equal(expected, ex.Message);
+        Assert.Equal(expected, ex.Message);
     }
 }

@@ -9,10 +9,10 @@ public sealed class DefaultComparerProviderTests
 
         var found = provider.TryGetEqualityComparer<string>(out var comparer);
 
-        Xunit.Assert.True(found);
-        Xunit.Assert.NotNull(comparer);
-        Xunit.Assert.True(comparer!.Equals("a", "a"));
-        Xunit.Assert.False(comparer.Equals("a", "b"));
+        Assert.True(found);
+        Assert.NotNull(comparer);
+        Assert.True(comparer!.Equals("a", "a"));
+        Assert.False(comparer.Equals("a", "b"));
     }
 
     [Fact]
@@ -22,9 +22,9 @@ public sealed class DefaultComparerProviderTests
 
         var found = provider.TryGetEqualityComparer<int>(out var comparer);
 
-        Xunit.Assert.True(found);
-        Xunit.Assert.NotNull(comparer);
-        Xunit.Assert.True(comparer!.Equals(42, 42));
-        Xunit.Assert.False(comparer.Equals(42, 43));
+        Assert.True(found);
+        Assert.NotNull(comparer);
+        Assert.True(comparer!.Equals(42, 42));
+        Assert.False(comparer.Equals(42, 43));
     }
 }

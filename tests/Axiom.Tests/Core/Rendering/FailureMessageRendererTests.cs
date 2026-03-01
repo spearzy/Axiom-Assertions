@@ -13,7 +13,7 @@ public sealed class FailureMessageRendererTests
         var message = FailureMessageRenderer.Render(failure);
 
         const string expected = "Expected value to start with \"ab\", but found \"test\".";
-        Xunit.Assert.Equal(expected, message);
+        Assert.Equal(expected, message);
     }
 
     [Fact]
@@ -27,7 +27,7 @@ public sealed class FailureMessageRendererTests
         var message = FailureMessageRenderer.Render(failure);
 
         const string expected = "Expected value to not be null, but found <null>.";
-        Xunit.Assert.Equal(expected, message);
+        Assert.Equal(expected, message);
     }
 
     [Fact]
@@ -42,6 +42,6 @@ public sealed class FailureMessageRendererTests
         var message = FailureMessageRenderer.Render(failure);
 
         const string expected = "Expected value to be 7 because input should match seeded data, but found 42.";
-        Xunit.Assert.Equal(expected, message);
+        Assert.Equal(expected, message);
     }
 }

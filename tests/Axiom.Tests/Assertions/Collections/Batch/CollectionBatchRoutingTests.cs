@@ -10,7 +10,7 @@ public sealed class CollectionBatchRoutingTests
     {
         int[] values = [1, 2, 3];
 
-        Xunit.Assert.Throws<InvalidOperationException>(() => values.Should().Contain(9));
+        Assert.Throws<InvalidOperationException>(() => values.Should().Contain(9));
     }
 
     [Fact]
@@ -19,10 +19,10 @@ public sealed class CollectionBatchRoutingTests
         int[] values = [1, 2, 3];
 
         using var batch = new Axiom.Core.Batch();
-        var callEx = Xunit.Record.Exception(() => values.Should().Contain(9));
+        var callEx = Record.Exception(() => values.Should().Contain(9));
 
-        Xunit.Assert.Null(callEx);
-        Xunit.Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
     }
 
     [Fact]
@@ -30,7 +30,7 @@ public sealed class CollectionBatchRoutingTests
     {
         int[] values = [1, 2, 3];
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
         {
             using var batch = new Axiom.Core.Batch("collections");
             values.Should().Contain(9);
@@ -38,8 +38,8 @@ public sealed class CollectionBatchRoutingTests
         });
 
         var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
-        Xunit.Assert.Contains("Batch 'collections' failed with 2 assertion failure(s):", message);
-        Xunit.Assert.Contains("1) Expected values to contain 9, but found System.Int32[].", message);
-        Xunit.Assert.Contains("2) Expected values to have count 2, but found 3.", message);
+        Assert.Contains("Batch 'collections' failed with 2 assertion failure(s):", message);
+        Assert.Contains("1) Expected values to contain 9, but found System.Int32[].", message);
+        Assert.Contains("2) Expected values to have count 2, but found 3.", message);
     }
 }

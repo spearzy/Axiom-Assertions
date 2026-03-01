@@ -9,7 +9,7 @@ public sealed class AsyncActionBatchRoutingTests
     {
         Func<Task> action = static () => Task.CompletedTask;
 
-        await Xunit.Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             await action.Should().ThrowAsync<InvalidOperationException>());
     }
 
@@ -19,11 +19,11 @@ public sealed class AsyncActionBatchRoutingTests
         Func<Task> action = static () => Task.CompletedTask;
 
         using var batch = new Axiom.Core.Batch();
-        var callEx = await Xunit.Record.ExceptionAsync(async () =>
+        var callEx = await Record.ExceptionAsync(async () =>
             await action.Should().ThrowAsync<InvalidOperationException>());
 
-        Xunit.Assert.Null(callEx);
-        Xunit.Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public sealed class AsyncActionBatchRoutingTests
         Func<Task> noThrow = static () => Task.CompletedTask;
         Func<ValueTask> wrongThrow = static () => ValueTask.FromException(new ArgumentException("bad"));
 
-        var ex = await Xunit.Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
             using var batch = new Axiom.Core.Batch("async actions");
             await noThrow.Should().ThrowAsync<InvalidOperationException>();
@@ -40,8 +40,8 @@ public sealed class AsyncActionBatchRoutingTests
         });
 
         var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
-        Xunit.Assert.Contains("Batch 'async actions' failed with 2 assertion failure(s):", message);
-        Xunit.Assert.Contains($"1) Expected noThrow to throw {typeof(InvalidOperationException)}, but found <no exception>.", message);
-        Xunit.Assert.Contains($"2) Expected wrongThrow to throw {typeof(InvalidOperationException)}, but found {typeof(ArgumentException)}.", message);
+        Assert.Contains("Batch 'async actions' failed with 2 assertion failure(s):", message);
+        Assert.Contains($"1) Expected noThrow to throw {typeof(InvalidOperationException)}, but found <no exception>.", message);
+        Assert.Contains($"2) Expected wrongThrow to throw {typeof(InvalidOperationException)}, but found {typeof(ArgumentException)}.", message);
     }
 }

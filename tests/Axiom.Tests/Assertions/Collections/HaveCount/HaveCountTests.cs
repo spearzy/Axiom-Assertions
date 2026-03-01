@@ -13,7 +13,7 @@ public sealed class HaveCountTests
         var baseAssertions = values.Should();
         var continuation = baseAssertions.HaveCount(3);
 
-        Xunit.Assert.Same(baseAssertions, continuation.And);
+        Assert.Same(baseAssertions, continuation.And);
     }
 
     [Fact]
@@ -21,10 +21,10 @@ public sealed class HaveCountTests
     {
         int[] values = [1, 2, 3];
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() => values.Should().HaveCount(2));
+        var ex = Assert.Throws<InvalidOperationException>(() => values.Should().HaveCount(2));
 
         const string expected = "Expected values to have count 2, but found 3.";
-        Xunit.Assert.Equal(expected, ex.Message);
+        Assert.Equal(expected, ex.Message);
     }
 
     [Fact]
@@ -32,9 +32,9 @@ public sealed class HaveCountTests
     {
         int[] values = [1, 2, 3];
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
             values.Should().HaveCount(2, "each branch must have two commits"));
 
-        Xunit.Assert.Contains("because each branch must have two commits", ex.Message);
+        Assert.Contains("because each branch must have two commits", ex.Message);
     }
 }

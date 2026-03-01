@@ -12,7 +12,7 @@ public sealed class ValueChainingTests
         var baseAssertions = value.Should();
         var continuation = baseAssertions.Be(42);
 
-        Xunit.Assert.Same(baseAssertions, continuation.And);
+        Assert.Same(baseAssertions, continuation.And);
     }
 
     [Fact]
@@ -23,7 +23,7 @@ public sealed class ValueChainingTests
         var baseAssertions = value.Should();
         var continuation = baseAssertions.NotBe(7);
 
-        Xunit.Assert.Same(baseAssertions, continuation.And);
+        Assert.Same(baseAssertions, continuation.And);
     }
 
     [Fact]

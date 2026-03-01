@@ -12,7 +12,7 @@ public sealed class StringChainingTests
         var baseAssertions = value.Should();
         var continuation = baseAssertions.NotBeNull();
 
-        Xunit.Assert.Same(baseAssertions, continuation.And);
+        Assert.Same(baseAssertions, continuation.And);
     }
 
     [Fact]
@@ -23,7 +23,7 @@ public sealed class StringChainingTests
         var baseAssertions = value.Should();
         var continuation = baseAssertions.StartWith("te");
 
-        Xunit.Assert.Same(baseAssertions, continuation.And);
+        Assert.Same(baseAssertions, continuation.And);
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public sealed class StringChainingTests
         var baseAssertions = value.Should();
         var continuation = baseAssertions.EndWith("st");
 
-        Xunit.Assert.Same(baseAssertions, continuation.And);
+        Assert.Same(baseAssertions, continuation.And);
     }
 
     [Fact]

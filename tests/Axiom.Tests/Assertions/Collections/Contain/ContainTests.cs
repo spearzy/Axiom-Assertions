@@ -13,7 +13,7 @@ public sealed class ContainTests
         var baseAssertions = values.Should();
         var continuation = baseAssertions.Contain(2);
 
-        Xunit.Assert.Same(baseAssertions, continuation.And);
+        Assert.Same(baseAssertions, continuation.And);
     }
 
     [Fact]
@@ -21,10 +21,10 @@ public sealed class ContainTests
     {
         int[] values = [1, 2, 3];
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() => values.Should().Contain(9));
+        var ex = Assert.Throws<InvalidOperationException>(() => values.Should().Contain(9));
 
         const string expected = "Expected values to contain 9, but found System.Int32[].";
-        Xunit.Assert.Equal(expected, ex.Message);
+        Assert.Equal(expected, ex.Message);
     }
 
     [Fact]
@@ -32,9 +32,9 @@ public sealed class ContainTests
     {
         int[] values = [1, 2, 3];
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
             values.Should().Contain(9, "the input must include an admin role"));
 
-        Xunit.Assert.Contains("because the input must include an admin role", ex.Message);
+        Assert.Contains("because the input must include an admin role", ex.Message);
     }
 }

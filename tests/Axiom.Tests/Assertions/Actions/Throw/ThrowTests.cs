@@ -9,9 +9,9 @@ public sealed class ThrowTests
     {
         Action action = static () => throw new InvalidOperationException("boom");
 
-        var ex = Xunit.Record.Exception(() => action.Should().Throw<InvalidOperationException>());
+        var ex = Record.Exception(() => action.Should().Throw<InvalidOperationException>());
 
-        Xunit.Assert.Null(ex);
+        Assert.Null(ex);
     }
 
     [Fact]
@@ -19,9 +19,9 @@ public sealed class ThrowTests
     {
         Action action = static () => throw new ArgumentNullException("value");
 
-        var ex = Xunit.Record.Exception(() => action.Should().Throw<ArgumentException>());
+        var ex = Record.Exception(() => action.Should().Throw<ArgumentException>());
 
-        Xunit.Assert.Null(ex);
+        Assert.Null(ex);
     }
 
     [Fact]
@@ -29,11 +29,11 @@ public sealed class ThrowTests
     {
         Action action = static () => { };
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
             action.Should().Throw<InvalidOperationException>());
 
         var expected = $"Expected action to throw {typeof(InvalidOperationException)}, but found <no exception>.";
-        Xunit.Assert.Equal(expected, ex.Message);
+        Assert.Equal(expected, ex.Message);
     }
 
     [Fact]
@@ -41,11 +41,11 @@ public sealed class ThrowTests
     {
         Action action = static () => throw new ArgumentException("bad");
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
             action.Should().Throw<InvalidOperationException>());
 
         var expected = $"Expected action to throw {typeof(InvalidOperationException)}, but found {typeof(ArgumentException)}.";
-        Xunit.Assert.Equal(expected, ex.Message);
+        Assert.Equal(expected, ex.Message);
     }
 
     [Fact]
@@ -53,9 +53,9 @@ public sealed class ThrowTests
     {
         Action action = static () => { };
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
             action.Should().Throw<InvalidOperationException>("this code path must fail fast"));
 
-        Xunit.Assert.Contains("because this code path must fail fast", ex.Message);
+        Assert.Contains("because this code path must fail fast", ex.Message);
     }
 }

@@ -12,7 +12,7 @@ public sealed class NotBeNullTests
         var baseAssertions = value.Should();
         var continuation = baseAssertions.NotBeNull();
 
-        Xunit.Assert.Same(baseAssertions, continuation.And);
+        Assert.Same(baseAssertions, continuation.And);
     }
 
     [Fact]
@@ -20,11 +20,11 @@ public sealed class NotBeNullTests
     {
         string? value = null;
 
-        var ex = Xunit.Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
             value.Should().NotBeNull());
 
-        Xunit.Assert.Contains("value", ex.Message);
-        Xunit.Assert.Contains("not be null", ex.Message);
-        Xunit.Assert.Contains("<null>", ex.Message);
+        Assert.Contains("value", ex.Message);
+        Assert.Contains("not be null", ex.Message);
+        Assert.Contains("<null>", ex.Message);
     }
 }
