@@ -47,12 +47,16 @@ public sealed class ValueAssertionComparerProviderTests : IDisposable
     {
         public bool TryGetEqualityComparer<T>(out IEqualityComparer<T>? comparer)
         {
+            // This provider only handles int assertions for this test fixture.
             if (typeof(T) == typeof(int))
             {
+                // The interface is generic, so we cast the int comparer to IEqualityComparer<T>
+                // after proving T is int.
                 comparer = (IEqualityComparer<T>)(object)new SameParityIntComparer();
                 return true;
             }
 
+            // Returning false tells Axiom to fall back to its default comparer.
             comparer = null;
             return false;
         }
@@ -62,11 +66,13 @@ public sealed class ValueAssertionComparerProviderTests : IDisposable
     {
         public bool Equals(int x, int y)
         {
+            // Two numbers are "equal" when they share parity (both odd or both even).
             return x % 2 == y % 2;
         }
 
         public int GetHashCode(int obj)
         {
+            // Hash code must match Equals semantics: only two buckets (odd/even).
             return obj % 2;
         }
     }

@@ -22,10 +22,7 @@ public sealed class BeEquivalentToTests
         var ex = Assert.Throws<InvalidOperationException>(() => value.Should().BeEquivalentTo(7));
 
         var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
-        const string expected = """
-            Expected value to be equivalent to 7, but found 1 difference(s):
-            1) value -> expected 7, but found 42 (Values differ.)
-            """;
+        const string expected = "Expected value to be equivalent to 7, but found 1 difference(s):\n1) value -> expected 7, but found 42 (Values differ.)";
         Assert.Equal(expected, message);
     }
 
