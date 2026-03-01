@@ -13,10 +13,10 @@ dotnet test Axiom.sln -c Debug
 ## Pull Requests
 
 - Keep changes focused and small.
-- Include tests for behavior changes.
-- Update docs when public behavior changes.
+- Include tests for behaviour changes.
+- Update docs when public behaviour changes.
 
 ## Code Style
 
-- Follow `.editorconfig` and analyzer guidance.
+- Follow `.editorconfig` and analyser guidance.
 - Keep failure output deterministic and testable.

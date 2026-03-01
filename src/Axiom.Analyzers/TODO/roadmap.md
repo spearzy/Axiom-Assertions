@@ -1,4 +1,4 @@
-# Analyzer Roadmap
+# Analyser Roadmap
 
 ## Candidate Rules
 
@@ -13,4 +13,4 @@
 
 ## Notes
 
-- Real analyzer implementation is intentionally deferred.
+- Real analyser implementation is intentionally deferred.

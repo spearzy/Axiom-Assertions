@@ -98,7 +98,7 @@ AxiomServices.Configure(c =>
 {
     c.Output.Enabled = true;
     c.Output.ShowPasses = true;
-    c.Output.UseColors = true;
+    c.Output.UseColours = true;
     c.Output.IncludeSourceLine = true;
 });
 ```
@@ -146,7 +146,7 @@ dotnet add <your-test-project>.csproj reference src/Axiom.Assertions/Axiom.Asser
 
 ### Scaffold Docs
 
-- Analyzers scaffold: [src/Axiom.Analyzers/README.md](src/Axiom.Analyzers/README.md)
+- Analysers scaffold: [src/Axiom.Analyzers/README.md](src/Axiom.Analyzers/README.md)
 - Vectors scaffold: [src/Axiom.Vectors/README.md](src/Axiom.Vectors/README.md)
 
 ## Design Notes

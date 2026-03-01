@@ -4,7 +4,7 @@ public sealed class AssertionOutputOptions
 {
     public bool Enabled { get; set; } = true;
     public bool ShowPasses { get; set; } = true;
-    public bool UseColors { get; set; } = true;
+    public bool UseColours { get; set; } = true;
     public bool IncludeSourceLine { get; set; } = true;
 
     public AssertionOutputOptions Clone()
@@ -13,7 +13,7 @@ public sealed class AssertionOutputOptions
         {
             Enabled = Enabled,
             ShowPasses = ShowPasses,
-            UseColors = UseColors,
+            UseColours = UseColours,
             IncludeSourceLine = IncludeSourceLine,
         };
     }

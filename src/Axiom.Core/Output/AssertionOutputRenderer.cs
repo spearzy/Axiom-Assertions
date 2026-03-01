@@ -18,13 +18,13 @@ public static class AssertionOutputRenderer
         AssertionOutputOptions options)
     {
         var builder = new StringBuilder();
-        builder.Append(Colorize("PASS", AnsiGreen, options.UseColors));
+        builder.Append(Colourise("PASS", AnsiGreen, options.UseColours));
         builder.Append(' ');
         builder.Append(assertionName);
         builder.Append(' ');
         builder.Append(string.IsNullOrWhiteSpace(subjectLabel) ? "<subject>" : subjectLabel);
 
-        AppendLocation(builder, callerFilePath, callerLineNumber, options.UseColors);
+        AppendLocation(builder, callerFilePath, callerLineNumber, options.UseColours);
         return builder.ToString();
     }
 
@@ -35,14 +35,14 @@ public static class AssertionOutputRenderer
         AssertionOutputOptions options)
     {
         var builder = new StringBuilder();
-        builder.Append(Colorize("FAIL", AnsiRed, options.UseColors));
+        builder.Append(Colourise("FAIL", AnsiRed, options.UseColours));
         builder.Append(' ');
         builder.Append(failureMessage);
 
-        AppendLocation(builder, callerFilePath, callerLineNumber, options.UseColors);
+        AppendLocation(builder, callerFilePath, callerLineNumber, options.UseColours);
         if (options.IncludeSourceLine)
         {
-            AppendSourceLine(builder, callerFilePath, callerLineNumber, options.UseColors);
+            AppendSourceLine(builder, callerFilePath, callerLineNumber, options.UseColours);
         }
 
         return builder.ToString();
@@ -52,7 +52,7 @@ public static class AssertionOutputRenderer
         StringBuilder builder,
         string? callerFilePath,
         int callerLineNumber,
-        bool useColors)
+        bool useColours)
     {
         if (string.IsNullOrWhiteSpace(callerFilePath) || callerLineNumber <= 0)
         {
@@ -60,8 +60,8 @@ public static class AssertionOutputRenderer
         }
 
         builder.AppendLine();
-        builder.Append(Colorize("  at ", AnsiDim, useColors));
-        builder.Append(Colorize(Path.GetFileName(callerFilePath), AnsiCyan, useColors));
+        builder.Append(Colourise("  at ", AnsiDim, useColours));
+        builder.Append(Colourise(Path.GetFileName(callerFilePath), AnsiCyan, useColours));
         builder.Append(':');
         builder.Append(callerLineNumber);
     }
@@ -70,7 +70,7 @@ public static class AssertionOutputRenderer
         StringBuilder builder,
         string? callerFilePath,
         int callerLineNumber,
-        bool useColors)
+        bool useColours)
     {
         var sourceLine = TryReadSourceLine(callerFilePath, callerLineNumber);
         if (string.IsNullOrWhiteSpace(sourceLine))
@@ -79,7 +79,7 @@ public static class AssertionOutputRenderer
         }
 
         builder.AppendLine();
-        builder.Append(Colorize("  > ", AnsiDim, useColors));
+        builder.Append(Colourise("  > ", AnsiDim, useColours));
         builder.Append(sourceLine);
     }
 
@@ -109,8 +109,8 @@ public static class AssertionOutputRenderer
         }
     }
 
-    private static string Colorize(string value, string color, bool useColors)
+    private static string Colourise(string value, string colour, bool useColours)
     {
-        return useColors ? $"{color}{value}{AnsiReset}" : value;
+        return useColours ? $"{colour}{value}{AnsiReset}" : value;
     }
 }

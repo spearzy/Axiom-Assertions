@@ -1,6 +1,6 @@
 # Axiom.Analyzers (Scaffold)
 
-This project will host Roslyn analyzers and code fixes for Axiom usage.
+This project will host Roslyn analysers and code fixes for Axiom usage.
 
 ## Planned Scope
 
@@ -10,6 +10,6 @@ This project will host Roslyn analyzers and code fixes for Axiom usage.
 
 ## Status
 
-Scaffold only. No production analyzers are implemented yet.
+Scaffold only. No production analysers are implemented yet.
 
-See [TODO/roadmap.md](TODO/roadmap.md) for planned analyzer work.
+See [TODO/roadmap.md](TODO/roadmap.md) for planned analyser work.

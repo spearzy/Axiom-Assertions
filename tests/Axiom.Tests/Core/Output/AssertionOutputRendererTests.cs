@@ -7,7 +7,7 @@ public sealed class AssertionOutputRendererTests
     {
         var options = new AssertionOutputOptions
         {
-            UseColors = false,
+            UseColours = false,
             IncludeSourceLine = false,
         };
 
@@ -31,7 +31,7 @@ public sealed class AssertionOutputRendererTests
             File.WriteAllLines(tempFile, ["first line", "second line"]);
             var options = new AssertionOutputOptions
             {
-                UseColors = false,
+                UseColours = false,
                 IncludeSourceLine = true,
             };
 
@@ -55,7 +55,7 @@ public sealed class AssertionOutputRendererTests
     {
         var options = new AssertionOutputOptions
         {
-            UseColors = true,
+            UseColours = true,
             IncludeSourceLine = false,
         };
 
