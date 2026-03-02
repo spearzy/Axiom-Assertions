@@ -32,28 +32,15 @@ Current string failure messages include the caller expression and expected/actua
 Expected value to start with "ab", but found "test".
 ```
 
-## Current Features
+## Key Features
 
-- `Should()` entrypoints for:
-  - `string?`
-  - generic values (`T`)
-  - `Action`
-  - `Func<Task>`
-  - `Func<ValueTask>`
-- Fluent chaining:
-  - strings: `NotBeNull()`, `StartWith(...)`, `EndWith(...)`
-  - values: `Be(...)`, `NotBe(...)`, `BeEquivalentTo(...)`
-  - actions: `Throw<TException>()`
-  - async actions: `ThrowAsync<TException>()`
-  - collections (on enumerable values): `Contain(...)`, `HaveCount(...)`
-  - `.And`
-- `Batch` aggregation:
-  - outside a batch, failures throw immediately,
-  - inside a batch, failures are collected,
-  - root batch dispose throws one combined deterministic exception.
-- Target frameworks:
-  - `net10.0` (primary)
-  - `net8.0` (multi-target for library projects)
+- Fluent `Should()` API with `.And` chaining
+- `Batch` assertions for one combined failure from multiple checks
+- `BeEquivalentTo(...)` for object graph comparison with configurable options
+- Optional global equivalency defaults with per-call overrides
+- Deterministic, testable failure messages and batch reports
+- Extensible value comparison/formatting via comparer and formatter hooks
+- Target frameworks: `net10.0` (primary) and `net8.0`
 
 ## Usage
 
@@ -109,6 +96,68 @@ actual.Should().BeEquivalentTo(expected, options =>
 
 The `options` parameter above is an `Action<EquivalencyOptions>`.
 
+### Custom Comparer Providers
+
+Use a custom comparer provider when your domain needs equality rules that differ from default `.Equals(...)`.
+
+Typical cases:
+- value objects that should compare case-insensitively,
+- tolerance-based equality for domain numbers,
+- types from external/generated code where you cannot (or should not) change the type itself.
+
+How Axiom uses comparer providers:
+- `Be(...)` and `NotBe(...)`: uses the provider for that value type.
+- `BeEquivalentTo(...)`: uses the provider for non-string leaf values during graph comparison.
+- Strings in `BeEquivalentTo(...)` use `EquivalencyOptions.StringComparison`.
+
+Implementation pattern:
+- Implement `IComparerProvider`.
+- Return an `IEqualityComparer<T>` for handled types.
+- Return `false` for unhandled types so Axiom falls back to default equality.
+
+```csharp
+using Axiom.Core.Comparison;
+using Axiom.Core.Configuration;
+
+public sealed class OrderCodeComparerProvider : IComparerProvider
+{
+    public bool TryGetEqualityComparer<T>(out IEqualityComparer<T>? comparer)
+    {
+        if (typeof(T) == typeof(OrderCode))
+        {
+            comparer = (IEqualityComparer<T>)(object)new OrderCodeComparer();
+            return true;
+        }
+
+        comparer = null;
+        return false;
+    }
+}
+
+public sealed class OrderCodeComparer : IEqualityComparer<OrderCode>
+{
+    // Domain rule: order codes are equal ignoring case.
+    public bool Equals(OrderCode? x, OrderCode? y)
+    {
+        if (x is null && y is null) return true;
+        if (x is null || y is null) return false;
+        return string.Equals(x.Value, y.Value, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public int GetHashCode(OrderCode obj)
+    {
+        return StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Value);
+    }
+}
+
+public sealed record OrderCode(string Value);
+
+AxiomServices.Configure(c =>
+{
+    c.ComparerProvider = new OrderCodeComparerProvider();
+});
+```
+
 ### Exception Assertions
 
 ```csharp
@@ -142,21 +191,30 @@ AxiomServices.Configure(c =>
 
 When enabled, Axiom prints readable pass/fail output with source location (and source line for failures when available).
 
-### Batch Aggregation
+### Batch Assertions
+
+Use `Batch` when you want to run several related assertions and see all failures together.
+
+Without `Batch`, the first failing assertion throws immediately and stops execution.
+With `Batch`, failures are collected and one combined exception is thrown when the root batch is disposed.
+
+`Batch` is useful for validating multiple fields in one object or multiple expectations in one scenario.
 
 ```csharp
-using var batch = Assert.Batch("strings");
+using var batch = Assert.Batch("user profile");
 
-"test".Should().StartWith("ab");
-"test".Should().EndWith("cd");
+user.Name.Should().StartWith("A");
+user.Email.Should().EndWith("@example.com");
+user.Roles.Should().Contain("admin");
 ```
 
-When the batch is disposed, Axiom throws one combined exception similar to:
+Disposing the root batch throws one combined deterministic message:
 
 ```text
-Batch 'strings' failed with 2 assertion failure(s):
-1) Expected value to start with "ab", but found "test".
-2) Expected value to end with "cd", but found "test".
+Batch 'user profile' failed with 3 assertion failure(s):
+1) ...
+2) ...
+3) ...
 ```
 
 ## Installation
