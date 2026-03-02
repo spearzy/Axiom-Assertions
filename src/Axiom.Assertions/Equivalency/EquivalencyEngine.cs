@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Axiom.Core.Comparison;
@@ -514,6 +515,12 @@ internal static class EquivalencyEngine
                nonNullableType == typeof(DateTime) ||
                nonNullableType == typeof(DateTimeOffset) ||
                nonNullableType == typeof(TimeSpan) ||
+               nonNullableType == typeof(DateOnly) ||
+               nonNullableType == typeof(TimeOnly) ||
+               nonNullableType == typeof(Half) ||
+               nonNullableType == typeof(Int128) ||
+               nonNullableType == typeof(UInt128) ||
+               nonNullableType == typeof(BigInteger) ||
                nonNullableType == typeof(Guid);
     }
 
