@@ -70,6 +70,16 @@ actual.Should().BeEquivalentTo(
     options => options.CollectionOrder = EquivalencyCollectionOrder.Any);
 ```
 
+### Tolerance Rules For Non-Finite Numbers
+
+When a tolerance is configured for `float`, `double`, or `Half`, Axiom applies explicit rules for non-finite values:
+
+- `NaN` only matches `NaN`.
+- `+Infinity` only matches `+Infinity`.
+- `-Infinity` only matches `-Infinity`.
+
+This keeps equivalency behaviour predictable for edge-case numeric inputs.
+
 ### Optional Global Equivalency Defaults
 
 You only need this if you want project-wide defaults.  
