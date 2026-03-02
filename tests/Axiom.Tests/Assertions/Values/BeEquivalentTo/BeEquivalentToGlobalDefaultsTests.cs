@@ -104,4 +104,31 @@ public sealed class BeEquivalentToGlobalDefaultsTests : IDisposable
 
         Assert.Contains("Values differ.", ex.Message, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void GivenGlobalDateTimeTolerance_WhenNoPerCallOverride_ThenUsesGlobalDefaults()
+    {
+        EquivalencyDefaults.Configure(options => options.DateTimeTolerance = TimeSpan.FromSeconds(2));
+
+        var actual = new DateTime(2026, 03, 02, 12, 00, 00, DateTimeKind.Utc);
+        var expected = actual.AddSeconds(1);
+
+        var ex = Record.Exception(() => actual.Should().BeEquivalentTo(expected));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void GivenGlobalDateTimeOffsetTolerance_WhenPerCallToleranceIsStricter_ThenPerCallOverrideWins()
+    {
+        EquivalencyDefaults.Configure(options => options.DateTimeOffsetTolerance = TimeSpan.FromSeconds(2));
+
+        var actual = new DateTimeOffset(2026, 03, 02, 12, 00, 00, TimeSpan.Zero);
+        var expected = actual.AddSeconds(1);
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.DateTimeOffsetTolerance = TimeSpan.FromMilliseconds(500)));
+
+        Assert.Contains("Values differ.", ex.Message, StringComparison.Ordinal);
+    }
 }
