@@ -251,4 +251,136 @@ public sealed class BeEquivalentToToleranceTests : IDisposable
 
         Assert.Contains("Values differ.", ex.Message, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void GivenDecimalValues_WhenUsingNegativeTolerance_ThenToleranceIsNormalised()
+    {
+        var actual = 10.00m;
+        var expected = 10.01m;
+
+        var ex = Record.Exception(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.DecimalTolerance = -0.02m));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void GivenFloatValues_WhenUsingNegativeTolerance_ThenToleranceIsNormalised()
+    {
+        var actual = 10.00f;
+        var expected = 10.01f;
+
+        var ex = Record.Exception(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.FloatTolerance = -0.02f));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void GivenDoubleValues_WhenUsingNegativeTolerance_ThenToleranceIsNormalised()
+    {
+        var actual = 10.00d;
+        var expected = 10.01d;
+
+        var ex = Record.Exception(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.DoubleTolerance = -0.02d));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void GivenHalfValues_WhenUsingNegativeTolerance_ThenToleranceIsNormalised()
+    {
+        Half actual = (Half)10.00;
+        Half expected = (Half)10.01;
+
+        var ex = Record.Exception(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.HalfTolerance = -0.02f));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void GivenDateOnlyValues_WhenUsingNegativeTolerance_ThenToleranceIsNormalised()
+    {
+        var actual = new DateOnly(2026, 03, 02);
+        var expected = actual.AddDays(1);
+
+        var ex = Record.Exception(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.DateOnlyTolerance = -TimeSpan.FromDays(1)));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void GivenDateTimeValues_WhenUsingNegativeTolerance_ThenToleranceIsNormalised()
+    {
+        var actual = new DateTime(2026, 03, 02, 12, 00, 00, DateTimeKind.Utc);
+        var expected = actual.AddMilliseconds(500);
+
+        var ex = Record.Exception(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.DateTimeTolerance = -TimeSpan.FromSeconds(1)));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void GivenDateTimeOffsetValues_WhenUsingNegativeTolerance_ThenToleranceIsNormalised()
+    {
+        var actual = new DateTimeOffset(2026, 03, 02, 12, 00, 00, TimeSpan.Zero);
+        var expected = actual.AddMilliseconds(500);
+
+        var ex = Record.Exception(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.DateTimeOffsetTolerance = -TimeSpan.FromSeconds(1)));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void GivenTimeOnlyValues_WhenUsingNegativeTolerance_ThenToleranceIsNormalised()
+    {
+        var actual = new TimeOnly(10, 15, 02);
+        var expected = new TimeOnly(10, 15, 01);
+
+        var ex = Record.Exception(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.TimeOnlyTolerance = -TimeSpan.FromSeconds(2)));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void GivenTimeSpanValues_WhenUsingNegativeTolerance_ThenToleranceIsNormalised()
+    {
+        var actual = TimeSpan.FromSeconds(10);
+        var expected = TimeSpan.FromSeconds(10.5);
+
+        var ex = Record.Exception(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.TimeSpanTolerance = -TimeSpan.FromSeconds(1)));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void GivenDoubleValues_WhenDifferenceEqualsTolerance_ThenDoesNotThrow()
+    {
+        var actual = 10.00d;
+        var expected = 10.01d;
+
+        var ex = Record.Exception(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.DoubleTolerance = 0.01d));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void GivenTimeSpanValues_WhenDifferenceEqualsTolerance_ThenDoesNotThrow()
+    {
+        var actual = TimeSpan.FromSeconds(10);
+        var expected = TimeSpan.FromSeconds(10.5);
+
+        var ex = Record.Exception(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.TimeSpanTolerance = TimeSpan.FromMilliseconds(500)));
+
+        Assert.Null(ex);
+    }
 }
