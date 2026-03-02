@@ -40,7 +40,7 @@ Expected value to start with "ab", but found "test".
 - Optional global equivalency defaults with per-call overrides
 - Deterministic, testable failure messages and batch reports
 - Extensible value comparison/formatting via comparer and formatter hooks
-- Target frameworks: `net10.0` (primary) and `net8.0`
+- Target frameworks: `net10.0` (primary), `net9.0`, and `net8.0`
 
 ## Usage
 
