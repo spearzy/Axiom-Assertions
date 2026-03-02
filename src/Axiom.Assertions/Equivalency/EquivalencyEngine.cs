@@ -217,7 +217,12 @@ internal static class EquivalencyEngine
                     continue;
                 }
 
-                if (!ItemsEquivalent(actualItems[actualIndex], expectedItem, options))
+                // In Any-order mode we still require deep equivalency for each candidate pair.
+                if (!ItemsEquivalentDeep(
+                        actualItems[actualIndex],
+                        expectedItem,
+                        $"{path}[{expectedIndex}]",
+                        options))
                 {
                     continue;
                 }
@@ -230,7 +235,7 @@ internal static class EquivalencyEngine
             if (!matched)
             {
                 differences.Add(new EquivalencyDifference(
-                    $"{path}[*]",
+                    $"{path}[{expectedIndex}]",
                     expectedItem,
                     null,
                     "Expected item was not found in actual collection."));
@@ -245,38 +250,23 @@ internal static class EquivalencyEngine
             }
 
             differences.Add(new EquivalencyDifference(
-                $"{path}[*]",
+                $"{path}[{actualIndex}]",
                 null,
                 actualItems[actualIndex],
                 "Actual collection contains an extra item."));
         }
     }
 
-    private static bool ItemsEquivalent(object? actual, object? expected, EquivalencyOptions options)
+    private static bool ItemsEquivalentDeep(
+        object? actual,
+        object? expected,
+        string path,
+        EquivalencyOptions options)
     {
-        if (ReferenceEquals(actual, expected))
-        {
-            return true;
-        }
-
-        if (actual is null || expected is null)
-        {
-            return false;
-        }
-
-        var actualType = actual.GetType();
-        var expectedType = expected.GetType();
-        if (!AreTypesCompatible(actualType, expectedType, options))
-        {
-            return false;
-        }
-
-        if (actual is string actualString && expected is string expectedString)
-        {
-            return string.Equals(actualString, expectedString, options.StringComparison);
-        }
-
-        return Equals(actual, expected);
+        var localDifferences = new List<EquivalencyDifference>();
+        var localVisitedPairs = new HashSet<ReferencePair>(ReferencePairComparer.Instance);
+        CompareNode(actual, expected, path, options, localDifferences, localVisitedPairs);
+        return localDifferences.Count == 0;
     }
 
     private static Dictionary<string, Func<object, object?>> GetComparableMembers(Type type, EquivalencyOptions options)
