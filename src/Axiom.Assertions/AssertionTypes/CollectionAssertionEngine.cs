@@ -270,6 +270,200 @@ internal static class CollectionAssertionEngine
         AssertionOutputWriter.ReportPass("NotContain", subjectLabel, callerFilePath, callerLineNumber);
     }
 
+    public static void AssertContainKey<TKey, TValue>(
+        IReadOnlyDictionary<TKey, TValue>? subject,
+        string? subjectExpression,
+        TKey expectedKey,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to contain key", expectedKey),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        if (subject.ContainsKey(expectedKey))
+        {
+            AssertionOutputWriter.ReportPass("ContainKey", subjectLabel, callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            subjectLabel,
+            new Expectation("to contain key", expectedKey),
+            new RenderedText($"keys were {FormatSortedSequence(subject.Keys)}"),
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertNotContainKey<TKey, TValue>(
+        IReadOnlyDictionary<TKey, TValue>? subject,
+        string? subjectExpression,
+        TKey unexpectedKey,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to not contain key", unexpectedKey),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        if (!subject.TryGetValue(unexpectedKey, out var actualValue))
+        {
+            AssertionOutputWriter.ReportPass("NotContainKey", subjectLabel, callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            subjectLabel,
+            new Expectation("to not contain key", unexpectedKey),
+            new RenderedText($"key was present with value {FormatSingleValue(actualValue)}"),
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertContainValue<TKey, TValue>(
+        IReadOnlyDictionary<TKey, TValue>? subject,
+        string? subjectExpression,
+        TValue expectedValue,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to contain value", expectedValue),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var valueComparer = GetComparer<TValue>();
+        foreach (var pair in subject)
+        {
+            if (valueComparer.Equals(pair.Value, expectedValue))
+            {
+                AssertionOutputWriter.ReportPass("ContainValue", subjectLabel, callerFilePath, callerLineNumber);
+                return;
+            }
+        }
+
+        var failure = new Failure(
+            subjectLabel,
+            new Expectation("to contain value", expectedValue),
+            new RenderedText($"values were {FormatSortedSequence(subject.Values)}"),
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertNotContainValue<TKey, TValue>(
+        IReadOnlyDictionary<TKey, TValue>? subject,
+        string? subjectExpression,
+        TValue unexpectedValue,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to not contain value", unexpectedValue),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var valueComparer = GetComparer<TValue>();
+        foreach (var pair in subject)
+        {
+            if (!valueComparer.Equals(pair.Value, unexpectedValue))
+            {
+                continue;
+            }
+
+            var failure = new Failure(
+                subjectLabel,
+                new Expectation("to not contain value", unexpectedValue),
+                new RenderedText($"a matching value at key {FormatSingleValue(pair.Key)}"),
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        AssertionOutputWriter.ReportPass("NotContainValue", subjectLabel, callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertContainEntry<TKey, TValue>(
+        IReadOnlyDictionary<TKey, TValue>? subject,
+        string? subjectExpression,
+        TKey expectedKey,
+        TValue expectedValue,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        var expectedEntry = new RenderedText(FormatEntry(expectedKey, expectedValue));
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to contain entry", expectedEntry),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        if (!subject.TryGetValue(expectedKey, out var actualValue))
+        {
+            var missingKeyFailure = new Failure(
+                subjectLabel,
+                new Expectation("to contain entry", expectedEntry),
+                new RenderedText($"key {FormatSingleValue(expectedKey)} was missing"),
+                because);
+            Fail(FailureMessageRenderer.Render(missingKeyFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var valueComparer = GetComparer<TValue>();
+        if (valueComparer.Equals(actualValue, expectedValue))
+        {
+            AssertionOutputWriter.ReportPass("ContainEntry", subjectLabel, callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var valueMismatchFailure = new Failure(
+            subjectLabel,
+            new Expectation("to contain entry", expectedEntry),
+            new RenderedText($"key {FormatSingleValue(expectedKey)} had value {FormatSingleValue(actualValue)}"),
+            because);
+        Fail(FailureMessageRenderer.Render(valueMismatchFailure), callerFilePath, callerLineNumber);
+    }
+
     public static void AssertContainInOrder<T>(
         IEnumerable<T>? subject,
         string? subjectExpression,
@@ -609,6 +803,43 @@ internal static class CollectionAssertionEngine
 
         builder.Append(']');
         return builder.ToString();
+    }
+
+    private static string FormatSortedSequence<T>(IEnumerable<T> values)
+    {
+        var formatter = AxiomServices.Configuration.ValueFormatter;
+        var renderedValues = new List<string>();
+        foreach (var value in values)
+        {
+            renderedValues.Add(formatter.Format(value));
+        }
+
+        renderedValues.Sort(StringComparer.Ordinal);
+
+        if (renderedValues.Count == 0)
+        {
+            return "[]";
+        }
+
+        var builder = new StringBuilder();
+        builder.Append('[');
+        for (var i = 0; i < renderedValues.Count; i++)
+        {
+            if (i > 0)
+            {
+                builder.Append(", ");
+            }
+
+            builder.Append(renderedValues[i]);
+        }
+
+        builder.Append(']');
+        return builder.ToString();
+    }
+
+    private static string FormatEntry<TKey, TValue>(TKey key, TValue value)
+    {
+        return $"{FormatSingleValue(key)} => {FormatSingleValue(value)}";
     }
 
     private static int CountItems(IEnumerable subject)
