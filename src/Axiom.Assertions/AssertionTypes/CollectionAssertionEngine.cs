@@ -85,6 +85,108 @@ internal static class CollectionAssertionEngine
         AssertionOutputWriter.ReportPass("HaveCount", subjectLabel, callerFilePath, callerLineNumber);
     }
 
+    public static void AssertBeEmpty(
+        IEnumerable? subject,
+        string? subjectExpression,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to be empty", IncludeExpectedValue: false),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var actualCount = GetCount(subject);
+        if (actualCount != 0)
+        {
+            var failure = new Failure(
+                subjectLabel,
+                new Expectation("to be empty", IncludeExpectedValue: false),
+                actualCount,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        AssertionOutputWriter.ReportPass("BeEmpty", subjectLabel, callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertNotBeEmpty(
+        IEnumerable? subject,
+        string? subjectExpression,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to not be empty", IncludeExpectedValue: false),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var actualCount = GetCount(subject);
+        if (actualCount == 0)
+        {
+            var failure = new Failure(
+                subjectLabel,
+                new Expectation("to not be empty", IncludeExpectedValue: false),
+                actualCount,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        AssertionOutputWriter.ReportPass("NotBeEmpty", subjectLabel, callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertContainSingle(
+        IEnumerable? subject,
+        string? subjectExpression,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to contain a single item", IncludeExpectedValue: false),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var actualCount = GetCount(subject);
+        if (actualCount != 1)
+        {
+            var failure = new Failure(
+                subjectLabel,
+                new Expectation("to contain a single item", IncludeExpectedValue: false),
+                actualCount,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        AssertionOutputWriter.ReportPass("ContainSingle", subjectLabel, callerFilePath, callerLineNumber);
+    }
+
     private static string SubjectLabel(string? subjectExpression)
     {
         return string.IsNullOrWhiteSpace(subjectExpression) ? "<subject>" : subjectExpression;
@@ -112,6 +214,13 @@ internal static class CollectionAssertionEngine
 
         count = 0;
         return false;
+    }
+
+    private static int GetCount(IEnumerable subject)
+    {
+        return TryGetCount(subject, out var knownCount)
+            ? knownCount
+            : CountItems(subject);
     }
 
     private static int CountItems(IEnumerable subject)

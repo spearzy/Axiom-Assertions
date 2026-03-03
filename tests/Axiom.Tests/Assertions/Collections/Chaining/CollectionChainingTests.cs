@@ -12,4 +12,20 @@ public sealed class CollectionChainingTests
 
         values.Should().Contain(2).And.HaveCount(3);
     }
+
+    [Fact]
+    public void SingleItemChain_CanBeComposed()
+    {
+        int[] values = [1];
+
+        values.Should().NotBeEmpty().And.ContainSingle().And.Contain(1).And.HaveCount(1);
+    }
+
+    [Fact]
+    public void EmptyChain_CanBeComposed()
+    {
+        int[] values = [];
+
+        values.Should().BeEmpty().And.HaveCount(0);
+    }
 }
