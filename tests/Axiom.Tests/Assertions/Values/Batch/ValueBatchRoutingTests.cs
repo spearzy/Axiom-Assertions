@@ -5,6 +5,16 @@ namespace Axiom.Tests.Assertions.Values.Batch;
 
 public sealed class ValueBatchRoutingTests
 {
+    private sealed class Marker(string id)
+    {
+        public string Id { get; } = id;
+
+        public override string ToString()
+        {
+            return $"Marker({Id})";
+        }
+    }
+
     [Fact]
     public void Be_OutsideBatch_ThrowsImmediately()
     {
@@ -161,5 +171,85 @@ public sealed class ValueBatchRoutingTests
         Assert.Contains("Batch 'nullability' failed with 2 assertion failure(s):", message);
         Assert.Contains("1) Expected hasValue to be null, but found 1.", message);
         Assert.Contains("2) Expected noValue to not be null, but found <null>.", message);
+    }
+
+    [Fact]
+    public void BeSameAs_OutsideBatch_ThrowsImmediately()
+    {
+        var first = new Marker("one");
+        var second = new Marker("two");
+
+        Assert.Throws<InvalidOperationException>(() => first.Should().BeSameAs(second));
+    }
+
+    [Fact]
+    public void BeSameAs_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        var first = new Marker("one");
+        var second = new Marker("two");
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => first.Should().BeSameAs(second));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void Batch_Dispose_ThrowsCombinedFailures_FromReferenceAssertions()
+    {
+        var first = new Marker("one");
+        var second = new Marker("two");
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            using var batch = new Axiom.Core.Batch("references");
+            first.Should().BeSameAs(second);
+            second.Should().BeSameAs(first);
+        });
+
+        var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
+        Assert.Contains("Batch 'references' failed with 2 assertion failure(s):", message);
+        Assert.Contains("1) Expected first to be same reference as Marker(two), but found Marker(one).", message);
+        Assert.Contains("2) Expected second to be same reference as Marker(one), but found Marker(two).", message);
+    }
+
+    [Fact]
+    public void NotBeSameAs_OutsideBatch_ThrowsImmediately()
+    {
+        var marker = new Marker("one");
+
+        Assert.Throws<InvalidOperationException>(() => marker.Should().NotBeSameAs(marker));
+    }
+
+    [Fact]
+    public void NotBeSameAs_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        var marker = new Marker("one");
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => marker.Should().NotBeSameAs(marker));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void Batch_Dispose_ThrowsCombinedFailures_FromReferenceInequalityAssertions()
+    {
+        var first = new Marker("one");
+        var second = new Marker("two");
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            using var batch = new Axiom.Core.Batch("reference-inequality");
+            first.Should().NotBeSameAs(first);
+            second.Should().NotBeSameAs(second);
+        });
+
+        var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
+        Assert.Contains("Batch 'reference-inequality' failed with 2 assertion failure(s):", message);
+        Assert.Contains("1) Expected first to not be same reference as Marker(one), but found Marker(one).", message);
+        Assert.Contains("2) Expected second to not be same reference as Marker(two), but found Marker(two).", message);
     }
 }

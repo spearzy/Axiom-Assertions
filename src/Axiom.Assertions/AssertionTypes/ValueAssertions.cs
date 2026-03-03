@@ -55,6 +55,46 @@ public sealed class ValueAssertions<T>(T subject, string? subjectExpression)
         return new AndContinuation<ValueAssertions<T>>(this);
     }
 
+    public AndContinuation<ValueAssertions<T>> BeSameAs(
+        T? expectedReference,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        if (!ReferenceEquals(Subject, expectedReference))
+        {
+            var failure = new Failure(
+                SubjectLabel(),
+                new Expectation("to be same reference as", expectedReference),
+                Subject,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+        }
+
+        AssertionOutputWriter.ReportPass(nameof(BeSameAs), SubjectLabel(), callerFilePath, callerLineNumber);
+        return new AndContinuation<ValueAssertions<T>>(this);
+    }
+
+    public AndContinuation<ValueAssertions<T>> NotBeSameAs(
+        T? unexpectedReference,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        if (ReferenceEquals(Subject, unexpectedReference))
+        {
+            var failure = new Failure(
+                SubjectLabel(),
+                new Expectation("to not be same reference as", unexpectedReference),
+                Subject,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+        }
+
+        AssertionOutputWriter.ReportPass(nameof(NotBeSameAs), SubjectLabel(), callerFilePath, callerLineNumber);
+        return new AndContinuation<ValueAssertions<T>>(this);
+    }
+
     public AndContinuation<ValueAssertions<T>> BeEquivalentTo<TExpected>(
         TExpected expected,
         string? because = null,

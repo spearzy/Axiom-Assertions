@@ -5,6 +5,11 @@ namespace Axiom.Tests.Assertions.Values.Chaining;
 
 public sealed class ValueChainingTests
 {
+    private sealed class Marker(string id)
+    {
+        public string Id { get; } = id;
+    }
+
     [Fact]
     public void Be_ReturnsContinuation_AndPointsBackToSameAssertions()
     {
@@ -101,5 +106,45 @@ public sealed class ValueChainingTests
         int? value = 42;
 
         value.Should().NotBeNull().And.Be(42);
+    }
+
+    [Fact]
+    public void BeSameAs_ReturnsContinuation_AndPointsBackToSameAssertions()
+    {
+        var value = new Marker("x");
+
+        var baseAssertions = value.Should();
+        var continuation = baseAssertions.BeSameAs(value);
+
+        Assert.Same(baseAssertions, continuation.And);
+    }
+
+    [Fact]
+    public void ReferenceChain_CanBeComposed()
+    {
+        var value = new Marker("x");
+
+        value.Should().BeSameAs(value).And.NotBeNull();
+    }
+
+    [Fact]
+    public void NotBeSameAs_ReturnsContinuation_AndPointsBackToSameAssertions()
+    {
+        var value = new Marker("x");
+        var other = new Marker("y");
+
+        var baseAssertions = value.Should();
+        var continuation = baseAssertions.NotBeSameAs(other);
+
+        Assert.Same(baseAssertions, continuation.And);
+    }
+
+    [Fact]
+    public void ReferenceInequalityChain_CanBeComposed()
+    {
+        var value = new Marker("x");
+        var other = new Marker("y");
+
+        value.Should().NotBeSameAs(other).And.NotBeNull();
     }
 }
