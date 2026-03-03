@@ -26,4 +26,26 @@ public sealed class TemporalChainingTests
             .BeBefore(value.AddMinutes(1)).And
             .BeWithin(value.AddMilliseconds(400), TimeSpan.FromMilliseconds(500));
     }
+
+    [Fact]
+    public void DateOnlyChain_CanBeComposed()
+    {
+        var value = new DateOnly(2026, 03, 03);
+
+        value.Should()
+            .BeAfter(value.AddDays(-1)).And
+            .BeBefore(value.AddDays(1)).And
+            .BeWithin(value.AddDays(1), TimeSpan.FromDays(1));
+    }
+
+    [Fact]
+    public void TimeOnlyChain_CanBeComposed()
+    {
+        var value = new TimeOnly(10, 00, 00);
+
+        value.Should()
+            .BeAfter(value.Add(-TimeSpan.FromMinutes(1))).And
+            .BeBefore(value.Add(TimeSpan.FromMinutes(1))).And
+            .BeWithin(value.Add(TimeSpan.FromMilliseconds(400)), TimeSpan.FromMilliseconds(500));
+    }
 }

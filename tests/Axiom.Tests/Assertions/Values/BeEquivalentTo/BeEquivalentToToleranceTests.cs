@@ -106,6 +106,18 @@ public sealed class BeEquivalentToToleranceTests : IDisposable
     }
 
     [Fact]
+    public void GivenTimeOnlyValues_WhenWithinPerCallTolerance_ThenDoesNotThrow()
+    {
+        var actual = new TimeOnly(10, 15, 00);
+        var expected = actual.Add(TimeSpan.FromMilliseconds(400));
+
+        var ex = Record.Exception(() =>
+            actual.Should().BeEquivalentTo(expected, options => options.TimeOnlyTolerance = TimeSpan.FromMilliseconds(500)));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
     public void GivenTimeSpanValues_WhenOutsidePerCallTolerance_ThenThrows()
     {
         var actual = TimeSpan.FromSeconds(10);

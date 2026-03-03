@@ -142,6 +142,143 @@ internal static class TemporalAssertionEngine
         Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
     }
 
+    public static void AssertBeBefore(
+        DateOnly subject,
+        string? subjectExpression,
+        DateOnly expected,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        if (subject < expected)
+        {
+            AssertionOutputWriter.ReportPass("BeBefore", SubjectLabel(subjectExpression), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            SubjectLabel(subjectExpression),
+            new Expectation("to be before", expected),
+            subject,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertBeAfter(
+        DateOnly subject,
+        string? subjectExpression,
+        DateOnly expected,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        if (subject > expected)
+        {
+            AssertionOutputWriter.ReportPass("BeAfter", SubjectLabel(subjectExpression), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            SubjectLabel(subjectExpression),
+            new Expectation("to be after", expected),
+            subject,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertBeWithin(
+        DateOnly subject,
+        string? subjectExpression,
+        DateOnly expected,
+        TimeSpan tolerance,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var normalisedTolerance = NormaliseTolerance(tolerance);
+        var difference = TimeSpan.FromDays(Math.Abs(subject.DayNumber - expected.DayNumber));
+        if (difference <= normalisedTolerance)
+        {
+            AssertionOutputWriter.ReportPass("BeWithin", SubjectLabel(subjectExpression), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            SubjectLabel(subjectExpression),
+            new Expectation($"to be within {normalisedTolerance} of", expected),
+            subject,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertBeBefore(
+        TimeOnly subject,
+        string? subjectExpression,
+        TimeOnly expected,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        if (subject < expected)
+        {
+            AssertionOutputWriter.ReportPass("BeBefore", SubjectLabel(subjectExpression), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            SubjectLabel(subjectExpression),
+            new Expectation("to be before", expected),
+            subject,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertBeAfter(
+        TimeOnly subject,
+        string? subjectExpression,
+        TimeOnly expected,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        if (subject > expected)
+        {
+            AssertionOutputWriter.ReportPass("BeAfter", SubjectLabel(subjectExpression), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            SubjectLabel(subjectExpression),
+            new Expectation("to be after", expected),
+            subject,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertBeWithin(
+        TimeOnly subject,
+        string? subjectExpression,
+        TimeOnly expected,
+        TimeSpan tolerance,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var normalisedTolerance = NormaliseTolerance(tolerance);
+        if (AbsoluteTimeOnlyDifference(subject, expected) <= normalisedTolerance)
+        {
+            AssertionOutputWriter.ReportPass("BeWithin", SubjectLabel(subjectExpression), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            SubjectLabel(subjectExpression),
+            new Expectation($"to be within {normalisedTolerance} of", expected),
+            subject,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
     private static string SubjectLabel(string? subjectExpression)
     {
         return string.IsNullOrWhiteSpace(subjectExpression) ? "<subject>" : subjectExpression;
@@ -155,6 +292,13 @@ internal static class TemporalAssertionEngine
         }
 
         return tolerance.Duration();
+    }
+
+    private static TimeSpan AbsoluteTimeOnlyDifference(TimeOnly left, TimeOnly right)
+    {
+        var directTicks = Math.Abs(left.Ticks - right.Ticks);
+        var wrappedTicks = TimeSpan.TicksPerDay - directTicks;
+        return TimeSpan.FromTicks(Math.Min(directTicks, wrappedTicks));
     }
 
     private static void Fail(string message, string? callerFilePath, int callerLineNumber)

@@ -355,7 +355,7 @@ internal static class EquivalencyEngine
 
             // Compare time-of-day values by permitted time window.
             case TimeOnly actualTimeOnly when expected is TimeOnly expectedTimeOnly && options.TimeOnlyTolerance.HasValue:
-                areEquivalent = (actualTimeOnly - expectedTimeOnly).Duration() <=
+                areEquivalent = AbsoluteTimeOnlyDifference(actualTimeOnly, expectedTimeOnly) <=
                                 NormaliseTemporalTolerance(options.TimeOnlyTolerance.Value, nameof(EquivalencyOptions.TimeOnlyTolerance));
                 return true;
 
@@ -408,6 +408,13 @@ internal static class EquivalencyEngine
         }
 
         return tolerance.Duration();
+    }
+
+    private static TimeSpan AbsoluteTimeOnlyDifference(TimeOnly left, TimeOnly right)
+    {
+        var directTicks = Math.Abs(left.Ticks - right.Ticks);
+        var wrappedTicks = TimeSpan.TicksPerDay - directTicks;
+        return TimeSpan.FromTicks(Math.Min(directTicks, wrappedTicks));
     }
 
     private static bool TryCompareWithConfiguredComparer(

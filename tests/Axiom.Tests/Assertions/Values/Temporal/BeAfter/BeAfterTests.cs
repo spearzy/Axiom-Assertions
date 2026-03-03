@@ -51,4 +51,48 @@ public sealed class BeAfterTests
 
         Assert.Null(ex);
     }
+
+    [Fact]
+    public void BeAfter_DoesNotThrow_WhenDateOnlyIsAfterExpected()
+    {
+        var actual = new DateOnly(2026, 03, 03);
+        var expected = actual.AddDays(-1);
+
+        var ex = Record.Exception(() => actual.Should().BeAfter(expected));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void BeAfter_Throws_WhenDateOnlyIsNotAfterExpected()
+    {
+        var actual = new DateOnly(2026, 03, 03);
+        var expected = actual.AddDays(1);
+
+        var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().BeAfter(expected));
+
+        Assert.Contains("to be after", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BeAfter_DoesNotThrow_WhenTimeOnlyIsAfterExpected()
+    {
+        var actual = new TimeOnly(10, 00, 00);
+        var expected = actual.Add(-TimeSpan.FromMinutes(1));
+
+        var ex = Record.Exception(() => actual.Should().BeAfter(expected));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void BeAfter_Throws_WhenTimeOnlyIsNotAfterExpected()
+    {
+        var actual = new TimeOnly(10, 00, 00);
+        var expected = actual.Add(TimeSpan.FromMinutes(1));
+
+        var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().BeAfter(expected));
+
+        Assert.Contains("to be after", ex.Message, StringComparison.Ordinal);
+    }
 }

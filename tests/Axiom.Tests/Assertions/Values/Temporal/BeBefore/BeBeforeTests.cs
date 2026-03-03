@@ -51,4 +51,48 @@ public sealed class BeBeforeTests
 
         Assert.Null(ex);
     }
+
+    [Fact]
+    public void BeBefore_DoesNotThrow_WhenDateOnlyIsBeforeExpected()
+    {
+        var actual = new DateOnly(2026, 03, 03);
+        var expected = actual.AddDays(1);
+
+        var ex = Record.Exception(() => actual.Should().BeBefore(expected));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void BeBefore_Throws_WhenDateOnlyIsNotBeforeExpected()
+    {
+        var actual = new DateOnly(2026, 03, 03);
+        var expected = actual.AddDays(-1);
+
+        var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().BeBefore(expected));
+
+        Assert.Contains("to be before", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BeBefore_DoesNotThrow_WhenTimeOnlyIsBeforeExpected()
+    {
+        var actual = new TimeOnly(10, 00, 00);
+        var expected = actual.Add(TimeSpan.FromMinutes(1));
+
+        var ex = Record.Exception(() => actual.Should().BeBefore(expected));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void BeBefore_Throws_WhenTimeOnlyIsNotBeforeExpected()
+    {
+        var actual = new TimeOnly(10, 00, 00);
+        var expected = actual.Add(-TimeSpan.FromMinutes(1));
+
+        var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().BeBefore(expected));
+
+        Assert.Contains("to be before", ex.Message, StringComparison.Ordinal);
+    }
 }
