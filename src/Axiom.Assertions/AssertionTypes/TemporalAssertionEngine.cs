@@ -1,0 +1,173 @@
+using Axiom.Core;
+using Axiom.Core.Failures;
+using Axiom.Core.Output;
+
+namespace Axiom.Assertions.AssertionTypes;
+
+internal static class TemporalAssertionEngine
+{
+    public static void AssertBeBefore(
+        DateTime subject,
+        string? subjectExpression,
+        DateTime expected,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        if (subject < expected)
+        {
+            AssertionOutputWriter.ReportPass("BeBefore", SubjectLabel(subjectExpression), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            SubjectLabel(subjectExpression),
+            new Expectation("to be before", expected),
+            subject,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertBeAfter(
+        DateTime subject,
+        string? subjectExpression,
+        DateTime expected,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        if (subject > expected)
+        {
+            AssertionOutputWriter.ReportPass("BeAfter", SubjectLabel(subjectExpression), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            SubjectLabel(subjectExpression),
+            new Expectation("to be after", expected),
+            subject,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertBeWithin(
+        DateTime subject,
+        string? subjectExpression,
+        DateTime expected,
+        TimeSpan tolerance,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var normalisedTolerance = NormaliseTolerance(tolerance);
+        if ((subject - expected).Duration() <= normalisedTolerance)
+        {
+            AssertionOutputWriter.ReportPass("BeWithin", SubjectLabel(subjectExpression), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            SubjectLabel(subjectExpression),
+            new Expectation($"to be within {normalisedTolerance} of", expected),
+            subject,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertBeBefore(
+        DateTimeOffset subject,
+        string? subjectExpression,
+        DateTimeOffset expected,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        if (subject < expected)
+        {
+            AssertionOutputWriter.ReportPass("BeBefore", SubjectLabel(subjectExpression), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            SubjectLabel(subjectExpression),
+            new Expectation("to be before", expected),
+            subject,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertBeAfter(
+        DateTimeOffset subject,
+        string? subjectExpression,
+        DateTimeOffset expected,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        if (subject > expected)
+        {
+            AssertionOutputWriter.ReportPass("BeAfter", SubjectLabel(subjectExpression), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            SubjectLabel(subjectExpression),
+            new Expectation("to be after", expected),
+            subject,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertBeWithin(
+        DateTimeOffset subject,
+        string? subjectExpression,
+        DateTimeOffset expected,
+        TimeSpan tolerance,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var normalisedTolerance = NormaliseTolerance(tolerance);
+        if ((subject - expected).Duration() <= normalisedTolerance)
+        {
+            AssertionOutputWriter.ReportPass("BeWithin", SubjectLabel(subjectExpression), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var failure = new Failure(
+            SubjectLabel(subjectExpression),
+            new Expectation($"to be within {normalisedTolerance} of", expected),
+            subject,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+    }
+
+    private static string SubjectLabel(string? subjectExpression)
+    {
+        return string.IsNullOrWhiteSpace(subjectExpression) ? "<subject>" : subjectExpression;
+    }
+
+    private static TimeSpan NormaliseTolerance(TimeSpan tolerance)
+    {
+        if (tolerance == TimeSpan.MinValue)
+        {
+            return TimeSpan.MaxValue;
+        }
+
+        return tolerance.Duration();
+    }
+
+    private static void Fail(string message, string? callerFilePath, int callerLineNumber)
+    {
+        AssertionOutputWriter.ReportFailure(message, callerFilePath, callerLineNumber);
+
+        var batch = Batch.Current;
+        if (batch is not null)
+        {
+            batch.AddFailure(message);
+            return;
+        }
+
+        throw new InvalidOperationException(message);
+    }
+}
