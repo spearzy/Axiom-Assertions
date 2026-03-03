@@ -1,4 +1,5 @@
 using Axiom.Assertions.EntryPoints;
+using Axiom.Assertions.Extensions;
 
 namespace Axiom.Tests.Assertions.Values.Batch;
 
@@ -42,5 +43,64 @@ public sealed class ValueBatchRoutingTests
         Assert.Contains("Batch 'values' failed with 2 assertion failure(s):", message);
         Assert.Contains("1) Expected value to be 7, but found 42.", message);
         Assert.Contains("2) Expected value to not be 42, but found 42.", message);
+    }
+
+    [Fact]
+    public void BeFalse_OutsideBatch_ThrowsImmediately()
+    {
+        const bool value = true;
+
+        Assert.Throws<InvalidOperationException>(() => value.Should().BeFalse());
+    }
+
+    [Fact]
+    public void BeFalse_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        const bool value = true;
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => value.Should().BeFalse());
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void BeTrue_OutsideBatch_ThrowsImmediately()
+    {
+        const bool value = false;
+
+        Assert.Throws<InvalidOperationException>(() => value.Should().BeTrue());
+    }
+
+    [Fact]
+    public void BeTrue_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        const bool value = false;
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => value.Should().BeTrue());
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void Batch_Dispose_ThrowsCombinedFailures_FromBooleanAssertions()
+    {
+        const bool isEnabled = true;
+        const bool isReady = false;
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            using var batch = new Axiom.Core.Batch("bools");
+            isEnabled.Should().BeFalse();
+            isReady.Should().BeTrue();
+        });
+
+        var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
+        Assert.Contains("Batch 'bools' failed with 2 assertion failure(s):", message);
+        Assert.Contains("1) Expected isEnabled to be False, but found True.", message);
+        Assert.Contains("2) Expected isReady to be True, but found False.", message);
     }
 }

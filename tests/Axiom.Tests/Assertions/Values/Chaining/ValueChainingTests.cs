@@ -1,4 +1,5 @@
 using Axiom.Assertions.EntryPoints;
+using Axiom.Assertions.Extensions;
 
 namespace Axiom.Tests.Assertions.Values.Chaining;
 
@@ -32,5 +33,41 @@ public sealed class ValueChainingTests
         var value = 42;
 
         value.Should().Be(42).And.NotBe(0);
+    }
+
+    [Fact]
+    public void BeFalse_ReturnsContinuation_AndPointsBackToSameAssertions()
+    {
+        const bool value = false;
+
+        var baseAssertions = value.Should();
+        var continuation = baseAssertions.BeFalse();
+
+        Assert.Same(baseAssertions, continuation.And);
+    }
+
+    [Fact]
+    public void BeFalseBoolChain_CanBeComposed()
+    {
+        const bool value = false;
+
+        value.Should().BeFalse().And.NotBe(true);
+    }
+
+    [Fact]
+    public void BeTrue_ReturnsContinuation_AndPointsBackToSameAssertions()
+    {
+        const bool value = true;
+
+        var baseAssertions = value.Should();
+        var continuation = baseAssertions.BeTrue();
+    }
+
+    [Fact]
+    public void BeTrueBoolChain_CanBeComposed()
+    {
+        const bool value = true;
+
+        value.Should().BeTrue().And.NotBe(false);
     }
 }
