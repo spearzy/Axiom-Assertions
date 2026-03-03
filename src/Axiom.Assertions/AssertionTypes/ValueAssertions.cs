@@ -325,30 +325,31 @@ public sealed class ValueAssertions<T>(T subject, string? subjectExpression)
         return EqualityComparer<T>.Default;
     }
 
-    private static bool TryCompareValues(T left, T right, out int comparison)
+    private static bool TryCompareValues(T candidate, T other, out int comparison)
     {
-        // Prefer the strongly typed comparer when available.
-        if (left is IComparable<T> genericComparable)
+        if (candidate is IComparable<T> genericComparable)
         {
             try
             {
-                comparison = genericComparable.CompareTo(right);
+                comparison = genericComparable.CompareTo(other);
                 return true;
             }
             catch (ArgumentException)
             {
+                // Incompatible runtime type for this comparer; fall through to alternate strategies.
             }
         }
 
-        if (left is IComparable comparable)
+        if (candidate is IComparable comparable)
         {
             try
             {
-                comparison = comparable.CompareTo(right);
+                comparison = comparable.CompareTo(other);
                 return true;
             }
             catch (ArgumentException)
             {
+                // Incompatible runtime type for this comparer; treat as not comparable.
             }
         }
 
