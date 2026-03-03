@@ -17,16 +17,7 @@ public sealed class ActionAssertions(Action subject, string? subjectExpression)
         [CallerLineNumber] int callerLineNumber = 0)
         where TException : Exception
     {
-        Exception? capturedException = null;
-        try
-        {
-            // Execute once and capture what happened so we can evaluate it deterministically.
-            Subject();
-        }
-        catch (Exception ex)
-        {
-            capturedException = ex;
-        }
+        var capturedException = CaptureException();
 
         // Accept the requested type or any subtype (common assertion-library expectation).
         if (capturedException is TException)
@@ -47,6 +38,69 @@ public sealed class ActionAssertions(Action subject, string? subjectExpression)
         Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
 
         return new AndContinuation<ActionAssertions>(this);
+    }
+
+    public AndContinuation<ActionAssertions> ThrowExactly<TException>(
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+        where TException : Exception
+    {
+        var capturedException = CaptureException();
+        if (capturedException?.GetType() == typeof(TException))
+        {
+            AssertionOutputWriter.ReportPass(nameof(ThrowExactly), SubjectLabel(), callerFilePath, callerLineNumber);
+            return new AndContinuation<ActionAssertions>(this);
+        }
+
+        object actual = capturedException is null
+            ? NoExceptionToken.Instance
+            : capturedException.GetType();
+
+        var failure = new Failure(
+            SubjectLabel(),
+            new Expectation("to throw exactly", typeof(TException)),
+            actual,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+
+        return new AndContinuation<ActionAssertions>(this);
+    }
+
+    public AndContinuation<ActionAssertions> NotThrow(
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        var capturedException = CaptureException();
+        if (capturedException is null)
+        {
+            AssertionOutputWriter.ReportPass(nameof(NotThrow), SubjectLabel(), callerFilePath, callerLineNumber);
+            return new AndContinuation<ActionAssertions>(this);
+        }
+
+        var failure = new Failure(
+            SubjectLabel(),
+            new Expectation("to not throw", IncludeExpectedValue: false),
+            capturedException.GetType(),
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+
+        return new AndContinuation<ActionAssertions>(this);
+    }
+
+    private Exception? CaptureException()
+    {
+        try
+        {
+            // Execute once and capture what happened so we can evaluate it deterministically.
+            Subject();
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
     }
 
     private string SubjectLabel()
