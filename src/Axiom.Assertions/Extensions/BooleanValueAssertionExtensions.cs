@@ -15,7 +15,7 @@ public static class BooleanValueAssertionExtensions
         ArgumentNullException.ThrowIfNull(assertions);
         return assertions.Be(true, because, callerFilePath, callerLineNumber);
     }
-    
+
     public static AndContinuation<ValueAssertions<bool>> BeFalse(
         this ValueAssertions<bool> assertions,
         string? because = null,

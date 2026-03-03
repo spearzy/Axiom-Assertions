@@ -118,7 +118,7 @@ public sealed class ValueAssertions<T>(T subject, string? subjectExpression)
         configure(options);
         return BeEquivalentToInternal(expected, options, because, callerFilePath, callerLineNumber);
     }
-    
+
     public AndContinuation<ValueAssertions<T>> BeNull(
         string? because = null,
         [CallerFilePath] string? callerFilePath = null,
@@ -135,7 +135,7 @@ public sealed class ValueAssertions<T>(T subject, string? subjectExpression)
         AssertionOutputWriter.ReportPass(nameof(BeNull), SubjectLabel(), callerFilePath, callerLineNumber);
         return new AndContinuation<ValueAssertions<T>>(this);
     }
-    
+
     public AndContinuation<ValueAssertions<T>> NotBeNull(
         string? because = null,
         [CallerFilePath] string? callerFilePath = null,
@@ -152,7 +152,7 @@ public sealed class ValueAssertions<T>(T subject, string? subjectExpression)
         AssertionOutputWriter.ReportPass(nameof(NotBeNull), SubjectLabel(), callerFilePath, callerLineNumber);
         return new AndContinuation<ValueAssertions<T>>(this);
     }
-    
+
     public AndContinuation<ValueAssertions<T>> BeOfType<TExpected>(
         string? because = null,
         [CallerFilePath] string? callerFilePath = null,
