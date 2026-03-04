@@ -4,6 +4,9 @@ namespace Axiom.Tests.Assertions.Strings.NotMatch;
 
 public sealed class NotMatchTests
 {
+    private const string SlowRegexPattern = "^(a+)+$";
+    private static readonly string SlowRegexInput = new string('a', 250_000) + "X";
+
     [Fact]
     public void NotMatch_ReturnsContinuation_WhenValueDoesNotMatchPattern()
     {
@@ -57,5 +60,27 @@ public sealed class NotMatchTests
 
         Assert.Equal("pattern", ex.ParamName);
         Assert.Contains("Invalid regex pattern", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void NotMatch_ThrowsArgumentOutOfRangeException_WhenTimeoutIsNotPositive()
+    {
+        const string value = "AB-123";
+
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            value.Should().NotMatch(@"^[A-Z]{2}-\d{3}$", TimeSpan.FromMilliseconds(-1)));
+
+        Assert.Equal("timeout", ex.ParamName);
+    }
+
+    [Fact]
+    public void NotMatch_UsesPerCallTimeoutOverride_WhenRegexEvaluationTimesOut()
+    {
+        var value = SlowRegexInput;
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            value.Should().NotMatch(SlowRegexPattern, TimeSpan.FromMilliseconds(1)));
+
+        Assert.Contains("regex evaluation timed out after 1 ms", ex.Message, StringComparison.Ordinal);
     }
 }

@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Axiom.Assertions.Chaining;
 using Axiom.Core;
+using Axiom.Core.Configuration;
 using Axiom.Core.Failures;
 using Axiom.Core.Output;
 
@@ -9,9 +10,6 @@ namespace Axiom.Assertions.AssertionTypes;
 
 public sealed class StringAssertions(string? subject, string? subjectExpression)
 {
-    // Regex operations always run with a timeout to avoid pathological pattern/input combinations hanging test runs.
-    private static readonly TimeSpan RegexMatchTimeout = TimeSpan.FromMilliseconds(250);
-
     public string? Subject { get; } = subject;
     public string? SubjectExpression { get; } = subjectExpression;
 
@@ -276,7 +274,28 @@ public sealed class StringAssertions(string? subject, string? subjectExpression)
         [CallerFilePath] string? callerFilePath = null,
         [CallerLineNumber] int callerLineNumber = 0)
     {
+        return MatchCore(pattern, timeoutOverride: null, because, callerFilePath, callerLineNumber);
+    }
+
+    public AndContinuation<StringAssertions> Match(
+        string pattern,
+        TimeSpan timeout,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        return MatchCore(pattern, timeout, because, callerFilePath, callerLineNumber);
+    }
+
+    private AndContinuation<StringAssertions> MatchCore(
+        string pattern,
+        TimeSpan? timeoutOverride,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
         ArgumentNullException.ThrowIfNull(pattern);
+        var regexTimeout = ResolveRegexTimeout(timeoutOverride);
 
         var subject = Subject;
         if (subject is null)
@@ -290,12 +309,12 @@ public sealed class StringAssertions(string? subject, string? subjectExpression)
             return new AndContinuation<StringAssertions>(this);
         }
 
-        if (!TryEvaluateRegex(subject, pattern, out var isMatch))
+        if (!TryEvaluateRegex(subject, pattern, regexTimeout, out var isMatch))
         {
             var timeoutFailure = new Failure(
                 SubjectLabel(),
                 new Expectation("to match regex", pattern),
-                new RenderedText($"regex evaluation timed out after {RegexMatchTimeout.TotalMilliseconds:0} ms"),
+                new RenderedText($"regex evaluation timed out after {regexTimeout.TotalMilliseconds:0} ms"),
                 because);
             Fail(FailureMessageRenderer.Render(timeoutFailure), callerFilePath, callerLineNumber);
             return new AndContinuation<StringAssertions>(this);
@@ -321,7 +340,28 @@ public sealed class StringAssertions(string? subject, string? subjectExpression)
         [CallerFilePath] string? callerFilePath = null,
         [CallerLineNumber] int callerLineNumber = 0)
     {
+        return NotMatchCore(pattern, timeoutOverride: null, because, callerFilePath, callerLineNumber);
+    }
+
+    public AndContinuation<StringAssertions> NotMatch(
+        string pattern,
+        TimeSpan timeout,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        return NotMatchCore(pattern, timeout, because, callerFilePath, callerLineNumber);
+    }
+
+    private AndContinuation<StringAssertions> NotMatchCore(
+        string pattern,
+        TimeSpan? timeoutOverride,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
         ArgumentNullException.ThrowIfNull(pattern);
+        var regexTimeout = ResolveRegexTimeout(timeoutOverride);
 
         var subject = Subject;
         if (subject is null)
@@ -335,12 +375,12 @@ public sealed class StringAssertions(string? subject, string? subjectExpression)
             return new AndContinuation<StringAssertions>(this);
         }
 
-        if (!TryEvaluateRegex(subject, pattern, out var isMatch))
+        if (!TryEvaluateRegex(subject, pattern, regexTimeout, out var isMatch))
         {
             var timeoutFailure = new Failure(
                 SubjectLabel(),
                 new Expectation("to not match regex", pattern),
-                new RenderedText($"regex evaluation timed out after {RegexMatchTimeout.TotalMilliseconds:0} ms"),
+                new RenderedText($"regex evaluation timed out after {regexTimeout.TotalMilliseconds:0} ms"),
                 because);
             Fail(FailureMessageRenderer.Render(timeoutFailure), callerFilePath, callerLineNumber);
             return new AndContinuation<StringAssertions>(this);
@@ -379,7 +419,27 @@ public sealed class StringAssertions(string? subject, string? subjectExpression)
         throw new InvalidOperationException(message);
     }
 
-    private static bool TryEvaluateRegex(string subject, string pattern, out bool isMatch)
+    private static TimeSpan ResolveRegexTimeout(TimeSpan? timeoutOverride)
+    {
+        if (timeoutOverride.HasValue)
+        {
+            return ValidateRegexTimeout(timeoutOverride.Value, "timeout");
+        }
+
+        return ValidateRegexTimeout(AxiomServices.Configuration.RegexMatchTimeout, nameof(AxiomConfiguration.RegexMatchTimeout));
+    }
+
+    private static TimeSpan ValidateRegexTimeout(TimeSpan timeout, string paramName)
+    {
+        if (timeout <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(paramName, "Regex timeout must be greater than zero.");
+        }
+
+        return timeout;
+    }
+
+    private static bool TryEvaluateRegex(string subject, string pattern, TimeSpan timeout, out bool isMatch)
     {
         try
         {
@@ -387,7 +447,7 @@ public sealed class StringAssertions(string? subject, string? subjectExpression)
                 subject,
                 pattern,
                 RegexOptions.CultureInvariant,
-                RegexMatchTimeout);
+                timeout);
             return true;
         }
         catch (RegexMatchTimeoutException)

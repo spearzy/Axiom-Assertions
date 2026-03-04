@@ -2,8 +2,16 @@ using Axiom.Assertions.EntryPoints;
 
 namespace Axiom.Tests.Assertions.Strings.Match;
 
-public sealed class MatchTests
+public sealed class MatchTests : IDisposable
 {
+    private const string SlowRegexPattern = "^(a+)+$";
+    private static readonly string SlowRegexInput = new string('a', 250_000) + "X";
+
+    public void Dispose()
+    {
+        AxiomServices.Reset();
+    }
+
     [Fact]
     public void Match_ReturnsContinuation_WhenValueMatchesPattern()
     {
@@ -57,5 +65,47 @@ public sealed class MatchTests
 
         Assert.Equal("pattern", ex.ParamName);
         Assert.Contains("Invalid regex pattern", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Match_ThrowsArgumentOutOfRangeException_WhenTimeoutIsNotPositive()
+    {
+        const string value = "AB-123";
+
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            value.Should().Match(@"^[A-Z]{2}-\d{3}$", TimeSpan.Zero));
+
+        Assert.Equal("timeout", ex.ParamName);
+    }
+
+    [Fact]
+    public void Match_ThrowsArgumentOutOfRangeException_WhenConfiguredRegexTimeoutIsNotPositive()
+    {
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            AxiomServices.Configure(config => config.RegexMatchTimeout = TimeSpan.Zero));
+
+        Assert.Equal("RegexMatchTimeout", ex.ParamName);
+    }
+
+    [Fact]
+    public void Match_UsesPerCallTimeoutOverride_WhenRegexEvaluationTimesOut()
+    {
+        var value = SlowRegexInput;
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            value.Should().Match(SlowRegexPattern, TimeSpan.FromMilliseconds(1)));
+
+        Assert.Contains("regex evaluation timed out after 1 ms", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Match_UsesConfiguredGlobalTimeout_WhenRegexEvaluationTimesOut()
+    {
+        AxiomServices.Configure(config => config.RegexMatchTimeout = TimeSpan.FromMilliseconds(2));
+        var value = SlowRegexInput;
+
+        var ex = Assert.Throws<InvalidOperationException>(() => value.Should().Match(SlowRegexPattern));
+
+        Assert.Contains("regex evaluation timed out after 2 ms", ex.Message, StringComparison.Ordinal);
     }
 }

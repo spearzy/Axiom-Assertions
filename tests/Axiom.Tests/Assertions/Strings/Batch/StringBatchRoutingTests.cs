@@ -203,6 +203,16 @@ public sealed class StringBatchRoutingTests
     }
 
     [Fact]
+    public void Match_ThrowsArgumentOutOfRangeException_WhenTimeoutIsNotPositive()
+    {
+        const string value = "AB-123";
+
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => value.Should().Match(@"\w+", TimeSpan.Zero));
+
+        Assert.Equal("timeout", ex.ParamName);
+    }
+
+    [Fact]
     public void NotMatch_ThrowsArgumentException_WhenPatternIsInvalid()
     {
         const string value = "AB-123";
@@ -210,6 +220,16 @@ public sealed class StringBatchRoutingTests
         var ex = Assert.Throws<ArgumentException>(() => value.Should().NotMatch("["));
 
         Assert.Equal("pattern", ex.ParamName);
+    }
+
+    [Fact]
+    public void NotMatch_ThrowsArgumentOutOfRangeException_WhenTimeoutIsNotPositive()
+    {
+        const string value = "AB-123";
+
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => value.Should().NotMatch(@"\w+", TimeSpan.Zero));
+
+        Assert.Equal("timeout", ex.ParamName);
     }
 
     [Fact]

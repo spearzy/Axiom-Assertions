@@ -49,6 +49,17 @@ public sealed class AxiomServicesTests : IDisposable
         Assert.True(after.ShowPasses);
     }
 
+    [Fact]
+    public void Configure_PreservesRegexTimeout_WhenUpdatingOtherSettings()
+    {
+        var timeout = TimeSpan.FromSeconds(2);
+        AxiomServices.Configure(c => c.RegexMatchTimeout = timeout);
+
+        AxiomServices.Configure(c => c.ValueFormatter = new ConstantFormatter("fmt"));
+
+        Assert.Equal(timeout, AxiomServices.Configuration.RegexMatchTimeout);
+    }
+
     private sealed class ConstantFormatter : IValueFormatter
     {
         private readonly string _text;
