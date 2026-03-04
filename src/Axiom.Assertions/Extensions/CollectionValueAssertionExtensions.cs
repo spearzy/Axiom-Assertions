@@ -71,6 +71,47 @@ public static class CollectionValueAssertionExtensions
         return new AndContinuation<ValueAssertions<TCollection>>(assertions);
     }
 
+    public static AndContinuation<ValueAssertions<TCollection>> ContainAny<TCollection, TItem>(
+        this ValueAssertions<TCollection> assertions,
+        IEnumerable<TItem> expectedItems,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+        where TCollection : IEnumerable<TItem>
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+        ArgumentNullException.ThrowIfNull(expectedItems);
+
+        CollectionAssertionEngine.AssertContainAny(
+            assertions.Subject,
+            assertions.SubjectExpression,
+            expectedItems,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<ValueAssertions<TCollection>>(assertions);
+    }
+
+    public static AndContinuation<ValueAssertions<TCollection>> ContainAny<TCollection, TItem>(
+        this ValueAssertions<TCollection> assertions,
+        params TItem[] expectedItems)
+        where TCollection : IEnumerable<TItem>
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+        ArgumentNullException.ThrowIfNull(expectedItems);
+
+        CollectionAssertionEngine.AssertContainAny(
+            assertions.Subject,
+            assertions.SubjectExpression,
+            expectedItems,
+            because: null,
+            callerFilePath: null,
+            callerLineNumber: 0);
+
+        return new AndContinuation<ValueAssertions<TCollection>>(assertions);
+    }
+
     public static AndContinuation<ValueAssertions<TCollection>> ContainExactly<TCollection, TItem>(
         this ValueAssertions<TCollection> assertions,
         IEnumerable<TItem> expectedSequence,

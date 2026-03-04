@@ -97,6 +97,57 @@ internal static class CollectionAssertionEngine
         AssertionOutputWriter.ReportPass("ContainAll", subjectLabel, callerFilePath, callerLineNumber);
     }
 
+    public static void AssertContainAny<T>(
+        IEnumerable<T>? subject,
+        string? subjectExpression,
+        IEnumerable<T> expectedItems,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        var expected = MaterialiseExpectedSequence(expectedItems);
+        var expectedText = new RenderedText(FormatSequence(expected));
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to contain any of", expectedText),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        if (expected.Length == 0)
+        {
+            var noExpectedItemsFailure = new Failure(
+                subjectLabel,
+                new Expectation("to contain any of", expectedText),
+                new RenderedText("no expected items were provided"),
+                because);
+            Fail(FailureMessageRenderer.Render(noExpectedItemsFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var comparer = GetComparer<T>();
+        foreach (var subjectItem in subject)
+        {
+            if (ContainsItem(expected, subjectItem, comparer))
+            {
+                AssertionOutputWriter.ReportPass("ContainAny", subjectLabel, callerFilePath, callerLineNumber);
+                return;
+            }
+        }
+
+        var missingAnyFailure = new Failure(
+            subjectLabel,
+            new Expectation("to contain any of", expectedText),
+            new RenderedText("none of the expected items were found"),
+            because);
+        Fail(FailureMessageRenderer.Render(missingAnyFailure), callerFilePath, callerLineNumber);
+    }
+
     public static void AssertContainExactly<T>(
         IEnumerable<T>? subject,
         string? subjectExpression,

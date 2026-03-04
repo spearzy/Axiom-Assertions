@@ -48,6 +48,26 @@ public sealed class CollectionBatchRoutingTests
     }
 
     [Fact]
+    public void ContainAny_OutsideBatch_ThrowsImmediately()
+    {
+        int[] values = [1, 2, 3];
+
+        Assert.Throws<InvalidOperationException>(() => values.Should().ContainAny(9, 10));
+    }
+
+    [Fact]
+    public void ContainAny_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        int[] values = [1, 2, 3];
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => values.Should().ContainAny(9, 10));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
     public void ContainExactly_OutsideBatch_ThrowsImmediately()
     {
         int[] values = [1, 2, 3];
