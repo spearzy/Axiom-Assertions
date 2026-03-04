@@ -48,6 +48,55 @@ internal static class CollectionAssertionEngine
         Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
     }
 
+    public static void AssertContainAll<T>(
+        IEnumerable<T>? subject,
+        string? subjectExpression,
+        IEnumerable<T> expectedItems,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        var expected = MaterialiseExpectedSequence(expectedItems);
+        var expectedText = new RenderedText(FormatSequence(expected));
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to contain all", expectedText),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        if (expected.Length == 0)
+        {
+            AssertionOutputWriter.ReportPass("ContainAll", subjectLabel, callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var subjectItems = MaterialiseExpectedSequence(subject);
+        var comparer = GetComparer<T>();
+        for (var index = 0; index < expected.Length; index++)
+        {
+            if (ContainsItem(subjectItems, expected[index], comparer))
+            {
+                continue;
+            }
+
+            var missingItemFailure = new Failure(
+                subjectLabel,
+                new Expectation("to contain all", expectedText),
+                new RenderedText($"missing expected item at index {index}: {FormatSingleValue(expected[index])}"),
+                because);
+            Fail(FailureMessageRenderer.Render(missingItemFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        AssertionOutputWriter.ReportPass("ContainAll", subjectLabel, callerFilePath, callerLineNumber);
+    }
+
     public static void AssertContainExactly<T>(
         IEnumerable<T>? subject,
         string? subjectExpression,

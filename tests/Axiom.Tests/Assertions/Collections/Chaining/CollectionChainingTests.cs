@@ -65,6 +65,17 @@ public sealed class CollectionChainingTests
     }
 
     [Fact]
+    public void ContainAllChain_CanBeComposed()
+    {
+        int[] values = [1, 2, 3];
+
+        values.Should()
+            .ContainAll(1, 3).And
+            .NotContain(9).And
+            .HaveCount(3);
+    }
+
+    [Fact]
     public void SubsetChain_CanBeComposed()
     {
         int[] values = [1, 2];
