@@ -54,6 +54,17 @@ public sealed class CollectionChainingTests
     }
 
     [Fact]
+    public void ExactSequenceChain_CanBeComposed()
+    {
+        int[] values = [1, 2, 3];
+
+        values.Should()
+            .ContainExactly([1, 2, 3]).And
+            .NotContain(9).And
+            .HaveCount(3);
+    }
+
+    [Fact]
     public void KeySelectionOrderChain_CanBeComposed()
     {
         WorkflowStep[] steps =

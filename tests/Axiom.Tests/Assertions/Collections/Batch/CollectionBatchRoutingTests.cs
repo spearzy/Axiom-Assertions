@@ -28,6 +28,26 @@ public sealed class CollectionBatchRoutingTests
     }
 
     [Fact]
+    public void ContainExactly_OutsideBatch_ThrowsImmediately()
+    {
+        int[] values = [1, 2, 3];
+
+        Assert.Throws<InvalidOperationException>(() => values.Should().ContainExactly([1, 2]));
+    }
+
+    [Fact]
+    public void ContainExactly_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        int[] values = [1, 2, 3];
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => values.Should().ContainExactly([1, 2]));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
     public void BeEmpty_OutsideBatch_ThrowsImmediately()
     {
         int[] values = [1];
@@ -185,6 +205,24 @@ public sealed class CollectionBatchRoutingTests
         Assert.Contains("Batch 'collection-advanced' failed with 2 assertion failure(s):", message);
         Assert.Contains("1) Expected values to not contain 2, but found 2.", message);
         Assert.Contains("2) Expected item to be greater than 0, but found -1.", message);
+    }
+
+    [Fact]
+    public void Batch_Dispose_ThrowsCombinedFailures_FromContainExactlyAssertions()
+    {
+        int[] values = [1, 2, 3];
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            using var batch = new Axiom.Core.Batch("collection-exact");
+            values.Should().ContainExactly([1, 9, 3]);
+            values.Should().ContainExactly([1, 2, 3, 4]);
+        });
+
+        var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
+        Assert.Contains("Batch 'collection-exact' failed with 2 assertion failure(s):", message);
+        Assert.Contains("1) Expected values to contain exactly [1, 9, 3], but found item mismatch at index 1: expected 9 but found 2.", message);
+        Assert.Contains("2) Expected values to contain exactly [1, 2, 3, 4], but found missing item at index 3: 4.", message);
     }
 
     [Fact]

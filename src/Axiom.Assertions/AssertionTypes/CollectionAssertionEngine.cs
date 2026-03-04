@@ -48,6 +48,74 @@ internal static class CollectionAssertionEngine
         Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
     }
 
+    public static void AssertContainExactly<T>(
+        IEnumerable<T>? subject,
+        string? subjectExpression,
+        IEnumerable<T> expectedSequence,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        var expectedItems = MaterialiseExpectedSequence(expectedSequence);
+        var expectedSequenceText = new RenderedText(FormatSequence(expectedItems));
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to contain exactly", expectedSequenceText),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var comparer = GetComparer<T>();
+        var index = 0;
+        // Compare position-by-position and stop at the first deterministic difference.
+        foreach (var item in subject)
+        {
+            if (index >= expectedItems.Length)
+            {
+                var extraItemFailure = new Failure(
+                    subjectLabel,
+                    new Expectation("to contain exactly", expectedSequenceText),
+                    new RenderedText($"extra item at index {index}: {FormatSingleValue(item)}"),
+                    because);
+                Fail(FailureMessageRenderer.Render(extraItemFailure), callerFilePath, callerLineNumber);
+                return;
+            }
+
+            if (!comparer.Equals(item, expectedItems[index]))
+            {
+                var mismatchFailure = new Failure(
+                    subjectLabel,
+                    new Expectation("to contain exactly", expectedSequenceText),
+                    new RenderedText(
+                        $"item mismatch at index {index}: expected {FormatSingleValue(expectedItems[index])} but found {FormatSingleValue(item)}"),
+                    because);
+                Fail(FailureMessageRenderer.Render(mismatchFailure), callerFilePath, callerLineNumber);
+                return;
+            }
+
+            index++;
+        }
+
+        // Subject ended before the expected sequence finished.
+        if (index < expectedItems.Length)
+        {
+            var missingItemFailure = new Failure(
+                subjectLabel,
+                new Expectation("to contain exactly", expectedSequenceText),
+                new RenderedText($"missing item at index {index}: {FormatSingleValue(expectedItems[index])}"),
+                because);
+            Fail(FailureMessageRenderer.Render(missingItemFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        AssertionOutputWriter.ReportPass("ContainExactly", subjectLabel, callerFilePath, callerLineNumber);
+    }
+
     public static void AssertHaveCount(
         IEnumerable? subject,
         string? subjectExpression,
