@@ -88,6 +88,54 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
         return new AndContinuation<AsyncActionAssertions>(this);
     }
 
+    public async ValueTask<AndContinuation<AsyncActionAssertions>> CompleteWithin(
+        TimeSpan timeout,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ValidateTimeout(timeout);
+
+        if (await CompletesWithinAsync(timeout).ConfigureAwait(false))
+        {
+            AssertionOutputWriter.ReportPass(nameof(CompleteWithin), SubjectLabel(), callerFilePath, callerLineNumber);
+            return new AndContinuation<AsyncActionAssertions>(this);
+        }
+
+        var failure = new Failure(
+            SubjectLabel(),
+            new Expectation("to complete within", timeout),
+            NotCompletedInTimeToken.Instance,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+
+        return new AndContinuation<AsyncActionAssertions>(this);
+    }
+
+    public async ValueTask<AndContinuation<AsyncActionAssertions>> NotCompleteWithin(
+        TimeSpan timeout,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ValidateTimeout(timeout);
+
+        if (!await CompletesWithinAsync(timeout).ConfigureAwait(false))
+        {
+            AssertionOutputWriter.ReportPass(nameof(NotCompleteWithin), SubjectLabel(), callerFilePath, callerLineNumber);
+            return new AndContinuation<AsyncActionAssertions>(this);
+        }
+
+        var failure = new Failure(
+            SubjectLabel(),
+            new Expectation("to not complete within", timeout),
+            CompletedInTimeToken.Instance,
+            because);
+        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+
+        return new AndContinuation<AsyncActionAssertions>(this);
+    }
+
     private async ValueTask<Exception?> CaptureExceptionAsync()
     {
         try
@@ -98,6 +146,38 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
         catch (Exception ex)
         {
             return ex;
+        }
+    }
+
+    private async ValueTask<bool> CompletesWithinAsync(TimeSpan timeout)
+    {
+        var executionTask = Subject().AsTask();
+        var timeoutTask = Task.Delay(timeout);
+
+        var completedTask = await Task.WhenAny(executionTask, timeoutTask).ConfigureAwait(false);
+        if (!ReferenceEquals(completedTask, executionTask))
+        {
+            return false;
+        }
+
+        // Observe the task result to avoid unobserved faulted task exceptions.
+        try
+        {
+            await executionTask.ConfigureAwait(false);
+        }
+        catch
+        {
+            // Completion assertions only care whether the action completed in time.
+        }
+
+        return true;
+    }
+
+    private static void ValidateTimeout(TimeSpan timeout)
+    {
+        if (timeout < TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(timeout), "timeout must be zero or greater.");
         }
     }
 
@@ -128,6 +208,26 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
         public override string ToString()
         {
             return "<no exception>";
+        }
+    }
+
+    private sealed class NotCompletedInTimeToken
+    {
+        public static NotCompletedInTimeToken Instance { get; } = new();
+
+        public override string ToString()
+        {
+            return "<not completed within timeout>";
+        }
+    }
+
+    private sealed class CompletedInTimeToken
+    {
+        public static CompletedInTimeToken Instance { get; } = new();
+
+        public override string ToString()
+        {
+            return "<completed within timeout>";
         }
     }
 }

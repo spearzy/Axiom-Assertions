@@ -105,6 +105,8 @@ Expected value to start with "ab", but found "test".
 - `ThrowAsync<TException>()`
 - `ThrowExactlyAsync<TException>()`
 - `NotThrowAsync()`
+- `CompleteWithin(timeout)`
+- `NotCompleteWithin(timeout)`
 
 ### Collection assertions
 - `Contain(item)`
@@ -340,6 +342,11 @@ await asyncAction.Should().ThrowExactlyAsync<InvalidOperationException>();
 
 Func<Task> asyncNoThrow = () => Task.CompletedTask;
 await asyncNoThrow.Should().NotThrowAsync();
+
+var completion = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+Func<Task> slowAction = () => completion.Task;
+await slowAction.Should().NotCompleteWithin(TimeSpan.FromMilliseconds(50));
+completion.TrySetResult(null);
 ```
 
 ### Collection Assertions
