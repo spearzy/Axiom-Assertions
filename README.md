@@ -28,6 +28,8 @@ Axiom is an open-source assertion library for .NET tests. It helps you write flu
 - [Installation](#installation)
 - [Build](#build)
 - [Benchmarks](#benchmarks)
+- [Release Management](#release-management)
+- [Security](#security)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -447,6 +449,28 @@ Current scenarios:
   - `HaveCount_Pass_OutsideBatch`
   - `HaveCount_Fail_OutsideBatch` (exception caught inside benchmark)
   - `ContainAndHaveCount_Pass_OutsideBatch`
+
+## Release Management
+
+Versioning and package publishing are automated through GitHub Actions:
+
+- CI runs build, tests, formatting, and pack validation on Linux, Windows, and macOS.
+- Dependabot raises weekly updates for NuGet dependencies and GitHub Actions.
+- Publishing is triggered by a version tag in the format `v<semver>` (for example `v0.1.0-preview.1`).
+- The release workflow publishes `Axiom.Core` and `Axiom.Assertions` to NuGet with trusted publishing (requires a NuGet trusted publisher policy and the `NUGET_ORG_USERNAME` repository secret).
+
+Maintainer references:
+
+- [CI workflow](.github/workflows/ci.yml)
+- [Release workflow](.github/workflows/release.yml)
+- [Dependabot configuration](.github/dependabot.yml)
+- [Changelog](CHANGELOG.md)
+
+## Security
+
+Security reports should be submitted privately first via GitHub vulnerability reporting.
+
+See [SECURITY.md](SECURITY.md) for details.
 
 ## Contributing
 

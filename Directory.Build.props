@@ -11,4 +11,24 @@
   <PropertyGroup Condition="'$(MSBuildProjectName)' != 'Axiom.Tests' and '$(MSBuildProjectName)' != 'Axiom.Benchmarks'">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Axiom.Core' or '$(MSBuildProjectName)' == 'Axiom.Assertions'">
+    <Authors>Axiom contributors</Authors>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/spearzy/Axiom</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/spearzy/Axiom</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>assertions;testing;dotnet;unit-testing</PackageTags>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <VersionPrefix>0.1.0-preview</VersionPrefix>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'Axiom.Core' or '$(MSBuildProjectName)' == 'Axiom.Assertions'">
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
 </Project>

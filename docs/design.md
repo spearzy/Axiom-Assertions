@@ -13,8 +13,8 @@ This document captures the design direction for Axiom.
 
 - `Axiom.Core`: batch, failure model, formatting pipeline, entrypoints.
 - `Axiom.Assertions`: built-in assertion sets and chaining APIs.
-- `Axiom.Analyzers`: Roslyn analysers/code fixes (initial scaffold).
-- `Axiom.Vectors`: vector-type adapters (initial scaffold).
+- `Axiom.Analyzers` (planned): Roslyn analysers/code fixes.
+- `Axiom.Vectors` (planned): vector-type adapters.
 - `Axiom.Benchmarks`: BenchmarkDotNet performance suite.
 
 ## Open Questions

@@ -1,0 +1,109 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-pack:
+    name: Build, Test, and Pack
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            10.0.x
+            9.0.x
+            8.0.x
+
+      - name: Resolve package version from tag
+        id: version
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          if [ -z "$version" ] || [ "$version" = "$tag" ]; then
+            echo "Release tags must use the format v<semver>, for example v0.1.0-preview.1."
+            exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Restore
+        run: dotnet restore Axiom.sln
+
+      - name: Build
+        run: dotnet build Axiom.sln -c Release --no-restore
+
+      - name: Test (net10.0)
+        run: dotnet test tests/Axiom.Tests/Axiom.Tests.csproj -c Release -f net10.0 --no-build
+
+      - name: Test (net9.0)
+        run: dotnet test tests/Axiom.Tests/Axiom.Tests.csproj -c Release -f net9.0 --no-build
+
+      - name: Test (net8.0)
+        run: dotnet test tests/Axiom.Tests/Axiom.Tests.csproj -c Release -f net8.0 --no-build
+
+      - name: Pack Axiom.Core
+        run: >
+          dotnet pack src/Axiom.Core/Axiom.Core.csproj
+          -c Release
+          --no-build
+          --output artifacts/packages
+          /p:PackageVersion=${{ steps.version.outputs.version }}
+
+      - name: Pack Axiom.Assertions
+        run: >
+          dotnet pack src/Axiom.Assertions/Axiom.Assertions.csproj
+          -c Release
+          --no-build
+          --output artifacts/packages
+          /p:PackageVersion=${{ steps.version.outputs.version }}
+
+      - name: Upload package artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: artifacts/packages/*
+          if-no-files-found: error
+
+  publish:
+    name: Publish to NuGet
+    runs-on: ubuntu-latest
+    needs: build-test-pack
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Download package artefacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-packages
+          path: artifacts/packages
+
+      # Requires a NuGet trusted publishing policy linked to this repository.
+      - name: Authenticate to NuGet
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_ORG_USERNAME }}
+
+      - name: Push packages
+        run: |
+          dotnet nuget push artifacts/packages/*.nupkg \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+
+          dotnet nuget push artifacts/packages/*.snupkg \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate

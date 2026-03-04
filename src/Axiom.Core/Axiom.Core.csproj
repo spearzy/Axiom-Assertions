@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PackageId>Axiom.Core</PackageId>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+    <Description>Core batching, failure modelling, formatting, and extensibility primitives for Axiom assertions.</Description>
   </PropertyGroup>
 </Project>
