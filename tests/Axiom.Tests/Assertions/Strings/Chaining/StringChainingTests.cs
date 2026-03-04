@@ -93,6 +93,28 @@ public sealed class StringChainingTests
     }
 
     [Fact]
+    public void BeNullOrWhiteSpace_ReturnsContinuation_AndPointsBackToSameAssertions()
+    {
+        var value = " ";
+
+        var baseAssertions = value.Should();
+        var continuation = baseAssertions.BeNullOrWhiteSpace();
+
+        Assert.Same(baseAssertions, continuation.And);
+    }
+
+    [Fact]
+    public void NotBeNullOrWhiteSpace_ReturnsContinuation_AndPointsBackToSameAssertions()
+    {
+        var value = "test";
+
+        var baseAssertions = value.Should();
+        var continuation = baseAssertions.NotBeNullOrWhiteSpace();
+
+        Assert.Same(baseAssertions, continuation.And);
+    }
+
+    [Fact]
     public void FullChain_CanBeComposed()
     {
         var value = "test";
@@ -107,6 +129,7 @@ public sealed class StringChainingTests
 
         value.Should()
             .NotBeNull().And
+            .NotBeNullOrWhiteSpace().And
             .StartWith("t").And
             .Contain("es").And
             .HaveLength(4).And

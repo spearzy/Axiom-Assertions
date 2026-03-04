@@ -113,6 +113,46 @@ public sealed class StringBatchRoutingTests
     }
 
     [Fact]
+    public void BeNullOrWhiteSpace_OutsideBatch_ThrowsImmediately()
+    {
+        const string value = "test";
+
+        Assert.Throws<InvalidOperationException>(() => value.Should().BeNullOrWhiteSpace());
+    }
+
+    [Fact]
+    public void BeNullOrWhiteSpace_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        const string value = "test";
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => value.Should().BeNullOrWhiteSpace());
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void NotBeNullOrWhiteSpace_OutsideBatch_ThrowsImmediately()
+    {
+        const string value = " ";
+
+        Assert.Throws<InvalidOperationException>(() => value.Should().NotBeNullOrWhiteSpace());
+    }
+
+    [Fact]
+    public void NotBeNullOrWhiteSpace_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        const string value = " ";
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => value.Should().NotBeNullOrWhiteSpace());
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
     public void Batch_Dispose_ThrowsCombinedFailures_FromStringAssertions()
     {
         const string valueA = "test";
@@ -138,5 +178,24 @@ public sealed class StringBatchRoutingTests
         Assert.Contains("3) Expected valueC to have length 3, but found 4.", message);
         Assert.Contains("4) Expected valueD to be empty, but found \"test\".", message);
         Assert.Contains("5) Expected valueE to not be empty, but found \"\".", message);
+    }
+
+    [Fact]
+    public void Batch_Dispose_ThrowsCombinedFailures_FromNullOrWhiteSpaceAssertions()
+    {
+        const string valueA = "test";
+        const string valueB = " ";
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            using var batch = new Axiom.Core.Batch("string-whitespace");
+            valueA.Should().BeNullOrWhiteSpace();
+            valueB.Should().NotBeNullOrWhiteSpace();
+        });
+
+        var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
+        Assert.Contains("Batch 'string-whitespace' failed with 2 assertion failure(s):", message);
+        Assert.Contains("1) Expected valueA to be null or white-space, but found \"test\".", message);
+        Assert.Contains("2) Expected valueB to not be null or white-space, but found \" \".", message);
     }
 }

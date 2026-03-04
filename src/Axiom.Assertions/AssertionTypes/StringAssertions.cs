@@ -225,6 +225,47 @@ public sealed class StringAssertions(string? subject, string? subjectExpression)
         return new AndContinuation<StringAssertions>(this);
     }
 
+    public AndContinuation<StringAssertions> BeNullOrWhiteSpace(
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        var subject = Subject;
+        // Null, empty, and white-space-only values all satisfy this assertion.
+        if (!string.IsNullOrWhiteSpace(subject))
+        {
+            var failure = new Failure(
+                SubjectLabel(),
+                new Expectation("to be null or white-space", IncludeExpectedValue: false),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+        }
+
+        AssertionOutputWriter.ReportPass(nameof(BeNullOrWhiteSpace), SubjectLabel(), callerFilePath, callerLineNumber);
+        return new AndContinuation<StringAssertions>(this);
+    }
+
+    public AndContinuation<StringAssertions> NotBeNullOrWhiteSpace(
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        var subject = Subject;
+        if (string.IsNullOrWhiteSpace(subject))
+        {
+            var failure = new Failure(
+                SubjectLabel(),
+                new Expectation("to not be null or white-space", IncludeExpectedValue: false),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+        }
+
+        AssertionOutputWriter.ReportPass(nameof(NotBeNullOrWhiteSpace), SubjectLabel(), callerFilePath, callerLineNumber);
+        return new AndContinuation<StringAssertions>(this);
+    }
+
     private string SubjectLabel()
     {
         return string.IsNullOrWhiteSpace(SubjectExpression) ? "<subject>" : SubjectExpression;
