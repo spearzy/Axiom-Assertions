@@ -41,6 +41,25 @@ public sealed class ValueChainingTests
     }
 
     [Fact]
+    public void NotBeEquivalentTo_ReturnsContinuation_AndPointsBackToSameAssertions()
+    {
+        var value = 42;
+
+        var baseAssertions = value.Should();
+        var continuation = baseAssertions.NotBeEquivalentTo(7);
+
+        Assert.Same(baseAssertions, continuation.And);
+    }
+
+    [Fact]
+    public void EquivalencyInequalityChain_CanBeComposed()
+    {
+        var value = 42;
+
+        value.Should().NotBeEquivalentTo(7).And.Be(42);
+    }
+
+    [Fact]
     public void BeFalse_ReturnsContinuation_AndPointsBackToSameAssertions()
     {
         const bool value = false;

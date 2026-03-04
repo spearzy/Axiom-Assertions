@@ -119,6 +119,30 @@ public sealed class ValueAssertions<T>(T subject, string? subjectExpression)
         return BeEquivalentToInternal(expected, options, because, callerFilePath, callerLineNumber);
     }
 
+    public AndContinuation<ValueAssertions<T>> NotBeEquivalentTo<TExpected>(
+        TExpected expected,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        var options = EquivalencyDefaults.Snapshot();
+        return NotBeEquivalentToInternal(expected, options, because, callerFilePath, callerLineNumber);
+    }
+
+    public AndContinuation<ValueAssertions<T>> NotBeEquivalentTo<TExpected>(
+        TExpected expected,
+        Action<EquivalencyOptions> configure,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+
+        var options = EquivalencyDefaults.Snapshot();
+        configure(options);
+        return NotBeEquivalentToInternal(expected, options, because, callerFilePath, callerLineNumber);
+    }
+
     public AndContinuation<ValueAssertions<T>> BeNull(
         string? because = null,
         [CallerFilePath] string? callerFilePath = null,
@@ -380,6 +404,32 @@ public sealed class ValueAssertions<T>(T subject, string? subjectExpression)
         }
 
         AssertionOutputWriter.ReportPass(nameof(BeEquivalentTo), subjectLabel, callerFilePath, callerLineNumber);
+        return new AndContinuation<ValueAssertions<T>>(this);
+    }
+
+    private AndContinuation<ValueAssertions<T>> NotBeEquivalentToInternal<TExpected>(
+        TExpected expected,
+        EquivalencyOptions options,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel();
+        var differences = EquivalencyEngine.Compare(Subject, expected, subjectLabel, options);
+        // NotBeEquivalentTo should fail only when there are no differences.
+        if (differences.Count == 0)
+        {
+            var failure = new Failure(
+                subjectLabel,
+                new Expectation("to not be equivalent to", expected),
+                Subject,
+                because);
+
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+            return new AndContinuation<ValueAssertions<T>>(this);
+        }
+
+        AssertionOutputWriter.ReportPass(nameof(NotBeEquivalentTo), subjectLabel, callerFilePath, callerLineNumber);
         return new AndContinuation<ValueAssertions<T>>(this);
     }
 
