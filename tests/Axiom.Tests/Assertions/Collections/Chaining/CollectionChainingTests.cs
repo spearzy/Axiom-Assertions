@@ -76,6 +76,17 @@ public sealed class CollectionChainingTests
     }
 
     [Fact]
+    public void SupersetChain_CanBeComposed()
+    {
+        int[] values = [1, 2, 3];
+
+        values.Should()
+            .BeSupersetOf([1, 2]).And
+            .Contain(3).And
+            .HaveCount(3);
+    }
+
+    [Fact]
     public void KeySelectionOrderChain_CanBeComposed()
     {
         WorkflowStep[] steps =

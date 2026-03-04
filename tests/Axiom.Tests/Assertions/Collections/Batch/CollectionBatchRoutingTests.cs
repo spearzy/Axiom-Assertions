@@ -68,6 +68,26 @@ public sealed class CollectionBatchRoutingTests
     }
 
     [Fact]
+    public void BeSupersetOf_OutsideBatch_ThrowsImmediately()
+    {
+        int[] values = [1, 2];
+
+        Assert.Throws<InvalidOperationException>(() => values.Should().BeSupersetOf([1, 2, 4]));
+    }
+
+    [Fact]
+    public void BeSupersetOf_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        int[] values = [1, 2];
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => values.Should().BeSupersetOf([1, 2, 4]));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
     public void BeEmpty_OutsideBatch_ThrowsImmediately()
     {
         int[] values = [1];
@@ -261,6 +281,24 @@ public sealed class CollectionBatchRoutingTests
         Assert.Contains("Batch 'collection-subset' failed with 2 assertion failure(s):", message);
         Assert.Contains("1) Expected values to be a subset of [1, 2, 3], but found missing item at index 1: 4.", message);
         Assert.Contains("2) Expected values to be a subset of [1, 2, 4], but found missing item at index 2: 5.", message);
+    }
+
+    [Fact]
+    public void Batch_Dispose_ThrowsCombinedFailures_FromBeSupersetOfAssertions()
+    {
+        int[] values = [1, 2];
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            using var batch = new Axiom.Core.Batch("collection-superset");
+            values.Should().BeSupersetOf([1, 2, 4]);
+            values.Should().BeSupersetOf([1, 2, 5]);
+        });
+
+        var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
+        Assert.Contains("Batch 'collection-superset' failed with 2 assertion failure(s):", message);
+        Assert.Contains("1) Expected values to be a superset of [1, 2, 4], but found missing expected item at index 2: 4.", message);
+        Assert.Contains("2) Expected values to be a superset of [1, 2, 5], but found missing expected item at index 2: 5.", message);
     }
 
     [Fact]

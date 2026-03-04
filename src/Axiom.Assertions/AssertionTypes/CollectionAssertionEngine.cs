@@ -161,6 +161,49 @@ internal static class CollectionAssertionEngine
         AssertionOutputWriter.ReportPass("BeSubsetOf", subjectLabel, callerFilePath, callerLineNumber);
     }
 
+    public static void AssertBeSupersetOf<T>(
+        IEnumerable<T>? subject,
+        string? subjectExpression,
+        IEnumerable<T> expectedSubset,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        var subsetItems = MaterialiseExpectedSequence(expectedSubset);
+        var subsetText = new RenderedText(FormatSequence(subsetItems));
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to be a superset of", subsetText),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var subjectItems = MaterialiseExpectedSequence(subject);
+        var comparer = GetComparer<T>();
+        for (var index = 0; index < subsetItems.Length; index++)
+        {
+            if (ContainsItem(subjectItems, subsetItems[index], comparer))
+            {
+                continue;
+            }
+
+            var missingItemFailure = new Failure(
+                subjectLabel,
+                new Expectation("to be a superset of", subsetText),
+                new RenderedText($"missing expected item at index {index}: {FormatSingleValue(subsetItems[index])}"),
+                because);
+            Fail(FailureMessageRenderer.Render(missingItemFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        AssertionOutputWriter.ReportPass("BeSupersetOf", subjectLabel, callerFilePath, callerLineNumber);
+    }
+
     public static void AssertHaveCount(
         IEnumerable? subject,
         string? subjectExpression,
