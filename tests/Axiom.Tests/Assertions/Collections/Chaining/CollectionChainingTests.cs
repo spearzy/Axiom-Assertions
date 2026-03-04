@@ -98,6 +98,17 @@ public sealed class CollectionChainingTests
     }
 
     [Fact]
+    public void UniqueItemsChain_CanBeComposed()
+    {
+        int[] values = [1, 2, 3];
+
+        values.Should()
+            .HaveUniqueItems().And
+            .ContainAll(1, 3).And
+            .NotContainAny(8, 9);
+    }
+
+    [Fact]
     public void SubsetChain_CanBeComposed()
     {
         int[] values = [1, 2];

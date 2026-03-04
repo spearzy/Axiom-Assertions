@@ -208,6 +208,26 @@ public sealed class CollectionBatchRoutingTests
     }
 
     [Fact]
+    public void HaveUniqueItems_OutsideBatch_ThrowsImmediately()
+    {
+        int[] values = [1, 2, 2, 3];
+
+        Assert.Throws<InvalidOperationException>(() => values.Should().HaveUniqueItems());
+    }
+
+    [Fact]
+    public void HaveUniqueItems_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        int[] values = [1, 2, 2, 3];
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => values.Should().HaveUniqueItems());
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
     public void AllSatisfy_OutsideBatch_ThrowsImmediately()
     {
         int[] values = [1, 2, -1];

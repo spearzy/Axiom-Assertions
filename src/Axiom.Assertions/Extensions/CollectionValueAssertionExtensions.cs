@@ -153,6 +153,25 @@ public static class CollectionValueAssertionExtensions
         return new AndContinuation<ValueAssertions<TCollection>>(assertions);
     }
 
+    public static AndContinuation<ValueAssertions<TCollection>> HaveUniqueItems<TCollection>(
+        this ValueAssertions<TCollection> assertions,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+        where TCollection : IEnumerable
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        CollectionAssertionEngine.AssertHaveUniqueItems(
+            assertions.Subject,
+            assertions.SubjectExpression,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<ValueAssertions<TCollection>>(assertions);
+    }
+
     public static AndContinuation<ValueAssertions<TCollection>> ContainExactly<TCollection, TItem>(
         this ValueAssertions<TCollection> assertions,
         IEnumerable<TItem> expectedSequence,

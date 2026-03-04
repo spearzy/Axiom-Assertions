@@ -197,6 +197,47 @@ internal static class CollectionAssertionEngine
         AssertionOutputWriter.ReportPass("NotContainAny", subjectLabel, callerFilePath, callerLineNumber);
     }
 
+    public static void AssertHaveUniqueItems(
+        IEnumerable? subject,
+        string? subjectExpression,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to have unique items", IncludeExpectedValue: false),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var seen = new HashSet<object?>();
+        var index = 0;
+        foreach (var item in subject)
+        {
+            if (seen.Add(item))
+            {
+                index++;
+                continue;
+            }
+
+            var duplicateItemFailure = new Failure(
+                subjectLabel,
+                new Expectation("to have unique items", IncludeExpectedValue: false),
+                new RenderedText($"first duplicate item at index {index}: {FormatSingleValue(item)}"),
+                because);
+            Fail(FailureMessageRenderer.Render(duplicateItemFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        AssertionOutputWriter.ReportPass("HaveUniqueItems", subjectLabel, callerFilePath, callerLineNumber);
+    }
+
     public static void AssertContainExactly<T>(
         IEnumerable<T>? subject,
         string? subjectExpression,
