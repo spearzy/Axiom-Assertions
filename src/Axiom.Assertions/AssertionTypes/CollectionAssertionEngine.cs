@@ -148,6 +148,55 @@ internal static class CollectionAssertionEngine
         Fail(FailureMessageRenderer.Render(missingAnyFailure), callerFilePath, callerLineNumber);
     }
 
+    public static void AssertNotContainAny<T>(
+        IEnumerable<T>? subject,
+        string? subjectExpression,
+        IEnumerable<T> unexpectedItems,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        var unexpected = MaterialiseExpectedSequence(unexpectedItems);
+        var unexpectedText = new RenderedText(FormatSequence(unexpected));
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to not contain any of", unexpectedText),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        if (unexpected.Length == 0)
+        {
+            AssertionOutputWriter.ReportPass("NotContainAny", subjectLabel, callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var comparer = GetComparer<T>();
+        var subjectIndex = 0;
+        foreach (var subjectItem in subject)
+        {
+            if (ContainsItem(unexpected, subjectItem, comparer))
+            {
+                var matchingUnexpectedFailure = new Failure(
+                    subjectLabel,
+                    new Expectation("to not contain any of", unexpectedText),
+                    new RenderedText($"first matching item at subject index {subjectIndex}: {FormatSingleValue(subjectItem)}"),
+                    because);
+                Fail(FailureMessageRenderer.Render(matchingUnexpectedFailure), callerFilePath, callerLineNumber);
+                return;
+            }
+
+            subjectIndex++;
+        }
+
+        AssertionOutputWriter.ReportPass("NotContainAny", subjectLabel, callerFilePath, callerLineNumber);
+    }
+
     public static void AssertContainExactly<T>(
         IEnumerable<T>? subject,
         string? subjectExpression,
