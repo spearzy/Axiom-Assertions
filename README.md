@@ -5,28 +5,44 @@
 [![CI](https://github.com/spearzy/Axiom/actions/workflows/ci.yml/badge.svg)](https://github.com/spearzy/Axiom/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-Axiom is an open-source assertion library for .NET focused on:
-- low pass-path overhead (pay-for-play),
-- clear failure messages (with caller expression text),
-- fluent chaining via `.And`,
-- batch-based aggregation via `Batch`.
+Axiom is an open-source assertion library for .NET tests. It helps you write fluent, readable assertions, get clear deterministic failure messages, and optionally collect multiple failures in one run with `Batch`.
+
+## Table of Contents
+
+- [Why Axiom?](#why-axiom)
+- [Key Features](#key-features)
+- [Implemented Assertion Methods (Current)](#implemented-assertion-methods-current)
+- [Usage](#usage)
+  - [Fluent String Assertions](#fluent-string-assertions)
+  - [Value Assertions](#value-assertions)
+  - [Equivalency Assertions](#equivalency-assertions)
+  - [Tolerance Rules For Non-Finite Numbers](#tolerance-rules-for-non-finite-numbers)
+  - [Optional Global Equivalency Defaults](#optional-global-equivalency-defaults)
+  - [Custom Comparer Providers](#custom-comparer-providers)
+  - [Per-Assertion Type Comparers (Equivalency)](#per-assertion-type-comparers-equivalency)
+  - [Exception Assertions](#exception-assertions-1)
+  - [Collection Assertions](#collection-assertions)
+  - [Temporal Assertions](#temporal-assertions)
+  - [Optional Coloured Assertion Output](#optional-coloured-assertion-output)
+  - [Batch Assertions](#batch-assertions)
+- [Installation](#installation)
+- [Build](#build)
+- [Benchmarks](#benchmarks)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Why Axiom?
 
-Traditional assertions can hide context:
+Axiom is designed for teams that treat test assertions as core developer tooling, not just helper methods.
 
-```csharp
-Assert.Equal("te", value[..2]);
-// If this fails, the expression context is not always obvious.
-```
+In practice, that means:
+- deterministic failure output you can rely on in CI and code reviews,
+- low pass-path overhead (defer work until failure where possible),
+- explicit batch aggregation with `Batch` for multi-check validation,
+- configurable equivalency behaviour with clear precedence,
+- extension points for custom comparers and value formatters.
 
-Axiom-style assertions keep intent and context in one line:
-
-```csharp
-value.Should().StartWith("te");
-```
-
-Current string failure messages include the caller expression and expected/actual values, e.g.:
+Example failure output includes subject context and expected/actual values:
 
 ```text
 Expected value to start with "ab", but found "test".
@@ -292,12 +308,13 @@ actual.Should().BeEquivalentTo("abc", options =>
     options.StringComparison = StringComparison.OrdinalIgnoreCase);
 ```
 
-Precedence for leaf value equality in equivalency is:
-- tolerance option for that type (if configured),
-- per-path comparer (`UseComparerForPath(...)`),
-- per-call type comparer (`UseComparerForType<T>`),
-- global comparer provider (`AxiomServices.Configure(...)`),
-- default equality.
+Precedence for leaf value equality in `BeEquivalentTo(...)`/`NotBeEquivalentTo(...)` is:
+1. Tolerance option for that leaf type (if configured).
+2. Per-path comparer (`UseComparerForPath(...)`).
+3. `StringComparison` (string leaves only).
+4. Per-call type comparer (`UseComparerForType<T>`, non-string leaves).
+5. Global comparer provider (`AxiomServices.Configure(...)`, non-string leaves).
+6. Default equality.
 
 ### Exception Assertions
 
@@ -402,23 +419,6 @@ Then reference the project(s) you need, for example:
 ```bash
 dotnet add <your-test-project>.csproj reference src/Axiom.Assertions/Axiom.Assertions.csproj
 ```
-
-## Planned Packages
-
-- `Axiom.Core`
-- `Axiom.Assertions`
-- `Axiom.Analyzers` (scaffold only for now)
-- `Axiom.Vectors` (scaffold only for now)
-- `Axiom.Benchmarks`
-
-### Scaffold Docs
-
-- Analysers scaffold: [src/Axiom.Analyzers/README.md](src/Axiom.Analyzers/README.md)
-- Vectors scaffold: [src/Axiom.Vectors/README.md](src/Axiom.Vectors/README.md)
-
-## Design Notes
-
-See [docs/design.md](docs/design.md) for architecture and design direction.
 
 ## Build
 
