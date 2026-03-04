@@ -208,12 +208,22 @@ internal static class EquivalencyEngine
                 }
 
                 var actualValue = actualGetter!(actual);
+                if (options.IgnoreActualNullMemberValues && actualValue is null)
+                {
+                    continue;
+                }
+
                 differences.Add(new EquivalencyDifference(memberPath, null, actualValue, "Member missing on expected type."));
                 continue;
             }
 
             var actualValueAtMember = actualGetter!(actual);
             var expectedValueAtMember = expectedGetter!(expected);
+            if (options.IgnoreActualNullMemberValues && actualValueAtMember is null)
+            {
+                continue;
+            }
+
             if (options.IgnoreExpectedNullMemberValues && expectedValueAtMember is null)
             {
                 continue;

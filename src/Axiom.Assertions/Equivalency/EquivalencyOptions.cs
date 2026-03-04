@@ -25,6 +25,7 @@ public sealed class EquivalencyOptions
     public bool FailOnMissingMembers { get; set; } = true;
     public bool FailOnExtraMembers { get; set; } = true;
     public bool IgnoreExpectedNullMemberValues { get; private set; }
+    public bool IgnoreActualNullMemberValues { get; private set; }
     public float? FloatTolerance { get; set; }
     public double? DoubleTolerance { get; set; }
     public float? HalfTolerance { get; set; }
@@ -109,6 +110,12 @@ public sealed class EquivalencyOptions
         return this;
     }
 
+    public EquivalencyOptions IgnoreActualNullMembers()
+    {
+        IgnoreActualNullMemberValues = true;
+        return this;
+    }
+
     internal bool TryCompareWithPathComparer(string path, object actual, object expected, out bool areEquivalent)
     {
         if (_pathComparers.TryGetValue(path, out var comparer))
@@ -159,6 +166,7 @@ public sealed class EquivalencyOptions
             FailOnMissingMembers = FailOnMissingMembers,
             FailOnExtraMembers = FailOnExtraMembers,
             IgnoreExpectedNullMemberValues = IgnoreExpectedNullMemberValues,
+            IgnoreActualNullMemberValues = IgnoreActualNullMemberValues,
             FloatTolerance = FloatTolerance,
             DoubleTolerance = DoubleTolerance,
             HalfTolerance = HalfTolerance,
