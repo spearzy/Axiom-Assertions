@@ -153,6 +153,66 @@ public sealed class StringBatchRoutingTests
     }
 
     [Fact]
+    public void Match_OutsideBatch_ThrowsImmediately()
+    {
+        const string value = "AB-12";
+
+        Assert.Throws<InvalidOperationException>(() => value.Should().Match(@"^[A-Z]{2}-\d{3}$"));
+    }
+
+    [Fact]
+    public void Match_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        const string value = "AB-12";
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => value.Should().Match(@"^[A-Z]{2}-\d{3}$"));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void NotMatch_OutsideBatch_ThrowsImmediately()
+    {
+        const string value = "AB-123";
+
+        Assert.Throws<InvalidOperationException>(() => value.Should().NotMatch(@"^[A-Z]{2}-\d{3}$"));
+    }
+
+    [Fact]
+    public void NotMatch_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        const string value = "AB-123";
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => value.Should().NotMatch(@"^[A-Z]{2}-\d{3}$"));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void Match_ThrowsArgumentException_WhenPatternIsInvalid()
+    {
+        const string value = "AB-123";
+
+        var ex = Assert.Throws<ArgumentException>(() => value.Should().Match("["));
+
+        Assert.Equal("pattern", ex.ParamName);
+    }
+
+    [Fact]
+    public void NotMatch_ThrowsArgumentException_WhenPatternIsInvalid()
+    {
+        const string value = "AB-123";
+
+        var ex = Assert.Throws<ArgumentException>(() => value.Should().NotMatch("["));
+
+        Assert.Equal("pattern", ex.ParamName);
+    }
+
+    [Fact]
     public void Batch_Dispose_ThrowsCombinedFailures_FromStringAssertions()
     {
         const string valueA = "test";
@@ -197,5 +257,24 @@ public sealed class StringBatchRoutingTests
         Assert.Contains("Batch 'string-whitespace' failed with 2 assertion failure(s):", message);
         Assert.Contains("1) Expected valueA to be null or white-space, but found \"test\".", message);
         Assert.Contains("2) Expected valueB to not be null or white-space, but found \" \".", message);
+    }
+
+    [Fact]
+    public void Batch_Dispose_ThrowsCombinedFailures_FromRegexAssertions()
+    {
+        const string valueA = "AB-12";
+        const string valueB = "AB-123";
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            using var batch = new Axiom.Core.Batch("string-regex");
+            valueA.Should().Match(@"^[A-Z]{2}-\d{3}$");
+            valueB.Should().NotMatch(@"^[A-Z]{2}-\d{3}$");
+        });
+
+        var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
+        Assert.Contains("Batch 'string-regex' failed with 2 assertion failure(s):", message);
+        Assert.Contains("1) Expected valueA to match regex \"^[A-Z]{2}-\\d{3}$\", but found \"AB-12\".", message);
+        Assert.Contains("2) Expected valueB to not match regex \"^[A-Z]{2}-\\d{3}$\", but found \"AB-123\".", message);
     }
 }

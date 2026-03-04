@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using Axiom.Assertions.Chaining;
 using Axiom.Core;
 using Axiom.Core.Failures;
@@ -8,6 +9,9 @@ namespace Axiom.Assertions.AssertionTypes;
 
 public sealed class StringAssertions(string? subject, string? subjectExpression)
 {
+    // Regex operations always run with a timeout to avoid pathological pattern/input combinations hanging test runs.
+    private static readonly TimeSpan RegexMatchTimeout = TimeSpan.FromMilliseconds(250);
+
     public string? Subject { get; } = subject;
     public string? SubjectExpression { get; } = subjectExpression;
 
@@ -266,6 +270,96 @@ public sealed class StringAssertions(string? subject, string? subjectExpression)
         return new AndContinuation<StringAssertions>(this);
     }
 
+    public AndContinuation<StringAssertions> Match(
+        string pattern,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(pattern);
+
+        var subject = Subject;
+        if (subject is null)
+        {
+            var failure = new Failure(
+                SubjectLabel(),
+                new Expectation("to match regex", pattern),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+            return new AndContinuation<StringAssertions>(this);
+        }
+
+        if (!TryEvaluateRegex(subject, pattern, out var isMatch))
+        {
+            var timeoutFailure = new Failure(
+                SubjectLabel(),
+                new Expectation("to match regex", pattern),
+                new RenderedText($"regex evaluation timed out after {RegexMatchTimeout.TotalMilliseconds:0} ms"),
+                because);
+            Fail(FailureMessageRenderer.Render(timeoutFailure), callerFilePath, callerLineNumber);
+            return new AndContinuation<StringAssertions>(this);
+        }
+
+        if (!isMatch)
+        {
+            var failure = new Failure(
+                SubjectLabel(),
+                new Expectation("to match regex", pattern),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+        }
+
+        AssertionOutputWriter.ReportPass(nameof(Match), SubjectLabel(), callerFilePath, callerLineNumber);
+        return new AndContinuation<StringAssertions>(this);
+    }
+
+    public AndContinuation<StringAssertions> NotMatch(
+        string pattern,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(pattern);
+
+        var subject = Subject;
+        if (subject is null)
+        {
+            var failure = new Failure(
+                SubjectLabel(),
+                new Expectation("to not match regex", pattern),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+            return new AndContinuation<StringAssertions>(this);
+        }
+
+        if (!TryEvaluateRegex(subject, pattern, out var isMatch))
+        {
+            var timeoutFailure = new Failure(
+                SubjectLabel(),
+                new Expectation("to not match regex", pattern),
+                new RenderedText($"regex evaluation timed out after {RegexMatchTimeout.TotalMilliseconds:0} ms"),
+                because);
+            Fail(FailureMessageRenderer.Render(timeoutFailure), callerFilePath, callerLineNumber);
+            return new AndContinuation<StringAssertions>(this);
+        }
+
+        if (isMatch)
+        {
+            var failure = new Failure(
+                SubjectLabel(),
+                new Expectation("to not match regex", pattern),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+        }
+
+        AssertionOutputWriter.ReportPass(nameof(NotMatch), SubjectLabel(), callerFilePath, callerLineNumber);
+        return new AndContinuation<StringAssertions>(this);
+    }
+
     private string SubjectLabel()
     {
         return string.IsNullOrWhiteSpace(SubjectExpression) ? "<subject>" : SubjectExpression;
@@ -283,5 +377,35 @@ public sealed class StringAssertions(string? subject, string? subjectExpression)
         }
 
         throw new InvalidOperationException(message);
+    }
+
+    private static bool TryEvaluateRegex(string subject, string pattern, out bool isMatch)
+    {
+        try
+        {
+            isMatch = Regex.IsMatch(
+                subject,
+                pattern,
+                RegexOptions.CultureInvariant,
+                RegexMatchTimeout);
+            return true;
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            isMatch = false;
+            return false;
+        }
+        catch (ArgumentException ex)
+        {
+            throw new ArgumentException($"Invalid regex pattern '{pattern}'.", nameof(pattern), ex);
+        }
+    }
+
+    private readonly record struct RenderedText(string Text)
+    {
+        public override string ToString()
+        {
+            return Text;
+        }
     }
 }

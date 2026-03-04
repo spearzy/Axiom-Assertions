@@ -115,6 +115,28 @@ public sealed class StringChainingTests
     }
 
     [Fact]
+    public void Match_ReturnsContinuation_AndPointsBackToSameAssertions()
+    {
+        var value = "AB-123";
+
+        var baseAssertions = value.Should();
+        var continuation = baseAssertions.Match(@"^[A-Z]{2}-\d{3}$");
+
+        Assert.Same(baseAssertions, continuation.And);
+    }
+
+    [Fact]
+    public void NotMatch_ReturnsContinuation_AndPointsBackToSameAssertions()
+    {
+        var value = "AB-12";
+
+        var baseAssertions = value.Should();
+        var continuation = baseAssertions.NotMatch(@"^[A-Z]{2}-\d{3}$");
+
+        Assert.Same(baseAssertions, continuation.And);
+    }
+
+    [Fact]
     public void FullChain_CanBeComposed()
     {
         var value = "test";
@@ -125,16 +147,18 @@ public sealed class StringChainingTests
     [Fact]
     public void ExtendedChain_CanBeComposed()
     {
-        var value = "test";
+        var value = "AB-123";
 
         value.Should()
             .NotBeNull().And
             .NotBeNullOrWhiteSpace().And
-            .StartWith("t").And
-            .Contain("es").And
-            .HaveLength(4).And
-            .NotContain("ab").And
-            .EndWith("t").And
+            .StartWith("AB").And
+            .Contain("-").And
+            .HaveLength(6).And
+            .NotContain(" ").And
+            .Match(@"^[A-Z]{2}-\d{3}$").And
+            .NotMatch(@"^\d+$").And
+            .EndWith("123").And
             .NotBeEmpty();
     }
 }
