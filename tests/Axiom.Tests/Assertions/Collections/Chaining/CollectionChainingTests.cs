@@ -65,6 +65,17 @@ public sealed class CollectionChainingTests
     }
 
     [Fact]
+    public void SubsetChain_CanBeComposed()
+    {
+        int[] values = [1, 2];
+
+        values.Should()
+            .BeSubsetOf([1, 2, 3]).And
+            .NotContain(9).And
+            .HaveCount(2);
+    }
+
+    [Fact]
     public void KeySelectionOrderChain_CanBeComposed()
     {
         WorkflowStep[] steps =

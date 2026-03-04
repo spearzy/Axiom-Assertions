@@ -48,6 +48,26 @@ public sealed class CollectionBatchRoutingTests
     }
 
     [Fact]
+    public void BeSubsetOf_OutsideBatch_ThrowsImmediately()
+    {
+        int[] values = [1, 4];
+
+        Assert.Throws<InvalidOperationException>(() => values.Should().BeSubsetOf([1, 2, 3]));
+    }
+
+    [Fact]
+    public void BeSubsetOf_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        int[] values = [1, 4];
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => values.Should().BeSubsetOf([1, 2, 3]));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
     public void BeEmpty_OutsideBatch_ThrowsImmediately()
     {
         int[] values = [1];
@@ -223,6 +243,24 @@ public sealed class CollectionBatchRoutingTests
         Assert.Contains("Batch 'collection-exact' failed with 2 assertion failure(s):", message);
         Assert.Contains("1) Expected values to contain exactly [1, 9, 3], but found item mismatch at index 1: expected 9 but found 2.", message);
         Assert.Contains("2) Expected values to contain exactly [1, 2, 3, 4], but found missing item at index 3: 4.", message);
+    }
+
+    [Fact]
+    public void Batch_Dispose_ThrowsCombinedFailures_FromBeSubsetOfAssertions()
+    {
+        int[] values = [1, 4, 5];
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            using var batch = new Axiom.Core.Batch("collection-subset");
+            values.Should().BeSubsetOf([1, 2, 3]);
+            values.Should().BeSubsetOf([1, 2, 4]);
+        });
+
+        var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
+        Assert.Contains("Batch 'collection-subset' failed with 2 assertion failure(s):", message);
+        Assert.Contains("1) Expected values to be a subset of [1, 2, 3], but found missing item at index 1: 4.", message);
+        Assert.Contains("2) Expected values to be a subset of [1, 2, 4], but found missing item at index 2: 5.", message);
     }
 
     [Fact]

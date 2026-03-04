@@ -116,6 +116,51 @@ internal static class CollectionAssertionEngine
         AssertionOutputWriter.ReportPass("ContainExactly", subjectLabel, callerFilePath, callerLineNumber);
     }
 
+    public static void AssertBeSubsetOf<T>(
+        IEnumerable<T>? subject,
+        string? subjectExpression,
+        IEnumerable<T> expectedSuperset,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        var supersetItems = MaterialiseExpectedSequence(expectedSuperset);
+        var supersetText = new RenderedText(FormatSequence(supersetItems));
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to be a subset of", supersetText),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var comparer = GetComparer<T>();
+        var index = 0;
+        // Report the first missing item so subset failures are deterministic and easy to scan.
+        foreach (var item in subject)
+        {
+            if (ContainsItem(supersetItems, item, comparer))
+            {
+                index++;
+                continue;
+            }
+
+            var missingItemFailure = new Failure(
+                subjectLabel,
+                new Expectation("to be a subset of", supersetText),
+                new RenderedText($"missing item at index {index}: {FormatSingleValue(item)}"),
+                because);
+            Fail(FailureMessageRenderer.Render(missingItemFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        AssertionOutputWriter.ReportPass("BeSubsetOf", subjectLabel, callerFilePath, callerLineNumber);
+    }
+
     public static void AssertHaveCount(
         IEnumerable? subject,
         string? subjectExpression,
@@ -926,6 +971,19 @@ internal static class CollectionAssertionEngine
         }
 
         return buffer.ToArray();
+    }
+
+    private static bool ContainsItem<T>(IReadOnlyList<T> values, T candidate, IEqualityComparer<T> comparer)
+    {
+        for (var i = 0; i < values.Count; i++)
+        {
+            if (comparer.Equals(values[i], candidate))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static string FormatSingleValue<T>(T value)
