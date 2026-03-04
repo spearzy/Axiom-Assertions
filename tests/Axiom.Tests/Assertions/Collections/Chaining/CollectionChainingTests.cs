@@ -43,6 +43,17 @@ public sealed class CollectionChainingTests
     }
 
     [Fact]
+    public void ItemAndAllSatisfyChain_CanBeComposed()
+    {
+        int[] values = [1, 2, 3];
+
+        values.Should()
+            .NotContain(9).And
+            .AllSatisfy((int item) => item.Should().BeGreaterThan(0)).And
+            .Contain(2);
+    }
+
+    [Fact]
     public void KeySelectionOrderChain_CanBeComposed()
     {
         WorkflowStep[] steps =

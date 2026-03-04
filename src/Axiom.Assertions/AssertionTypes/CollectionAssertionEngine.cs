@@ -270,6 +270,90 @@ internal static class CollectionAssertionEngine
         AssertionOutputWriter.ReportPass("NotContain", subjectLabel, callerFilePath, callerLineNumber);
     }
 
+    public static void AssertNotContainItem<T>(
+        IEnumerable<T>? subject,
+        string? subjectExpression,
+        T unexpected,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to not contain", unexpected),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var comparer = GetComparer<T>();
+        foreach (var item in subject)
+        {
+            if (!comparer.Equals(item, unexpected))
+            {
+                continue;
+            }
+
+            var failure = new Failure(
+                subjectLabel,
+                new Expectation("to not contain", unexpected),
+                item,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        AssertionOutputWriter.ReportPass("NotContain", subjectLabel, callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertAllSatisfy<T>(
+        IEnumerable<T>? subject,
+        string? subjectExpression,
+        Action<T> assertion,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation("to satisfy all assertions for each item", IncludeExpectedValue: false),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var index = 0;
+        foreach (var item in subject)
+        {
+            try
+            {
+                assertion(item);
+            }
+            catch (InvalidOperationException ex)
+            {
+                var failure = new Failure(
+                    subjectLabel,
+                    new Expectation($"to satisfy all assertions for each item (first failing index {index})", IncludeExpectedValue: false),
+                    new RenderedText(ex.Message),
+                    because);
+                Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+                return;
+            }
+
+            index++;
+        }
+
+        AssertionOutputWriter.ReportPass("AllSatisfy", subjectLabel, callerFilePath, callerLineNumber);
+    }
+
     public static void AssertContainKey<TKey, TValue>(
         IReadOnlyDictionary<TKey, TValue>? subject,
         string? subjectExpression,

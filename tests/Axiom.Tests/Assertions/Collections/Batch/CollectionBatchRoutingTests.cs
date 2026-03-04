@@ -68,6 +68,48 @@ public sealed class CollectionBatchRoutingTests
     }
 
     [Fact]
+    public void NotContainItem_OutsideBatch_ThrowsImmediately()
+    {
+        int[] values = [1, 2, 3];
+
+        Assert.Throws<InvalidOperationException>(() => values.Should().NotContain(2));
+    }
+
+    [Fact]
+    public void NotContainItem_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        int[] values = [1, 2, 3];
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => values.Should().NotContain(2));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void AllSatisfy_OutsideBatch_ThrowsImmediately()
+    {
+        int[] values = [1, 2, -1];
+
+        Assert.Throws<InvalidOperationException>(() =>
+            values.Should().AllSatisfy((int item) => item.Should().BeGreaterThan(0)));
+    }
+
+    [Fact]
+    public void AllSatisfy_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        int[] values = [1, 2, -1];
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() =>
+            values.Should().AllSatisfy((int item) => item.Should().BeGreaterThan(0)));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
     public void Batch_Dispose_ThrowsCombinedFailures_FromCollectionAssertions()
     {
         int[] values = [1, 2, 3];
@@ -125,6 +167,24 @@ public sealed class CollectionBatchRoutingTests
         Assert.Contains("1) Expected values to only contain items matching predicate (first non-matching index 0), but found 1.", message);
         Assert.Contains("2) Expected values to not contain any item matching predicate (first matching index 1), but found 2.", message);
         Assert.Contains("3) Expected values to contain items in order [1, 3, 2], but found missing expected item at sequence index 2: 2.", message);
+    }
+
+    [Fact]
+    public void Batch_Dispose_ThrowsCombinedFailures_FromItemAndAllSatisfyAssertions()
+    {
+        int[] values = [1, 2, -1];
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            using var batch = new Axiom.Core.Batch("collection-advanced");
+            values.Should().NotContain(2);
+            values.Should().AllSatisfy((int item) => item.Should().BeGreaterThan(0));
+        });
+
+        var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
+        Assert.Contains("Batch 'collection-advanced' failed with 2 assertion failure(s):", message);
+        Assert.Contains("1) Expected values to not contain 2, but found 2.", message);
+        Assert.Contains("2) Expected item to be greater than 0, but found -1.", message);
     }
 
     [Fact]
