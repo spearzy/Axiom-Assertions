@@ -1,6 +1,6 @@
 # Axiom
 
-![Axiom](Axiom.png)
+![Axiom](assets/images/axiom-logo.png)
 
 [![CI](https://github.com/spearzy/Axiom/actions/workflows/ci.yml/badge.svg)](https://github.com/spearzy/Axiom/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
@@ -26,7 +26,6 @@ Axiom is an open-source assertion library for .NET tests. It helps you write flu
   - [Temporal Assertions](#temporal-assertions)
 - [Installation](#installation)
 - [Build](#build)
-- [Benchmarks](#benchmarks)
 - [Release Management](#release-management)
 - [Security](#security)
 - [Contributing](#contributing)
@@ -34,7 +33,8 @@ Axiom is an open-source assertion library for .NET tests. It helps you write flu
 
 ## Why Axiom?
 
-Axiom is designed for teams that treat test assertions as core developer tooling, not just helper methods.
+Axiom started as a learning project to understand how a modern .NET assertion library is built end to end.
+It is open source so other developers can use it, inspect the design decisions, and extend it where useful.
 
 In practice, that means:
 - deterministic failure output you can rely on in CI and code reviews,
@@ -466,26 +466,6 @@ dotnet restore Axiom.sln
 dotnet build Axiom.sln -c Release
 dotnet test Axiom.sln -c Release
 ```
-
-## Benchmarks
-
-Run the current benchmark suite:
-
-```bash
-dotnet run -c Release --project benchmarks/Axiom.Benchmarks/Axiom.Benchmarks.csproj
-```
-
-Current scenarios:
-- String assertions:
-  - `StartWith_Pass_OutsideBatch`
-  - `StartWith_Fail_OutsideBatch` (exception caught inside benchmark)
-  - `StartWith_Fail_InsideBatch` (aggregated throw on batch dispose)
-- Collection assertions:
-  - `Contain_Pass_OutsideBatch`
-  - `Contain_Fail_OutsideBatch` (exception caught inside benchmark)
-  - `HaveCount_Pass_OutsideBatch`
-  - `HaveCount_Fail_OutsideBatch` (exception caught inside benchmark)
-  - `ContainAndHaveCount_Pass_OutsideBatch`
 
 ## Release Management
 
