@@ -4,20 +4,29 @@ Axiom is a .NET assertion library focused on fluent APIs, deterministic failure 
 
 ## Install
 
-```bash
-dotnet add package Axiom.Assertions --prerelease
-```
-
-If you only need core primitives:
+Use an explicit version:
 
 ```bash
-dotnet add package Axiom.Core --prerelease
+dotnet add package Axiom.Assertions --version 0.1.0-preview.1
 ```
+
+If you only need core primitives directly:
+
+```bash
+dotnet add package Axiom.Core --version 0.1.0-preview.1
+```
+
+## Which Package?
+
+- `Axiom.Assertions`: fluent assertions (`Should()`, chaining, string/value/collection/dictionary/exception/equivalency assertions).  
+  This is the package most test projects should reference.
+- `Axiom.Core`: batch aggregation and core extensibility primitives.  
+  Use this directly only when you need low-level primitives without the full fluent assertion surface.
 
 ## Quick Start
 
 ```csharp
-using Axiom.Assertions.EntryPoints;
+using Axiom.Assertions;
 using Axiom.Core;
 
 "abc".Should().StartWith("a").And.EndWith("c");
