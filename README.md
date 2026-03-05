@@ -453,16 +453,16 @@ later.Should().BeAfter(now).And.BeWithin(now.AddMinutes(2), TimeSpan.FromSeconds
 - `Axiom.Assertions`: use this in test projects. It contains the fluent `Should()` API and references `Axiom.Core` automatically.
 - `Axiom.Core`: use this only when you need core primitives directly (for example `Batch`), or when building custom assertion layers.
 
-Install with an explicit version:
+Install the latest preview:
 
 ```bash
-dotnet add package Axiom.Assertions --version 0.1.0-preview.1
+dotnet add package Axiom.Assertions --prerelease
 ```
 
 If you only need the core primitives:
 
 ```bash
-dotnet add package Axiom.Core --version 0.1.0-preview.1
+dotnet add package Axiom.Core --prerelease
 ```
 
 Common namespaces when writing tests:
