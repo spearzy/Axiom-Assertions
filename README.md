@@ -13,6 +13,7 @@ Axiom is an open-source assertion library for .NET tests. It helps you write flu
 - [Key Features](#key-features)
 - [Implemented Assertion Methods (Current)](#implemented-assertion-methods-current)
 - [Usage](#usage)
+  - [Batch Assertions](#batch-assertions)
   - [Fluent String Assertions](#fluent-string-assertions)
   - [Value Assertions](#value-assertions)
   - [Equivalency Assertions](#equivalency-assertions)
@@ -23,8 +24,6 @@ Axiom is an open-source assertion library for .NET tests. It helps you write flu
   - [Exception Assertions](#exception-assertions-1)
   - [Collection Assertions](#collection-assertions)
   - [Temporal Assertions](#temporal-assertions)
-  - [Optional Coloured Assertion Output](#optional-coloured-assertion-output)
-  - [Batch Assertions](#batch-assertions)
 - [Installation](#installation)
 - [Build](#build)
 - [Benchmarks](#benchmarks)
@@ -134,6 +133,32 @@ Expected value to start with "ab", but found "test".
 for `DateTime`, `DateTimeOffset`, `DateOnly`, and `TimeOnly`.
 
 ## Usage
+
+### Batch Assertions
+
+Use `Batch` when you want to run several related assertions and see all failures together.
+
+Without `Batch`, the first failing assertion throws immediately and stops execution.
+With `Batch`, failures are collected and one combined exception is thrown when the root batch is disposed.
+
+`Batch` is useful for validating multiple fields in one object or multiple expectations in one scenario.
+
+```csharp
+using var batch = Assert.Batch("user profile");
+
+user.Name.Should().StartWith("A");
+user.Email.Should().EndWith("@example.com");
+user.Roles.Should().Contain("admin");
+```
+
+Disposing the root batch throws one combined deterministic message:
+
+```text
+Batch 'user profile' failed with 3 assertion failure(s):
+1) ...
+2) ...
+3) ...
+```
 
 ### Fluent String Assertions
 
@@ -418,48 +443,6 @@ var now = DateTime.UtcNow;
 var later = now.AddMinutes(2);
 
 later.Should().BeAfter(now).And.BeWithin(now.AddMinutes(2), TimeSpan.FromSeconds(1));
-```
-
-### Optional Coloured Assertion Output
-
-```csharp
-using Axiom.Core.Configuration;
-
-AxiomServices.Configure(c =>
-{
-    c.Output.Enabled = true;
-    c.Output.ShowPasses = true;
-    c.Output.UseColours = true;
-    c.Output.IncludeSourceLine = true;
-});
-```
-
-When enabled, Axiom prints readable pass/fail output with source location (and source line for failures when available).
-
-### Batch Assertions
-
-Use `Batch` when you want to run several related assertions and see all failures together.
-
-Without `Batch`, the first failing assertion throws immediately and stops execution.
-With `Batch`, failures are collected and one combined exception is thrown when the root batch is disposed.
-
-`Batch` is useful for validating multiple fields in one object or multiple expectations in one scenario.
-
-```csharp
-using var batch = Assert.Batch("user profile");
-
-user.Name.Should().StartWith("A");
-user.Email.Should().EndWith("@example.com");
-user.Roles.Should().Contain("admin");
-```
-
-Disposing the root batch throws one combined deterministic message:
-
-```text
-Batch 'user profile' failed with 3 assertion failure(s):
-1) ...
-2) ...
-3) ...
 ```
 
 ## Installation

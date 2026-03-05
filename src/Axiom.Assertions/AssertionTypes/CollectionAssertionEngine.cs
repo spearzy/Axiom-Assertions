@@ -3,7 +3,6 @@ using System.Text;
 using Axiom.Core;
 using Axiom.Core.Configuration;
 using Axiom.Core.Failures;
-using Axiom.Core.Output;
 
 namespace Axiom.Assertions.AssertionTypes;
 
@@ -35,7 +34,6 @@ internal static class CollectionAssertionEngine
         {
             if (comparer.Equals(item, expected))
             {
-                AssertionOutputWriter.ReportPass("Contain", subjectLabel, callerFilePath, callerLineNumber);
                 return;
             }
         }
@@ -72,7 +70,6 @@ internal static class CollectionAssertionEngine
 
         if (expected.Length == 0)
         {
-            AssertionOutputWriter.ReportPass("ContainAll", subjectLabel, callerFilePath, callerLineNumber);
             return;
         }
 
@@ -93,8 +90,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(missingItemFailure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("ContainAll", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertContainAny<T>(
@@ -135,7 +130,6 @@ internal static class CollectionAssertionEngine
         {
             if (ContainsItem(expected, subjectItem, comparer))
             {
-                AssertionOutputWriter.ReportPass("ContainAny", subjectLabel, callerFilePath, callerLineNumber);
                 return;
             }
         }
@@ -172,7 +166,6 @@ internal static class CollectionAssertionEngine
 
         if (unexpected.Length == 0)
         {
-            AssertionOutputWriter.ReportPass("NotContainAny", subjectLabel, callerFilePath, callerLineNumber);
             return;
         }
 
@@ -193,8 +186,6 @@ internal static class CollectionAssertionEngine
 
             subjectIndex++;
         }
-
-        AssertionOutputWriter.ReportPass("NotContainAny", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertHaveUniqueItems(
@@ -234,8 +225,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(duplicateItemFailure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("HaveUniqueItems", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertContainExactly<T>(
@@ -302,8 +291,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(missingItemFailure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("ContainExactly", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertBeSubsetOf<T>(
@@ -347,8 +334,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(missingItemFailure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("BeSubsetOf", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertBeSupersetOf<T>(
@@ -390,8 +375,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(missingItemFailure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("BeSupersetOf", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertHaveCount(
@@ -428,8 +411,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("HaveCount", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertBeEmpty(
@@ -462,8 +443,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("BeEmpty", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertNotBeEmpty(
@@ -496,8 +475,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("NotBeEmpty", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertContainSingle(
@@ -530,8 +507,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("ContainSingle", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertOnlyContain<T>(
@@ -571,8 +546,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("OnlyContain", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertNotContain<T>(
@@ -612,8 +585,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("NotContain", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertNotContainItem<T>(
@@ -652,8 +623,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("NotContain", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertAllSatisfy<T>(
@@ -696,8 +665,6 @@ internal static class CollectionAssertionEngine
 
             index++;
         }
-
-        AssertionOutputWriter.ReportPass("AllSatisfy", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertContainKey<TKey, TValue>(
@@ -722,7 +689,6 @@ internal static class CollectionAssertionEngine
 
         if (subject.ContainsKey(expectedKey))
         {
-            AssertionOutputWriter.ReportPass("ContainKey", subjectLabel, callerFilePath, callerLineNumber);
             return;
         }
 
@@ -756,7 +722,6 @@ internal static class CollectionAssertionEngine
 
         if (!subject.TryGetValue(unexpectedKey, out var actualValue))
         {
-            AssertionOutputWriter.ReportPass("NotContainKey", subjectLabel, callerFilePath, callerLineNumber);
             return;
         }
 
@@ -793,7 +758,6 @@ internal static class CollectionAssertionEngine
         {
             if (valueComparer.Equals(pair.Value, expectedValue))
             {
-                AssertionOutputWriter.ReportPass("ContainValue", subjectLabel, callerFilePath, callerLineNumber);
                 return;
             }
         }
@@ -842,8 +806,6 @@ internal static class CollectionAssertionEngine
             Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
             return;
         }
-
-        AssertionOutputWriter.ReportPass("NotContainValue", subjectLabel, callerFilePath, callerLineNumber);
     }
 
     public static void AssertContainEntry<TKey, TValue>(
@@ -882,7 +844,6 @@ internal static class CollectionAssertionEngine
         var valueComparer = GetComparer<TValue>();
         if (valueComparer.Equals(actualValue, expectedValue))
         {
-            AssertionOutputWriter.ReportPass("ContainEntry", subjectLabel, callerFilePath, callerLineNumber);
             return;
         }
 
@@ -919,14 +880,12 @@ internal static class CollectionAssertionEngine
 
         if (!subject.TryGetValue(unexpectedKey, out var actualValue))
         {
-            AssertionOutputWriter.ReportPass("NotContainEntry", subjectLabel, callerFilePath, callerLineNumber);
             return;
         }
 
         var valueComparer = GetComparer<TValue>();
         if (!valueComparer.Equals(actualValue, unexpectedValue))
         {
-            AssertionOutputWriter.ReportPass("NotContainEntry", subjectLabel, callerFilePath, callerLineNumber);
             return;
         }
 
@@ -964,7 +923,6 @@ internal static class CollectionAssertionEngine
 
         if (expectedItems.Length == 0)
         {
-            AssertionOutputWriter.ReportPass("ContainInOrder", subjectLabel, callerFilePath, callerLineNumber);
             return;
         }
 
@@ -975,7 +933,6 @@ internal static class CollectionAssertionEngine
             : ContainsInOrderWithoutGaps(subject, expectedItems, comparer);
         if (matched)
         {
-            AssertionOutputWriter.ReportPass("ContainInOrder", subjectLabel, callerFilePath, callerLineNumber);
             return;
         }
 
@@ -1016,7 +973,6 @@ internal static class CollectionAssertionEngine
 
         if (expectedItems.Length == 0)
         {
-            AssertionOutputWriter.ReportPass("ContainInOrder", subjectLabel, callerFilePath, callerLineNumber);
             return;
         }
 
@@ -1027,7 +983,6 @@ internal static class CollectionAssertionEngine
             : ContainsProjectedInOrderWithoutGaps(subject, expectedItems, keySelector, comparer);
         if (matched)
         {
-            AssertionOutputWriter.ReportPass("ContainInOrder", subjectLabel, callerFilePath, callerLineNumber);
             return;
         }
 
@@ -1351,7 +1306,6 @@ internal static class CollectionAssertionEngine
 
     private static void Fail(string message, string? callerFilePath, int callerLineNumber)
     {
-        AssertionOutputWriter.ReportFailure(message, callerFilePath, callerLineNumber);
 
         var batch = Batch.Current;
         if (batch is not null)

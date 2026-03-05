@@ -2,7 +2,6 @@ using System.Runtime.CompilerServices;
 using Axiom.Assertions.Chaining;
 using Axiom.Core;
 using Axiom.Core.Failures;
-using Axiom.Core.Output;
 
 namespace Axiom.Assertions.AssertionTypes;
 
@@ -21,7 +20,6 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
 
         if (capturedException is TException)
         {
-            AssertionOutputWriter.ReportPass(nameof(ThrowAsync), SubjectLabel(), callerFilePath, callerLineNumber);
             return new AndContinuation<AsyncActionAssertions>(this);
         }
 
@@ -48,7 +46,6 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
         var capturedException = await CaptureExceptionAsync().ConfigureAwait(false);
         if (capturedException?.GetType() == typeof(TException))
         {
-            AssertionOutputWriter.ReportPass(nameof(ThrowExactlyAsync), SubjectLabel(), callerFilePath, callerLineNumber);
             return new AndContinuation<AsyncActionAssertions>(this);
         }
 
@@ -74,7 +71,6 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
         var capturedException = await CaptureExceptionAsync().ConfigureAwait(false);
         if (capturedException is null)
         {
-            AssertionOutputWriter.ReportPass(nameof(NotThrowAsync), SubjectLabel(), callerFilePath, callerLineNumber);
             return new AndContinuation<AsyncActionAssertions>(this);
         }
 
@@ -98,7 +94,6 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
 
         if (await CompletesWithinAsync(timeout).ConfigureAwait(false))
         {
-            AssertionOutputWriter.ReportPass(nameof(CompleteWithin), SubjectLabel(), callerFilePath, callerLineNumber);
             return new AndContinuation<AsyncActionAssertions>(this);
         }
 
@@ -122,7 +117,6 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
 
         if (!await CompletesWithinAsync(timeout).ConfigureAwait(false))
         {
-            AssertionOutputWriter.ReportPass(nameof(NotCompleteWithin), SubjectLabel(), callerFilePath, callerLineNumber);
             return new AndContinuation<AsyncActionAssertions>(this);
         }
 
@@ -188,7 +182,6 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
 
     private static void Fail(string message, string? callerFilePath, int callerLineNumber)
     {
-        AssertionOutputWriter.ReportFailure(message, callerFilePath, callerLineNumber);
 
         var batch = Batch.Current;
         if (batch is not null)
