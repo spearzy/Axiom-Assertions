@@ -68,7 +68,7 @@ jobs:
           /p:PackageVersion=${{ steps.version.outputs.version }}
 
       - name: Upload package artefacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nuget-packages
           path: artifacts/packages/*
