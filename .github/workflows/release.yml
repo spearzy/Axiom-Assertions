@@ -108,3 +108,46 @@ jobs:
             --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
+
+  create-github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: publish
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Extract release notes from changelog
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+
+          # Pull only the matching changelog section:
+          # "## [<version>] ..." up to (but not including) the next version heading.
+          awk -v version="$version" '
+            BEGIN { in_section = 0; found = 0 }
+            /^## \[/ {
+              if (in_section && $0 !~ "^## \\[" version "\\]") { exit }
+              if ($0 ~ "^## \\[" version "\\]") {
+                in_section = 1
+                found = 1
+              }
+            }
+            in_section { print }
+            END {
+              if (!found) { exit 2 }
+            }
+          ' CHANGELOG.md > release-notes.md
+
+          if [ ! -s release-notes.md ]; then
+            echo "No release notes were found in CHANGELOG.md for version '$version'."
+            exit 1
+          fi
+
+      - name: Create release entry
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body_path: release-notes.md
