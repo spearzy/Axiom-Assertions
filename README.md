@@ -445,16 +445,16 @@ later.Should().BeAfter(now).And.BeWithin(now.AddMinutes(2), TimeSpan.FromSeconds
 
 ## Installation
 
-Axiom is not published on NuGet yet. For now, consume it from source:
+Install Axiom from NuGet:
 
 ```bash
-git clone https://github.com/spearzy/Axiom.git
+dotnet add package Axiom.Assertions --prerelease
 ```
 
-Then reference the project(s) you need, for example:
+If you only need the core primitives:
 
 ```bash
-dotnet add <your-test-project>.csproj reference src/Axiom.Assertions/Axiom.Assertions.csproj
+dotnet add package Axiom.Core --prerelease
 ```
 
 ## Security
