@@ -39,7 +39,7 @@ rm -f UnitTest1.cs
 cat > ConsumerSmokeTests.cs <<'EOF'
 using Axiom.Assertions;
 using Axiom.Assertions.Extensions;
-using Axiom.Core;
+using AAssert = Axiom.Core.Assert;
 using XAssert = Xunit.Assert;
 
 namespace Axiom.ConsumerSmoke;
@@ -79,7 +79,7 @@ public sealed class ConsumerSmokeTests
     {
         var ex = XAssert.Throws<InvalidOperationException>(() =>
         {
-            using var batch = Assert.Batch("smoke");
+            using var batch = AAssert.Batch("smoke");
             "abc".Should().StartWith("z");
             1.Should().BeGreaterThan(5);
         });
