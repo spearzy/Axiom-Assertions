@@ -16,7 +16,6 @@ dotnet test Axiom.sln -c Debug
 - Include tests for behaviour changes.
 - Update docs when public behaviour changes.
 - Do not push directly to `main`; create a branch and open a pull request.
-- Branch naming convention: `codex/<short-topic>` for agent-created branches.
 
 ## Code Style
 
