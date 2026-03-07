@@ -3,19 +3,37 @@ using Axiom.Core.Failures;
 
 namespace Axiom.Assertions.AssertionTypes;
 
-public sealed class ThrownExceptionAssertions<TParent>(
+public sealed class ThrownExceptionAssertions<TParent, TException>(
     Exception? capturedException,
     bool wasThrowAssertionSatisfied,
+    string? throwFailureMessage,
     TParent parentAssertions,
     string subjectLabel,
     string? inheritedReason,
     Action<string, string?, int> fail)
+    where TException : Exception
 {
     public TParent And { get; } = parentAssertions;
 
     public Exception? Exception { get; } = capturedException;
 
-    public ThrownExceptionAssertions<TParent> WithMessage(
+    public TException Thrown
+    {
+        get
+        {
+            if (wasThrowAssertionSatisfied && Exception is TException typedException)
+            {
+                return typedException;
+            }
+
+            var message = throwFailureMessage is null
+                ? "Thrown is unavailable because Throw assertion failed."
+                : $"Thrown is unavailable because Throw assertion failed with error: {throwFailureMessage}";
+            throw new InvalidOperationException(message);
+        }
+    }
+
+    public ThrownExceptionAssertions<TParent, TException> WithMessage(
         string expectedMessage,
         StringComparison comparison = StringComparison.Ordinal,
         string? because = null,
@@ -43,7 +61,7 @@ public sealed class ThrownExceptionAssertions<TParent>(
         return this;
     }
 
-    public ThrownExceptionAssertions<TParent> WithParamName(
+    public ThrownExceptionAssertions<TParent, TException> WithParamName(
         string expectedParamName,
         string? because = null,
         [CallerFilePath] string? callerFilePath = null,
@@ -80,7 +98,7 @@ public sealed class ThrownExceptionAssertions<TParent>(
         return this;
     }
 
-    public ThrownExceptionAssertions<TParent> WithInnerException<TInnerException>(
+    public ThrownExceptionAssertions<TParent, TException> WithInnerException<TInnerException>(
         string? because = null,
         [CallerFilePath] string? callerFilePath = null,
         [CallerLineNumber] int callerLineNumber = 0)

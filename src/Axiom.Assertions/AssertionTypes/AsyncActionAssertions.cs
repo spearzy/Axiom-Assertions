@@ -10,7 +10,7 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
     public Func<ValueTask> Subject { get; } = subject;
     public string? SubjectExpression { get; } = subjectExpression;
 
-    public async ValueTask<ThrownExceptionAssertions<AsyncActionAssertions>> ThrowAsync<TException>(
+    public async ValueTask<ThrownExceptionAssertions<AsyncActionAssertions, TException>> ThrowAsync<TException>(
         string? because = null,
         [CallerFilePath] string? callerFilePath = null,
         [CallerLineNumber] int callerLineNumber = 0)
@@ -20,9 +20,10 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
 
         if (capturedException is TException)
         {
-            return new ThrownExceptionAssertions<AsyncActionAssertions>(
+            return new ThrownExceptionAssertions<AsyncActionAssertions, TException>(
                 capturedException,
                 wasThrowAssertionSatisfied: true,
+                throwFailureMessage: null,
                 this,
                 SubjectLabel(),
                 because,
@@ -38,18 +39,20 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
             new Expectation("to throw", typeof(TException)),
             actual,
             because);
-        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+        var failureMessage = FailureMessageRenderer.Render(failure);
+        Fail(failureMessage, callerFilePath, callerLineNumber);
 
-        return new ThrownExceptionAssertions<AsyncActionAssertions>(
+        return new ThrownExceptionAssertions<AsyncActionAssertions, TException>(
             capturedException,
             wasThrowAssertionSatisfied: false,
+            throwFailureMessage: failureMessage,
             this,
             SubjectLabel(),
             because,
             Fail);
     }
 
-    public async ValueTask<ThrownExceptionAssertions<AsyncActionAssertions>> ThrowExactlyAsync<TException>(
+    public async ValueTask<ThrownExceptionAssertions<AsyncActionAssertions, TException>> ThrowExactlyAsync<TException>(
         string? because = null,
         [CallerFilePath] string? callerFilePath = null,
         [CallerLineNumber] int callerLineNumber = 0)
@@ -58,9 +61,10 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
         var capturedException = await CaptureExceptionAsync().ConfigureAwait(false);
         if (capturedException?.GetType() == typeof(TException))
         {
-            return new ThrownExceptionAssertions<AsyncActionAssertions>(
+            return new ThrownExceptionAssertions<AsyncActionAssertions, TException>(
                 capturedException,
                 wasThrowAssertionSatisfied: true,
+                throwFailureMessage: null,
                 this,
                 SubjectLabel(),
                 because,
@@ -76,11 +80,13 @@ public sealed class AsyncActionAssertions(Func<ValueTask> subject, string? subje
             new Expectation("to throw exactly", typeof(TException)),
             actual,
             because);
-        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+        var failureMessage = FailureMessageRenderer.Render(failure);
+        Fail(failureMessage, callerFilePath, callerLineNumber);
 
-        return new ThrownExceptionAssertions<AsyncActionAssertions>(
+        return new ThrownExceptionAssertions<AsyncActionAssertions, TException>(
             capturedException,
             wasThrowAssertionSatisfied: false,
+            throwFailureMessage: failureMessage,
             this,
             SubjectLabel(),
             because,

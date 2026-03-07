@@ -27,6 +27,18 @@ public sealed class ThrowAsyncTests
     }
 
     [Fact]
+    public async Task ThrowAsync_Thrown_ReturnsTypedException_WhenExpectedExceptionTypeIsThrown()
+    {
+        Func<Task> action = static () => Task.FromException(new InvalidOperationException("boom"));
+
+        var continuation = await action.Should().ThrowAsync<InvalidOperationException>();
+        var thrown = continuation.Thrown;
+
+        Assert.IsType<InvalidOperationException>(thrown);
+        Assert.Equal("boom", thrown.Message);
+    }
+
+    [Fact]
     public async Task ThrowAsync_Passes_WhenDerivedExceptionTypeIsThrown()
     {
         Func<ValueTask> action = static () => ValueTask.FromException(new ArgumentNullException("value"));
@@ -70,5 +82,20 @@ public sealed class ThrowAsyncTests
             await action.Should().ThrowAsync<InvalidOperationException>("this code path must fail fast"));
 
         Assert.Contains("because this code path must fail fast", ex.Message);
+    }
+
+    [Fact]
+    public async Task ThrowAsync_Thrown_ThrowsExplicitMessage_WhenThrowAsyncFailedInsideBatch()
+    {
+        Func<Task> action = static () => Task.CompletedTask;
+        var batch = new Axiom.Core.Batch();
+
+        var continuation = await action.Should().ThrowAsync<InvalidOperationException>();
+        var ex = Assert.Throws<InvalidOperationException>(() => _ = continuation.Thrown);
+
+        var failureMessage = $"Expected action to throw {typeof(InvalidOperationException)}, but found <no exception>.";
+        var expected = $"Thrown is unavailable because Throw assertion failed with error: {failureMessage}";
+        Assert.Equal(expected, ex.Message);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
     }
 }

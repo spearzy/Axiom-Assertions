@@ -122,13 +122,17 @@ Expected value to start with "ab", but found "test".
 
 ### Exception assertions
 - `Throw<TException>()`
+- `Throw<TException>().Thrown`
 - `ThrowExactly<TException>()`
+- `ThrowExactly<TException>().Thrown`
 - `WithMessage(expectedMessage[, comparison])`
 - `WithParamName(expectedParamName)`
 - `WithInnerException<TInnerException>()`
 - `NotThrow()`
 - `ThrowAsync<TException>()`
+- `ThrowAsync<TException>().Thrown`
 - `ThrowExactlyAsync<TException>()`
+- `ThrowExactlyAsync<TException>().Thrown`
 - `NotThrowAsync()`
 - `CompleteWithin(timeout)`
 - `NotCompleteWithin(timeout)`
@@ -448,8 +452,9 @@ For collection items, `UseCollectionItemComparerForPath(...)` takes precedence f
 ### Exception Assertions
 
 ```csharp
-Action strictThrow = () => throw new InvalidOperationException();
-strictThrow.Should().ThrowExactly<InvalidOperationException>();
+Action strictThrow = () => throw new InvalidOperationException("boom");
+var thrownSync = strictThrow.Should().ThrowExactly<InvalidOperationException>().Thrown;
+thrownSync.Message.Should().Be("boom");
 
 Action withDetails = () => throw new ArgumentNullException("value", "Value is required.");
 withDetails.Should()
@@ -470,6 +475,8 @@ await asyncAction.Should().ThrowAsync<Exception>();
 await asyncAction.Should().ThrowExactlyAsync<InvalidOperationException>();
 await (await asyncAction.Should().ThrowExactlyAsync<InvalidOperationException>())
     .WithMessage("boom");
+var thrownAsync = (await asyncAction.Should().ThrowExactlyAsync<InvalidOperationException>()).Thrown;
+thrownAsync.Message.Should().Be("boom");
 
 Func<Task> asyncArgumentFailure =
     () => Task.FromException(new ArgumentNullException("userId", "User id is required."));
@@ -511,12 +518,14 @@ scores.Should()
     .ContainValue(2).And
     .ContainEntry("b", 2);
 
-// If ContainSingle fails outside Batch, it throws immediately.
-// Inside Batch, the failure is aggregated; accessing SingleItem then throws:
-// "SingleItem is unavailable because ContainSingle failed with error: <original failure>"
-
 public sealed record Order(int Id, decimal Total);
 ```
+
+### Extractor Behaviour (`Thrown` / `SingleItem`)
+
+- If the base assertion succeeds, the extractor returns the matched value.
+- If the base assertion fails outside `Batch`, it throws immediately and the extractor is not reached.
+- If the base assertion fails inside `Batch`, the failure is aggregated and the extractor throws an explicit unavailable message that includes the original assertion failure text.
 
 ### Temporal Assertions
 

@@ -204,4 +204,34 @@ public sealed class AsyncActionBatchRoutingTests
         Assert.Null(callEx);
         Assert.Throws<InvalidOperationException>(() => batch.Dispose());
     }
+
+    [Fact]
+    public async Task Thrown_InsideBatch_ThrowsExplicitMessage_WhenThrowAsyncFailed()
+    {
+        Func<Task> action = static () => Task.CompletedTask;
+        var batch = new Axiom.Core.Batch();
+
+        var continuation = await action.Should().ThrowAsync<InvalidOperationException>();
+        var ex = Assert.Throws<InvalidOperationException>(() => _ = continuation.Thrown);
+
+        var failureMessage = $"Expected action to throw {typeof(InvalidOperationException)}, but found <no exception>.";
+        var expected = $"Thrown is unavailable because Throw assertion failed with error: {failureMessage}";
+        Assert.Equal(expected, ex.Message);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public async Task Thrown_InsideBatch_ReturnsException_WhenThrowAsyncPassed()
+    {
+        Func<Task> action = static () => Task.FromException(new InvalidOperationException("boom"));
+        var batch = new Axiom.Core.Batch();
+
+        var continuation = await action.Should().ThrowAsync<InvalidOperationException>();
+        var thrown = continuation.Thrown;
+
+        Assert.IsType<InvalidOperationException>(thrown);
+        Assert.Equal("boom", thrown.Message);
+        var disposeEx = Record.Exception(() => batch.Dispose());
+        Assert.Null(disposeEx);
+    }
 }
