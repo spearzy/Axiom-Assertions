@@ -26,6 +26,18 @@ public sealed class ThrowTests
     }
 
     [Fact]
+    public void Throw_Thrown_ReturnsTypedException_WhenExpectedExceptionTypeIsThrown()
+    {
+        Action action = static () => throw new InvalidOperationException("boom");
+
+        var continuation = action.Should().Throw<InvalidOperationException>();
+        var thrown = continuation.Thrown;
+
+        Assert.IsType<InvalidOperationException>(thrown);
+        Assert.Equal("boom", thrown.Message);
+    }
+
+    [Fact]
     public void Throw_Passes_WhenDerivedExceptionTypeIsThrown()
     {
         Action action = static () => throw new ArgumentNullException("value");
@@ -68,5 +80,20 @@ public sealed class ThrowTests
             action.Should().Throw<InvalidOperationException>("this code path must fail fast"));
 
         Assert.Contains("because this code path must fail fast", ex.Message);
+    }
+
+    [Fact]
+    public void Throw_Thrown_ThrowsExplicitMessage_WhenThrowFailedInsideBatch()
+    {
+        Action action = static () => { };
+        var batch = new Axiom.Core.Batch();
+
+        var continuation = action.Should().Throw<InvalidOperationException>();
+        var ex = Assert.Throws<InvalidOperationException>(() => _ = continuation.Thrown);
+
+        var failureMessage = $"Expected action to throw {typeof(InvalidOperationException)}, but found <no exception>.";
+        var expected = $"Thrown is unavailable because Throw assertion failed with error: {failureMessage}";
+        Assert.Equal(expected, ex.Message);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
     }
 }

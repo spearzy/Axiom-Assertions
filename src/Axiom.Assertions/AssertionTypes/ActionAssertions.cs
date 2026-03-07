@@ -10,7 +10,7 @@ public sealed class ActionAssertions(Action subject, string? subjectExpression)
     public Action Subject { get; } = subject;
     public string? SubjectExpression { get; } = subjectExpression;
 
-    public ThrownExceptionAssertions<ActionAssertions> Throw<TException>(
+    public ThrownExceptionAssertions<ActionAssertions, TException> Throw<TException>(
         string? because = null,
         [CallerFilePath] string? callerFilePath = null,
         [CallerLineNumber] int callerLineNumber = 0)
@@ -21,9 +21,10 @@ public sealed class ActionAssertions(Action subject, string? subjectExpression)
         // Accept the requested type or any subtype (common assertion-library expectation).
         if (capturedException is TException)
         {
-            return new ThrownExceptionAssertions<ActionAssertions>(
+            return new ThrownExceptionAssertions<ActionAssertions, TException>(
                 capturedException,
                 wasThrowAssertionSatisfied: true,
+                throwFailureMessage: null,
                 this,
                 SubjectLabel(),
                 because,
@@ -39,18 +40,20 @@ public sealed class ActionAssertions(Action subject, string? subjectExpression)
             new Expectation("to throw", typeof(TException)),
             actual,
             because);
-        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+        var failureMessage = FailureMessageRenderer.Render(failure);
+        Fail(failureMessage, callerFilePath, callerLineNumber);
 
-        return new ThrownExceptionAssertions<ActionAssertions>(
+        return new ThrownExceptionAssertions<ActionAssertions, TException>(
             capturedException,
             wasThrowAssertionSatisfied: false,
+            throwFailureMessage: failureMessage,
             this,
             SubjectLabel(),
             because,
             Fail);
     }
 
-    public ThrownExceptionAssertions<ActionAssertions> ThrowExactly<TException>(
+    public ThrownExceptionAssertions<ActionAssertions, TException> ThrowExactly<TException>(
         string? because = null,
         [CallerFilePath] string? callerFilePath = null,
         [CallerLineNumber] int callerLineNumber = 0)
@@ -59,9 +62,10 @@ public sealed class ActionAssertions(Action subject, string? subjectExpression)
         var capturedException = CaptureException();
         if (capturedException?.GetType() == typeof(TException))
         {
-            return new ThrownExceptionAssertions<ActionAssertions>(
+            return new ThrownExceptionAssertions<ActionAssertions, TException>(
                 capturedException,
                 wasThrowAssertionSatisfied: true,
+                throwFailureMessage: null,
                 this,
                 SubjectLabel(),
                 because,
@@ -77,11 +81,13 @@ public sealed class ActionAssertions(Action subject, string? subjectExpression)
             new Expectation("to throw exactly", typeof(TException)),
             actual,
             because);
-        Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+        var failureMessage = FailureMessageRenderer.Render(failure);
+        Fail(failureMessage, callerFilePath, callerLineNumber);
 
-        return new ThrownExceptionAssertions<ActionAssertions>(
+        return new ThrownExceptionAssertions<ActionAssertions, TException>(
             capturedException,
             wasThrowAssertionSatisfied: false,
+            throwFailureMessage: failureMessage,
             this,
             SubjectLabel(),
             because,

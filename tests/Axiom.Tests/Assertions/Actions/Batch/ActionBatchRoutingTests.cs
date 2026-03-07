@@ -131,4 +131,34 @@ public sealed class ActionBatchRoutingTests
         Assert.Null(callEx);
         Assert.Throws<InvalidOperationException>(() => batch.Dispose());
     }
+
+    [Fact]
+    public void Thrown_InsideBatch_ThrowsExplicitMessage_WhenThrowFailed()
+    {
+        Action action = static () => { };
+        var batch = new Axiom.Core.Batch();
+
+        var continuation = action.Should().Throw<InvalidOperationException>();
+        var ex = Assert.Throws<InvalidOperationException>(() => _ = continuation.Thrown);
+
+        var failureMessage = $"Expected action to throw {typeof(InvalidOperationException)}, but found <no exception>.";
+        var expected = $"Thrown is unavailable because Throw assertion failed with error: {failureMessage}";
+        Assert.Equal(expected, ex.Message);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void Thrown_InsideBatch_ReturnsException_WhenThrowPassed()
+    {
+        Action action = static () => throw new InvalidOperationException("boom");
+        var batch = new Axiom.Core.Batch();
+
+        var continuation = action.Should().Throw<InvalidOperationException>();
+        var thrown = continuation.Thrown;
+
+        Assert.IsType<InvalidOperationException>(thrown);
+        Assert.Equal("boom", thrown.Message);
+        var disposeEx = Record.Exception(() => batch.Dispose());
+        Assert.Null(disposeEx);
+    }
 }
