@@ -160,6 +160,10 @@ Expected value to start with "ab", but found "test".
 - `SatisfyRespectively(assertions...)`
 - `ContainInOrder(expectedSequence, allowGaps = true)`
 - `ContainInOrder(expectedSequence, keySelector, allowGaps = true)`
+- `BeInAscendingOrder()`
+- `BeInDescendingOrder()`
+- `BeInAscendingOrder(keySelector[, comparer])`
+- `BeInDescendingOrder(keySelector[, comparer])`
 
 ### Dictionary assertions
 - `ContainKey(key)`
@@ -503,6 +507,7 @@ completion.TrySetResult(null);
 ```csharp
 int[] values = [1, 2, 3];
 values.Should()
+    .BeInAscendingOrder().And
     .Contain(2).And
     .SatisfyRespectively(
         (int item) => item.Should().BeGreaterThan(0),
@@ -537,6 +542,7 @@ User[] users =
     new(2, "b@example.com")
 ];
 users.Should().HaveUniqueItemsBy((User user) => user.Email, StringComparer.OrdinalIgnoreCase);
+users.Should().BeInAscendingOrder((User user) => user.Email, StringComparer.OrdinalIgnoreCase);
 
 public sealed record Order(int Id, decimal Total);
 public sealed record User(int Id, string Email);
