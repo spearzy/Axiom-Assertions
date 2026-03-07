@@ -182,4 +182,35 @@ public sealed class CollectionChainingTests
             .ContainInOrder([1, 2], (WorkflowStep step) => step.Position, allowGaps: false).And
             .NotContain((WorkflowStep step) => step.Name == "archive");
     }
+
+    [Fact]
+    public void AscendingAndDescendingOrderChain_CanBeComposed()
+    {
+        int[] ascending = [1, 2, 3];
+        int[] descending = [3, 2, 1];
+
+        ascending.Should()
+            .BeInAscendingOrder().And
+            .ContainInOrder([1, 3]);
+
+        descending.Should()
+            .BeInDescendingOrder().And
+            .ContainInOrder([3, 1]);
+    }
+
+    [Fact]
+    public void KeySelectedOrderChain_CanBeComposed()
+    {
+        User[] users =
+        [
+            new(1, "a@example.com"),
+            new(2, "b@example.com"),
+            new(3, "c@example.com")
+        ];
+
+        users.Should()
+            .BeInAscendingOrder((User user) => user.Id).And
+            .BeInAscendingOrder((User user) => user.Email, StringComparer.OrdinalIgnoreCase).And
+            .HaveCount(3);
+    }
 }

@@ -329,6 +329,63 @@ public sealed class CollectionBatchRoutingTests
     }
 
     [Fact]
+    public void BeInAscendingOrder_OutsideBatch_ThrowsImmediately()
+    {
+        int[] values = [1, 3, 2];
+
+        Assert.Throws<InvalidOperationException>(() => values.Should().BeInAscendingOrder());
+    }
+
+    [Fact]
+    public void BeInAscendingOrder_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        int[] values = [1, 3, 2];
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => values.Should().BeInAscendingOrder());
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void BeInDescendingOrder_OutsideBatch_ThrowsImmediately()
+    {
+        int[] values = [3, 1, 2];
+
+        Assert.Throws<InvalidOperationException>(() => values.Should().BeInDescendingOrder());
+    }
+
+    [Fact]
+    public void BeInDescendingOrder_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        int[] values = [3, 1, 2];
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => values.Should().BeInDescendingOrder());
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void BeInAscendingOrder_ByKey_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        User[] values =
+        [
+            new(1, "a@example.com"),
+            new(3, "b@example.com"),
+            new(2, "c@example.com")
+        ];
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => values.Should().BeInAscendingOrder((User user) => user.Id));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
     public void Batch_Dispose_ThrowsCombinedFailures_FromCollectionAssertions()
     {
         int[] values = [1, 2, 3];

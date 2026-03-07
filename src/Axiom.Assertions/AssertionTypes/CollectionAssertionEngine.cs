@@ -1118,6 +1118,88 @@ internal static class CollectionAssertionEngine
         Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
     }
 
+    public static void AssertBeInAscendingOrder(
+        IEnumerable? subject,
+        string? subjectExpression,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        AssertInOrder(
+            subject,
+            subjectExpression,
+            because,
+            expectationText: "to be in ascending order",
+            failureDetailText: "first out-of-order pair",
+            inOrder: (previous, current) => CompareObjects(previous, current) <= 0,
+            callerFilePath,
+            callerLineNumber);
+    }
+
+    public static void AssertBeInDescendingOrder(
+        IEnumerable? subject,
+        string? subjectExpression,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        AssertInOrder(
+            subject,
+            subjectExpression,
+            because,
+            expectationText: "to be in descending order",
+            failureDetailText: "first out-of-order pair",
+            inOrder: (previous, current) => CompareObjects(previous, current) >= 0,
+            callerFilePath,
+            callerLineNumber);
+    }
+
+    public static void AssertBeInAscendingOrderByKey<T, TKey>(
+        IEnumerable<T>? subject,
+        string? subjectExpression,
+        Func<T, TKey> keySelector,
+        IComparer<TKey>? comparer,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var resolvedComparer = comparer ?? GetOrderComparer<TKey>();
+        AssertInOrderByKey(
+            subject,
+            subjectExpression,
+            keySelector,
+            resolvedComparer,
+            because,
+            expectationText: "to be in ascending order by selected key",
+            failureDetailText: "first out-of-order selected key pair",
+            inOrder: (previous, current, keyComparer) => keyComparer.Compare(previous, current) <= 0,
+            callerFilePath,
+            callerLineNumber);
+    }
+
+    public static void AssertBeInDescendingOrderByKey<T, TKey>(
+        IEnumerable<T>? subject,
+        string? subjectExpression,
+        Func<T, TKey> keySelector,
+        IComparer<TKey>? comparer,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var resolvedComparer = comparer ?? GetOrderComparer<TKey>();
+        AssertInOrderByKey(
+            subject,
+            subjectExpression,
+            keySelector,
+            resolvedComparer,
+            because,
+            expectationText: "to be in descending order by selected key",
+            failureDetailText: "first out-of-order selected key pair",
+            inOrder: (previous, current, keyComparer) => keyComparer.Compare(previous, current) >= 0,
+            callerFilePath,
+            callerLineNumber);
+    }
+
     private static string BuildContainInOrderExpectationText(bool allowGaps, bool usesSelectedKey)
     {
         var baseExpectation = usesSelectedKey
@@ -1280,6 +1362,150 @@ internal static class CollectionAssertionEngine
         return string.IsNullOrWhiteSpace(subjectExpression) ? "<subject>" : subjectExpression;
     }
 
+    private static void AssertInOrder(
+        IEnumerable? subject,
+        string? subjectExpression,
+        string? because,
+        string expectationText,
+        string failureDetailText,
+        Func<object?, object?, bool> inOrder,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation(expectationText, IncludeExpectedValue: false),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        var enumerator = subject.GetEnumerator();
+        try
+        {
+            if (!enumerator.MoveNext())
+            {
+                return;
+            }
+
+            var previous = enumerator.Current;
+            var index = 1;
+            while (enumerator.MoveNext())
+            {
+                var current = enumerator.Current;
+                if (inOrder(previous, current))
+                {
+                    previous = current;
+                    index++;
+                    continue;
+                }
+
+                var failure = new Failure(
+                    subjectLabel,
+                    new Expectation(expectationText, IncludeExpectedValue: false),
+                    new RenderedText($"{failureDetailText} at index {index}: previous {FormatSingleValue(previous)} then current {FormatSingleValue(current)}"),
+                    because);
+                Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+                return;
+            }
+        }
+        finally
+        {
+            (enumerator as IDisposable)?.Dispose();
+        }
+    }
+
+    private static int CompareObjects(object? previous, object? current)
+    {
+        if (ReferenceEquals(previous, current))
+        {
+            return 0;
+        }
+
+        if (previous is null)
+        {
+            return -1;
+        }
+
+        if (current is null)
+        {
+            return 1;
+        }
+
+        if (previous is IComparable comparable)
+        {
+            try
+            {
+                return comparable.CompareTo(current);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Values of runtime type '{previous.GetType().FullName}' do not define a compatible default ordering. Use a key-selector overload with an explicit comparer.",
+                    ex);
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Values of runtime type '{previous.GetType().FullName}' do not define a default ordering. Use a key-selector overload with an explicit comparer.");
+    }
+
+    private static void AssertInOrderByKey<T, TKey>(
+        IEnumerable<T>? subject,
+        string? subjectExpression,
+        Func<T, TKey> keySelector,
+        IComparer<TKey> comparer,
+        string? because,
+        string expectationText,
+        string failureDetailText,
+        Func<TKey, TKey, IComparer<TKey>, bool> inOrder,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subjectLabel = SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            var nullFailure = new Failure(
+                subjectLabel,
+                new Expectation(expectationText, IncludeExpectedValue: false),
+                subject,
+                because);
+            Fail(FailureMessageRenderer.Render(nullFailure), callerFilePath, callerLineNumber);
+            return;
+        }
+
+        using var enumerator = subject.GetEnumerator();
+        if (!enumerator.MoveNext())
+        {
+            return;
+        }
+
+        var previousKey = keySelector(enumerator.Current);
+        var index = 1;
+        while (enumerator.MoveNext())
+        {
+            var currentKey = keySelector(enumerator.Current);
+            if (inOrder(previousKey, currentKey, comparer))
+            {
+                previousKey = currentKey;
+                index++;
+                continue;
+            }
+
+            var failure = new Failure(
+                subjectLabel,
+                new Expectation(expectationText, IncludeExpectedValue: false),
+                new RenderedText($"{failureDetailText} at index {index}: previous {FormatSingleValue(previousKey)} then current {FormatSingleValue(currentKey)}"),
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+            return;
+        }
+    }
+
     private static ContainSingleResult EvaluateContainSingle(
         IEnumerable? subject,
         string? subjectExpression,
@@ -1411,6 +1637,17 @@ internal static class CollectionAssertionEngine
         }
 
         return count;
+    }
+
+    private static IComparer<T> GetOrderComparer<T>()
+    {
+        if (DefaultOrderComparerCache<T>.HasDefaultOrderComparer)
+        {
+            return DefaultOrderComparerCache<T>.DefaultComparer;
+        }
+
+        throw new InvalidOperationException(
+            $"Type '{typeof(T).FullName}' does not define a default ordering. Use an overload that accepts an IComparer<{typeof(T).Name}>.");
     }
 
     private static IEqualityComparer<T> GetComparer<T>()
@@ -1578,5 +1815,13 @@ internal static class CollectionAssertionEngine
         {
             return Text;
         }
+    }
+
+    private static class DefaultOrderComparerCache<T>
+    {
+        public static readonly IComparer<T> DefaultComparer = Comparer<T>.Default;
+        public static readonly bool HasDefaultOrderComparer =
+            typeof(IComparable<T>).IsAssignableFrom(typeof(T)) ||
+            typeof(IComparable).IsAssignableFrom(typeof(T));
     }
 }
