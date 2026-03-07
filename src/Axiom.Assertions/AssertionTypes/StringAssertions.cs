@@ -28,6 +28,23 @@ public sealed class StringAssertions(string? subject, string? subjectExpression)
         }
         return new AndContinuation<StringAssertions>(this);
     }
+    
+    public AndContinuation<StringAssertions> BeNull(
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        if (Subject is not null)
+        {
+            var failure = new Failure(
+                SubjectLabel(),
+                new Expectation("to be null", IncludeExpectedValue: false),
+                Subject,
+                because);
+            Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+        }
+        return new AndContinuation<StringAssertions>(this);
+    }
 
     public AndContinuation<StringAssertions> StartWith(
         string expectedPrefix,
