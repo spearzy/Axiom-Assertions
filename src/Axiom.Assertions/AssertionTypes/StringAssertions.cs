@@ -361,7 +361,7 @@ public sealed class StringAssertions(string? subject, string? subjectExpression)
     {
         return MatchCore(pattern, timeout, because, callerFilePath, callerLineNumber);
     }
-    
+
     public AndContinuation<StringAssertions> Be(
         string expected,
         string? because = null,
@@ -377,7 +377,7 @@ public sealed class StringAssertions(string? subject, string? subjectExpression)
                 because);
             Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
         }
-        
+
         return new AndContinuation<StringAssertions>(this);
     }
 
