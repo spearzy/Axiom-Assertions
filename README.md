@@ -470,6 +470,12 @@ await asyncAction.Should().ThrowExactlyAsync<InvalidOperationException>();
 await (await asyncAction.Should().ThrowExactlyAsync<InvalidOperationException>())
     .WithMessage("boom");
 
+Func<Task> asyncArgumentFailure =
+    () => Task.FromException(new ArgumentNullException("userId", "User id is required."));
+await (await asyncArgumentFailure.Should().ThrowAsync<ArgumentException>())
+    .WithParamName("userId")
+    .WithMessage("User id is required. (Parameter 'userId')");
+
 Func<Task> asyncNoThrow = () => Task.CompletedTask;
 await asyncNoThrow.Should().NotThrowAsync();
 
