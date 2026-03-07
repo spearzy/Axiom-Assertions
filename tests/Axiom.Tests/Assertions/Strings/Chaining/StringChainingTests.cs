@@ -5,6 +5,17 @@ namespace Axiom.Tests.Assertions.Strings.Chaining;
 public sealed class StringChainingTests
 {
     [Fact]
+    public void BeNull_ReturnsContinuation_AndPointsBackToSameAssertions()
+    {
+        string? value = null;
+
+        var baseAssertions = value.Should();
+        var continuation = baseAssertions.BeNull();
+
+        Assert.Same(baseAssertions, continuation.And);
+    }
+
+    [Fact]
     public void Be_ReturnsContinuation_AndPointsBackToSameAssertions()
     {
         var value = "test";

@@ -5,6 +5,26 @@ namespace Axiom.Tests.Assertions.Strings.Batch;
 public sealed class StringBatchRoutingTests
 {
     [Fact]
+    public void BeNull_OutsideBatch_ThrowsImmediately()
+    {
+        const string value = "test";
+
+        Assert.Throws<InvalidOperationException>(() => value.Should().BeNull());
+    }
+
+    [Fact]
+    public void BeNull_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        const string value = "test";
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => value.Should().BeNull());
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
     public void Be_OutsideBatch_ThrowsImmediately()
     {
         const string value = "test";
