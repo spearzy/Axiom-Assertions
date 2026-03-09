@@ -37,7 +37,7 @@ internal static class EquivalencyEngine
         List<EquivalencyDifference> differences,
         HashSet<ReferencePair> visitedPairs)
     {
-        if (IsPathIgnored(path, options))
+        if (IsPathIgnored(path, rootPath, options))
         {
             return;
         }
@@ -57,6 +57,11 @@ internal static class EquivalencyEngine
 
         if (actual is null || expected is null)
         {
+            if (actual is null && expected is null)
+            {
+                return;
+            }
+
             differences.Add(new EquivalencyDifference(path, expected, actual, "One value was <null> and the other was not."));
             return;
         }
@@ -175,7 +180,7 @@ internal static class EquivalencyEngine
             }
 
             var memberPath = $"{path}.{actualMemberName}";
-            if (IsPathIgnored(memberPath, options))
+            if (IsPathIgnored(memberPath, rootPath, options))
             {
                 continue;
             }
@@ -235,7 +240,7 @@ internal static class EquivalencyEngine
             }
 
             var memberPath = $"{path}.{actualMemberName}";
-            if (IsPathIgnored(memberPath, options))
+            if (IsPathIgnored(memberPath, rootPath, options))
             {
                 continue;
             }
@@ -775,24 +780,44 @@ internal static class EquivalencyEngine
         return members;
     }
 
-    private static bool IsPathIgnored(string path, EquivalencyOptions options)
+    private static bool IsPathIgnored(string path, string rootPath, EquivalencyOptions options)
     {
         if (options.IgnoredPaths.Contains(path))
         {
             return true;
         }
 
-        // Ignoring "a.b" also ignores children like "a.b.c" and "a.b[0]".
+        var relativePath = ToRelativePath(path, rootPath);
+        if (relativePath.Length > 0 && options.IgnoredPaths.Contains(relativePath))
+        {
+            return true;
+        }
+
         foreach (var ignoredPath in options.IgnoredPaths)
         {
-            if (path.StartsWith($"{ignoredPath}.", StringComparison.Ordinal) ||
-                path.StartsWith($"{ignoredPath}[", StringComparison.Ordinal))
+            if (PathMatchesOrIsChild(path, ignoredPath))
+            {
+                return true;
+            }
+
+            if (relativePath.Length > 0 && PathMatchesOrIsChild(relativePath, ignoredPath))
             {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static bool PathMatchesOrIsChild(string currentPath, string configuredPath)
+    {
+        if (currentPath.Equals(configuredPath, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        return currentPath.StartsWith($"{configuredPath}.", StringComparison.Ordinal) ||
+               currentPath.StartsWith($"{configuredPath}[", StringComparison.Ordinal);
     }
 
     private static bool IsPathIncluded(string path, string rootPath, EquivalencyOptions options)

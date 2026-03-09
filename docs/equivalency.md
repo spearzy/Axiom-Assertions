@@ -57,6 +57,23 @@ actual.Should().BeEquivalentTo(expected, options =>
 });
 ```
 
+When you are configuring equivalency for a named subject type, prefer expression selectors over string paths:
+
+```csharp
+actual.Should().BeEquivalentTo(expected, options =>
+{
+    options.Ignore<OrderSnapshot>(x => x.UpdatedAt);
+    options.OnlyCompare<OrderSnapshot>(x => x.Id, x => x.Total);
+    options.UseComparer<OrderSnapshot>(x => x.Code, StringComparer.OrdinalIgnoreCase);
+});
+```
+
+String paths still matter when:
+
+- you are working with anonymous types
+- you need cross-shape member mapping rules
+- you want to target a path outside the current subject type expression model
+
 Project-wide defaults:
 
 ```csharp
@@ -114,6 +131,13 @@ actual.Should().BeEquivalentTo(expected, options =>
 
 `IgnorePath(...)` uses the rooted graph path form such as `actual.Address`, and child paths under that branch are ignored automatically.
 
+For named types, you can avoid hard-coded paths:
+
+```csharp
+actual.Should().BeEquivalentTo(expected, options =>
+    options.Ignore<Person>(x => x.Address));
+```
+
 ### Compare Only Selected Members
 
 Use `OnlyCompareMember(...)` or `OnlyCompareMembers(...)` when you want equivalency to focus on a small part of the object.
@@ -129,6 +153,13 @@ actual.Should().BeEquivalentTo(expected, options =>
 ```
 
 This is useful when a test only cares about a stable subset of the graph and you want the assertion to ignore everything else.
+
+For named types, use selector-based includes instead of string paths:
+
+```csharp
+actual.Should().BeEquivalentTo(expected, options =>
+    options.OnlyCompare<Person>(x => x.Name, x => x.Address!.Postcode));
+```
 
 ### Control Whether Properties And Fields Participate
 
@@ -196,6 +227,13 @@ options.UseComparerForPath("actual.Name", StringComparer.OrdinalIgnoreCase);
 options.UseComparerForPath("Name", StringComparer.OrdinalIgnoreCase);
 ```
 
+For named types, prefer the selector-based form:
+
+```csharp
+actual.Should().BeEquivalentTo(expected, options =>
+    options.UseComparer<Person>(x => x.Name, StringComparer.OrdinalIgnoreCase));
+```
+
 ### Compare One Specific Member
 
 `UseComparerForMember(...)` is an alias for path-based comparison that reads better when the intent is member-focused:
@@ -215,6 +253,13 @@ actual.Should().BeEquivalentTo(expected, options =>
 ```
 
 This is useful when collection items contain volatile details but one key member defines logical identity.
+
+Selector-based configuration is also available for collection members on named types:
+
+```csharp
+actual.Should().BeEquivalentTo(expected, options =>
+    options.UseCollectionItemComparer<Order>(x => x.Items, new LineItemSkuComparer()));
+```
 
 ## Collection Behavior
 

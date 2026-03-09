@@ -132,7 +132,7 @@ actual.Should().BeEquivalentTo(expected, options =>
 Current equivalency configuration supports:
 
 - strict or any-order collection comparison
-- member and path exclusion
+- member and path exclusion, including expression-based selectors on named types
 - member-name mapping between different object shapes
 - per-path, per-member, and per-type comparers
 - missing and extra member controls
