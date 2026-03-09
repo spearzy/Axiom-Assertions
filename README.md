@@ -299,6 +299,15 @@ Failure dispatch is configurable through `IFailureStrategy`.
 
 Default behaviour throws `InvalidOperationException`.
 
+Use this when you want Axiom failures to integrate with your test framework's native assertion exception type (for example xUnit/NUnit/MSTest), or when your team wants a custom exception policy.
+
+Failure flow is:
+
+1. An assertion fails and calls Axiom's dispatcher.
+2. If a batch is active, the failure message is recorded.
+3. If no batch is active, the configured `IFailureStrategy` is called immediately.
+4. When a root batch is disposed, one combined failure message is sent through the same strategy.
+
 ```csharp
 using Axiom.Core.Configuration;
 using Axiom.Core.Failures;
@@ -320,6 +329,30 @@ public sealed class CustomFailureStrategy : IFailureStrategy
 ```
 
 `IFailureStrategy.Fail(...)` should always throw. If a strategy returns instead of throwing, Axiom raises an `InvalidOperationException` guard failure.
+
+Built-in framework strategies are also available:
+
+```csharp
+using Axiom.Core.Configuration;
+using Axiom.Core.Failures;
+
+// xUnit projects
+AxiomServices.Configure(c => c.FailureStrategy = XunitFailureStrategy.Instance);
+
+// NUnit projects
+AxiomServices.Configure(c => c.FailureStrategy = NUnitFailureStrategy.Instance);
+
+// MSTest projects
+AxiomServices.Configure(c => c.FailureStrategy = MSTestFailureStrategy.Instance);
+```
+
+Each built-in strategy requires the corresponding test framework package to be referenced by the test project.
+
+Quick selection guide:
+
+- Keep default `InvalidOperationException`: simplest option, no framework coupling.
+- Use `XunitFailureStrategy` / `NUnitFailureStrategy` / `MSTestFailureStrategy`: framework-native assertion exception types.
+- Implement custom `IFailureStrategy`: project-specific exception type or reporting policy.
 
 Use a custom comparer provider when your domain equality rules differ from default `.Equals(...)`. For one-off equivalency rules, prefer per-assertion options such as `UseComparerForType(...)`, `UseComparerForPath(...)`, or `UseComparerForMember(...)`.
 
