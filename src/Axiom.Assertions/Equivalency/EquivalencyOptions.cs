@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq.Expressions;
 
 namespace Axiom.Assertions.Equivalency;
 
@@ -60,6 +61,31 @@ public sealed class EquivalencyOptions
         return this;
     }
 
+    public EquivalencyOptions Ignore<TSubject>(Expression<Func<TSubject, object?>> memberSelector)
+    {
+        ArgumentNullException.ThrowIfNull(memberSelector);
+
+        _ignoredPaths.Add(EquivalencySelectorPath.Create(memberSelector, nameof(memberSelector)));
+        return this;
+    }
+
+    public EquivalencyOptions Ignore<TSubject>(params Expression<Func<TSubject, object?>>[] memberSelectors)
+    {
+        ArgumentNullException.ThrowIfNull(memberSelectors);
+
+        foreach (var memberSelector in memberSelectors)
+        {
+            if (memberSelector is null)
+            {
+                throw new ArgumentNullException(nameof(memberSelectors), "memberSelectors must not contain null entries.");
+            }
+
+            _ignoredPaths.Add(EquivalencySelectorPath.Create(memberSelector, nameof(memberSelectors)));
+        }
+
+        return this;
+    }
+
     // Restrict equivalency to one member branch, e.g. "Name" or "Address.Postcode".
     public EquivalencyOptions OnlyCompareMember(string memberPath)
     {
@@ -74,6 +100,31 @@ public sealed class EquivalencyOptions
         foreach (var memberPath in memberPaths)
         {
             OnlyCompareMember(memberPath);
+        }
+
+        return this;
+    }
+
+    public EquivalencyOptions OnlyCompare<TSubject>(Expression<Func<TSubject, object?>> memberSelector)
+    {
+        ArgumentNullException.ThrowIfNull(memberSelector);
+
+        _onlyComparedMembers.Add(EquivalencySelectorPath.Create(memberSelector, nameof(memberSelector)));
+        return this;
+    }
+
+    public EquivalencyOptions OnlyCompare<TSubject>(params Expression<Func<TSubject, object?>>[] memberSelectors)
+    {
+        ArgumentNullException.ThrowIfNull(memberSelectors);
+
+        foreach (var memberSelector in memberSelectors)
+        {
+            if (memberSelector is null)
+            {
+                throw new ArgumentNullException(nameof(memberSelectors), "memberSelectors must not contain null entries.");
+            }
+
+            _onlyComparedMembers.Add(EquivalencySelectorPath.Create(memberSelector, nameof(memberSelectors)));
         }
 
         return this;
@@ -109,12 +160,34 @@ public sealed class EquivalencyOptions
         return this;
     }
 
+    public EquivalencyOptions UseComparer<TSubject>(
+        Expression<Func<TSubject, object?>> memberSelector,
+        IEqualityComparer comparer)
+    {
+        ArgumentNullException.ThrowIfNull(memberSelector);
+        ArgumentNullException.ThrowIfNull(comparer);
+
+        AddPathComparer(EquivalencySelectorPath.Create(memberSelector, nameof(memberSelector)), comparer);
+        return this;
+    }
+
     public EquivalencyOptions UseCollectionItemComparerForPath(string path, IEqualityComparer comparer)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(comparer);
 
         _collectionItemComparers[path.Trim()] = comparer;
+        return this;
+    }
+
+    public EquivalencyOptions UseCollectionItemComparer<TSubject>(
+        Expression<Func<TSubject, object?>> collectionSelector,
+        IEqualityComparer comparer)
+    {
+        ArgumentNullException.ThrowIfNull(collectionSelector);
+        ArgumentNullException.ThrowIfNull(comparer);
+
+        _collectionItemComparers[EquivalencySelectorPath.Create(collectionSelector, nameof(collectionSelector))] = comparer;
         return this;
     }
 
