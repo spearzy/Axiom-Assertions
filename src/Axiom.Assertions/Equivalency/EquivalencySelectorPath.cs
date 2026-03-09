@@ -60,10 +60,12 @@ internal static class EquivalencySelectorPath
         // Selectors returning object? often include compiler-added conversions
         // (for example boxing value types). Remove those wrappers so member
         // traversal sees the real expression chain.
-        while (expression is UnaryExpression { 
-                   NodeType: ExpressionType.Convert 
-                   or ExpressionType.ConvertChecked 
-                   or ExpressionType.TypeAs } unaryExpression)
+        while (expression is UnaryExpression
+            {
+                NodeType: ExpressionType.Convert
+                   or ExpressionType.ConvertChecked
+                   or ExpressionType.TypeAs
+            } unaryExpression)
         {
             expression = unaryExpression.Operand;
         }
