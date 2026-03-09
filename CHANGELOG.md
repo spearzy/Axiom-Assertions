@@ -4,11 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.3.3] - 2026-03-09
 
 ### Added
 
-- _Nothing yet._
+- Assertion failure strategy abstraction with `AxiomServices.Configure(...)` integration.
+- Built-in framework failure strategies for:
+  - xUnit (`XunitFailureStrategy`)
+  - NUnit (`NUnitFailureStrategy`)
+  - MSTest (`MSTestFailureStrategy`)
+- Typed `ContainSingle(predicate)` continuation access without consumer-side casting.
+
+### Changed
+
+- Added predicate-expression diagnostics across value and collection predicate assertions for clearer failure output.
+- Added deterministic string-difference diagnostics for string assertion failures.
+- Added `StringComparison` overloads for string equality assertions:
+  - `Be(expected, comparison)`
+  - `NotBe(unexpected, comparison)`
+- Updated batch-routing test expectations to align with the improved string diagnostics.
+- Expanded README and NuGet README documentation for the updated assertion and failure strategy surfaces.
+
+### Fixed
+
+- Upgraded `coverlet.msbuild` in test infrastructure from `6.0.4` to `8.0.0`.
 
 ## [0.2.1] - 2026-03-08
 
