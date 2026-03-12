@@ -47,6 +47,40 @@ Example deterministic failure output:
 Expected user.Email to contain "@", but found "invalid-email".
 ```
 
+## Global Setup
+
+Put shared configuration in one `AxiomSetup.cs` file in your test project:
+
+```csharp
+using Axiom.Assertions.Equivalency;
+using Axiom.Core.Configuration;
+using Axiom.Core.Failures;
+
+public static class AxiomSetup
+{
+    public static void Apply()
+    {
+        EquivalencyDefaults.Configure(options =>
+        {
+            options.CollectionOrder = EquivalencyCollectionOrder.Any;
+            options.RequireStrictRuntimeTypes = false;
+        });
+
+        AxiomServices.Configure(config =>
+        {
+            config.RegexMatchTimeout = TimeSpan.FromMilliseconds(500);
+
+            // Pick the strategy that matches your test framework:
+            config.FailureStrategy = XunitFailureStrategy.Instance;
+            // config.FailureStrategy = NUnitFailureStrategy.Instance;
+            // config.FailureStrategy = MSTestFailureStrategy.Instance;
+        });
+    }
+}
+```
+
+Call `AxiomSetup.Apply()` once from your framework startup hook (xUnit fixture, NUnit one-time setup, or MSTest assembly initialise).
+
 ## Core Workflows
 
 ### Batch Aggregation
