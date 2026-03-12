@@ -1,6 +1,3 @@
-using Axiom.Assertions;
-using Axiom.Assertions.EntryPoints;
-
 namespace Axiom.Tests.Assertions.Actions.WithParamName;
 
 public sealed class WithParamNameTests

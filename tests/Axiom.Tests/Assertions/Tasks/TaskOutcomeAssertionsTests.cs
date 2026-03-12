@@ -1,5 +1,4 @@
 using System.Threading.Tasks.Sources;
-using Axiom.Assertions.EntryPoints;
 
 namespace Axiom.Tests.Assertions.Tasks;
 
