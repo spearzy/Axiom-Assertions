@@ -1,3 +1,4 @@
+using Axiom.Assertions.Configuration;
 using Axiom.Assertions.Equivalency;
 
 namespace Axiom.Tests.Core.Configuration;
