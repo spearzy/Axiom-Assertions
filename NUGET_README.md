@@ -118,8 +118,10 @@ act.Should()
     .Throw<ArgumentNullException>()
     .WithParamName("userId");
 
-Task completed = Task.CompletedTask;
-await completed.Should().CompleteWithin(TimeSpan.FromMilliseconds(50));
+Task<string> rollout = Task.FromResult("pricing-api");
+
+var continuation = await rollout.Should().SucceedWithin(TimeSpan.FromMilliseconds(50));
+continuation.WhoseResult.Should().Be("pricing-api");
 ```
 
 ## Assertion Coverage
@@ -128,7 +130,7 @@ Axiom currently includes:
 
 - value assertions: equality, nullability, type/reference checks, numeric comparisons, ranges, predicates, approximate numeric checks, equivalency
 - string assertions: exact equality, null/empty/whitespace checks, prefix/suffix/contain, regex, comparison-aware matching
-- exceptions and async: throw, exact throw, message/parameter/inner-exception checks, completion assertions, direct task entrypoints
+- exceptions and async: throw, exact throw, message/parameter/inner-exception checks, delegate-based async assertions, direct task completion and outcome assertions
 - collections and dictionaries: containment, exact sequence, count/empty checks, ordering, uniqueness, single-item extraction, key/value extraction
 - temporal assertions: before, after, and within-tolerance checks
 

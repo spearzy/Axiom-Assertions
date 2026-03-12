@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/).
 
+## [0.4.1] - 2026-03-12
+
+### Fixed
+
+- Corrected the assertion reference to document the current direct task entry points and task outcome assertions.
+- Updated GitHub and NuGet README async examples to show direct task success/result assertions alongside the `AxiomSettings.Configure(...)` setup guidance.
+
 ## [0.4.0] - 2026-03-12
 
 ### Added

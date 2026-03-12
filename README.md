@@ -210,8 +210,10 @@ Func<Task> failingTask = () => Task.FromException(new InvalidOperationException(
 await (await failingTask.Should().ThrowAsync<InvalidOperationException>())
     .WithMessage("boom");
 
-Task completed = Task.CompletedTask;
-await completed.Should().CompleteWithin(TimeSpan.FromMilliseconds(50));
+Task<string> rollout = Task.FromResult("pricing-api");
+
+var continuation = await rollout.Should().SucceedWithin(TimeSpan.FromMilliseconds(50));
+continuation.WhoseResult.Should().Be("pricing-api");
 ```
 
 Async exception and completion assertions are supported on:
@@ -222,6 +224,8 @@ Async exception and completion assertions are supported on:
 - `Task<T>`
 - `ValueTask`
 - `ValueTask<T>`
+
+Direct task subjects also support outcome assertions such as `Succeed()`, `SucceedWithin(...)`, `BeCanceled()`, and `BeFaultedWith<TException>()`.
 
 ### Collections And Dictionaries
 
@@ -280,7 +284,7 @@ This README focuses on common workflows rather than listing every method in the 
 
 - Values: equality, nullability, type/reference checks, numeric comparisons, ranges, predicates, approximate numeric checks, equivalency
 - Strings: exact equality, null/empty/whitespace checks, prefix/suffix/contain, regex, case-aware comparisons
-- Exceptions and async: throw, exact throw, message/parameter/inner-exception checks, completion assertions, direct task entrypoints
+- Exceptions and async: throw, exact throw, message/parameter/inner-exception checks, delegate-based async assertions, direct task completion and outcome assertions
 - Collections and dictionaries: containment, sequence checks, ordering, uniqueness, count/empty checks, single-item extraction, key/value extraction
 - Temporal values: before, after, and within-tolerance checks
 
