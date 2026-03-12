@@ -54,6 +54,46 @@ Example failure output is deterministic and stable:
 Expected user.Email to contain "@", but found "invalid-email".
 ```
 
+## Global Setup
+
+For most teams, the clearest approach is one setup file in the test project.
+
+Create `AxiomSetup.cs`:
+
+```csharp
+using Axiom.Assertions.Equivalency;
+using Axiom.Core.Configuration;
+using Axiom.Core.Failures;
+
+public static class AxiomSetup
+{
+    public static void Apply()
+    {
+        EquivalencyDefaults.Configure(options =>
+        {
+            options.CollectionOrder = EquivalencyCollectionOrder.Any;
+            options.RequireStrictRuntimeTypes = false;
+        });
+
+        AxiomServices.Configure(config =>
+        {
+            config.RegexMatchTimeout = TimeSpan.FromMilliseconds(500);
+
+            // Pick the strategy that matches your test framework:
+            config.FailureStrategy = XunitFailureStrategy.Instance;
+            // config.FailureStrategy = NUnitFailureStrategy.Instance;
+            // config.FailureStrategy = MSTestFailureStrategy.Instance;
+        });
+    }
+}
+```
+
+Call `AxiomSetup.Apply()` once in your test framework's startup hook:
+
+- xUnit: call it in a collection fixture constructor.
+- NUnit: call it from `[SetUpFixture]` + `[OneTimeSetUp]`.
+- MSTest: call it from `[AssemblyInitialize]`.
+
 ## Why Axiom
 
 - Deterministic messages you can rely on in CI, code review, and snapshot-like tests.
