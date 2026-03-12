@@ -5,7 +5,7 @@ Axiom's [README](../README.md) focuses on adoption and common workflows. This pa
 All fluent assertions either:
 
 - return `.And` so you can continue chaining on the same assertion object
-- return a specialized continuation that exposes an extracted value such as `Thrown`, `SingleItem`, or `WhoseValue`
+- return a specialized continuation that exposes an extracted value such as `Thrown`, `SingleItem`, `WhoseValue`, or `WhoseResult`
 
 ## Entry Points
 
@@ -16,12 +16,12 @@ All fluent assertions either:
 | `Action` | `subject.Should()` | `ActionAssertions` |
 | `Func<Task>` | `subject.Should()` | `AsyncActionAssertions` |
 | `Func<ValueTask>` | `subject.Should()` | `AsyncActionAssertions` |
-| `Task` | `subject.Should()` | `AsyncActionAssertions` |
-| `Task<T>` | `subject.Should()` | `AsyncActionAssertions` |
-| `ValueTask` | `subject.Should()` | `AsyncActionAssertions` |
-| `ValueTask<T>` | `subject.Should()` | `AsyncActionAssertions` |
+| `Task` | `subject.Should()` | `TaskAssertions` |
+| `Task<T>` | `subject.Should()` | `TaskAssertions<T>` |
+| `ValueTask` | `subject.Should()` | `TaskAssertions` |
+| `ValueTask<T>` | `subject.Should()` | `TaskAssertions<T>` |
 
-`Task<T>` and `ValueTask<T>` currently expose task-behavior assertions such as throws and completion timing. They do not yet unwrap the result into `ValueAssertions<T>`.
+`Task<T>` and `ValueTask<T>` expose task-behaviour assertions plus success continuations through `WhoseResult`. They do not unwrap the result directly into `ValueAssertions<T>`.
 
 ## Core Primitives
 
@@ -137,10 +137,6 @@ Available on `AsyncActionAssertions` from:
 
 - `Func<Task>`
 - `Func<ValueTask>`
-- `Task`
-- `Task<T>`
-- `ValueTask`
-- `ValueTask<T>`
 
 ```csharp
 ThrowAsync<TException>()
@@ -151,6 +147,41 @@ NotCompleteWithin(timeout)
 ```
 
 `ThrowAsync(...)` and `ThrowExactlyAsync(...)` return the same `ThrownExceptionAssertions<AsyncActionAssertions, TException>` continuation surface documented above.
+
+## Direct Task Assertions
+
+Available on `TaskAssertions` / `TaskAssertions<T>` from:
+
+- `Task`
+- `Task<T>`
+- `ValueTask`
+- `ValueTask<T>`
+
+Shared task assertion surface:
+
+```csharp
+ThrowAsync<TException>()
+ThrowExactlyAsync<TException>()
+NotThrowAsync()
+CompleteWithin(timeout)
+NotCompleteWithin(timeout)
+Succeed()
+SucceedWithin(timeout)
+BeCanceled()
+BeCanceledWithin(timeout)
+BeFaultedWith<TException>()
+BeFaultedWithWithin<TException>(timeout)
+```
+
+Task result continuations:
+
+```csharp
+// Succeed() / SucceedWithin(timeout) on Task<T> / ValueTask<T>
+And
+WhoseResult
+```
+
+`BeFaultedWith(...)` and `BeFaultedWithWithin(...)` return the same `ThrownExceptionAssertions<TParent, TException>` continuation surface documented in the exception section above.
 
 ## Collection Assertions
 
