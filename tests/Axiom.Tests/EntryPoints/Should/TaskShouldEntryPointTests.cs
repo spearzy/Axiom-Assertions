@@ -1,5 +1,3 @@
-using Axiom.Assertions;
-
 namespace Axiom.Tests.EntryPoints.Should;
 
 public sealed class TaskShouldEntryPointTests

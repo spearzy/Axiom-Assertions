@@ -1,5 +1,3 @@
-using Axiom.Assertions;
-
 namespace Axiom.Tests.Assertions.Strings.NotContain;
 
 public sealed class NotContainTests

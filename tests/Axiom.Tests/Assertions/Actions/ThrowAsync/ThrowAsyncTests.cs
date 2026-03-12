@@ -1,5 +1,3 @@
-using Axiom.Assertions;
-
 namespace Axiom.Tests.Assertions.Actions.ThrowAsync;
 
 public sealed class ThrowAsyncTests

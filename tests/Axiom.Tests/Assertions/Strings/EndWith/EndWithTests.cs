@@ -1,5 +1,3 @@
-using Axiom.Assertions;
-
 namespace Axiom.Tests.Assertions.Strings.EndWith;
 
 public sealed class EndWithTests

@@ -1,5 +1,3 @@
-using Axiom.Assertions;
-
 namespace Axiom.Tests.Assertions.Strings.Match;
 
 public sealed class MatchTests : IDisposable

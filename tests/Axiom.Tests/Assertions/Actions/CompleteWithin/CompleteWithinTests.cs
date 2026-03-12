@@ -1,5 +1,3 @@
-using Axiom.Assertions;
-
 namespace Axiom.Tests.Assertions.Actions.CompleteWithin;
 
 public sealed class CompleteWithinTests

@@ -1,5 +1,3 @@
-using Axiom.Assertions;
-
 namespace Axiom.Tests.Assertions.Strings.BeNullOrEmpty;
 
 public sealed class BeNullOrEmptyTests
