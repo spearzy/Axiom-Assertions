@@ -3,9 +3,38 @@
     <PackageId>Axiom.Assertions</PackageId>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
     <Description>Fluent assertion APIs for strings, values, collections, exceptions, and equivalency in Axiom.</Description>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddBundledAnalyzersToPackage</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Axiom.Core\Axiom.Core.csproj" />
   </ItemGroup>
+
+  <Target Name="BuildBundledAnalyzersForPack" Condition="'$(TargetFramework)' == 'net10.0'">
+    <MSBuild
+      Projects="../Axiom.Analyzers/Axiom.Analyzers.csproj"
+      Targets="Build"
+      Properties="Configuration=$(Configuration);TargetFramework=netstandard2.0" />
+    <MSBuild
+      Projects="../Axiom.Analyzers.CodeFixes/Axiom.Analyzers.CodeFixes.csproj"
+      Targets="Build"
+      Properties="Configuration=$(Configuration);TargetFramework=netstandard2.0;BuildProjectReferences=false" />
+  </Target>
+
+  <Target Name="AddBundledAnalyzersToPackage" DependsOnTargets="BuildBundledAnalyzersForPack" Condition="'$(TargetFramework)' == 'net10.0'">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="../Axiom.Analyzers/bin/$(Configuration)/netstandard2.0/Axiom.Analyzers.dll">
+        <PackagePath>analyzers/dotnet/cs</PackagePath>
+      </TfmSpecificPackageFile>
+      <TfmSpecificPackageFile Include="../Axiom.Analyzers/bin/$(Configuration)/netstandard2.0/Axiom.Analyzers.pdb" Condition="Exists('../Axiom.Analyzers/bin/$(Configuration)/netstandard2.0/Axiom.Analyzers.pdb')">
+        <PackagePath>analyzers/dotnet/cs</PackagePath>
+      </TfmSpecificPackageFile>
+      <TfmSpecificPackageFile Include="../Axiom.Analyzers.CodeFixes/bin/$(Configuration)/netstandard2.0/Axiom.Analyzers.CodeFixes.dll">
+        <PackagePath>analyzers/dotnet/cs</PackagePath>
+      </TfmSpecificPackageFile>
+      <TfmSpecificPackageFile Include="../Axiom.Analyzers.CodeFixes/bin/$(Configuration)/netstandard2.0/Axiom.Analyzers.CodeFixes.pdb" Condition="Exists('../Axiom.Analyzers.CodeFixes/bin/$(Configuration)/netstandard2.0/Axiom.Analyzers.CodeFixes.pdb')">
+        <PackagePath>analyzers/dotnet/cs</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
 </Project>

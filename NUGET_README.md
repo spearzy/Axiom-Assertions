@@ -12,6 +12,12 @@ Most test projects should install `Axiom.Assertions`:
 dotnet add package Axiom.Assertions
 ```
 
+Install `Axiom.Analyzers` separately only if you want the diagnostics without the runtime assertion library:
+
+```bash
+dotnet add package Axiom.Analyzers
+```
+
 Install `Axiom.Core` directly only when you want low-level primitives such as `Batch`, formatting, or configuration without the full fluent assertion surface:
 
 ```bash
@@ -64,11 +70,7 @@ public static class AxiomSetup
         AxiomSettings.Configure(options =>
         {
             options.Core.RegexMatchTimeout = TimeSpan.FromMilliseconds(500);
-
-            // Pick the strategy that matches your test framework:
             options.Core.FailureStrategy = XunitFailureStrategy.Instance;
-            // options.Core.FailureStrategy = NUnitFailureStrategy.Instance;
-            // options.Core.FailureStrategy = MSTestFailureStrategy.Instance;
 
             options.Equivalency.CollectionOrder = EquivalencyCollectionOrder.Any;
             options.Equivalency.RequireStrictRuntimeTypes = false;
@@ -79,7 +81,7 @@ public static class AxiomSetup
 }
 ```
 
-Call `AxiomSetup.Apply()` once from your framework startup hook (xUnit fixture, NUnit one-time setup, or MSTest assembly initialise).
+Set `options.Core.FailureStrategy` to the strategy that matches your test framework, then call `AxiomSetup.Apply()` once from your framework startup hook (xUnit fixture, NUnit one-time setup, or MSTest assembly initialise).
 
 If you package shared defaults for several test projects, use `AxiomSettings.UseModule(...)` with an `IAxiomSettingsModule`:
 
@@ -195,3 +197,4 @@ Axiom currently includes:
 - [Assertion reference](https://github.com/spearzy/Axiom/blob/main/docs/assertion-reference.md)
 - [Custom assertions guide](https://github.com/spearzy/Axiom/blob/main/docs/custom-assertions.md)
 - [Equivalency guide](https://github.com/spearzy/Axiom/blob/main/docs/equivalency.md)
+- [Analyzer guide](https://github.com/spearzy/Axiom/blob/main/docs/analyzers.md)
