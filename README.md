@@ -13,13 +13,16 @@
 [![Version](https://img.shields.io/nuget/v/Axiom.Core?label=version)](https://www.nuget.org/packages/Axiom.Core)
 [![Downloads](https://img.shields.io/nuget/dt/Axiom.Core?label=downloads)](https://www.nuget.org/packages/Axiom.Core)
 
+`Axiom.Analyzers`  
+[![Version](https://img.shields.io/nuget/v/Axiom.Analyzers?label=version)](https://www.nuget.org/packages/Axiom.Analyzers)
+
 Axiom is a fluent assertion library for modern .NET tests. It is designed around deterministic failure output, explicit batch aggregation, low pass-path overhead, and configurable equivalency.
 
 Target frameworks: `net8.0`, `net9.0`, and `net10.0`.
 
 ## Packages
 
-Most test projects should reference `Axiom.Assertions`. It contains the fluent `Should()` API and pulls in `Axiom.Core` automatically.
+Most test projects should reference `Axiom.Assertions`. It contains the fluent `Should()` API, pulls in `Axiom.Core` automatically, and bundles the Axiom analyzers/code fixes so editor and build diagnostics light up without extra package setup. The bundled rules currently cover ignored async Axiom assertions and `Batch` instances that are created without being disposed.
 
 Use `Axiom.Core` directly only when you need low-level primitives such as `Batch`, formatting, or configuration without the full assertion surface.
 
@@ -31,6 +34,12 @@ If you only need the core primitives:
 
 ```bash
 dotnet add package Axiom.Core
+```
+
+If you only want the diagnostics as a standalone package:
+
+```bash
+dotnet add package Axiom.Analyzers
 ```
 
 ## Quick Start
@@ -73,11 +82,7 @@ public static class AxiomSetup
         AxiomSettings.Configure(options =>
         {
             options.Core.RegexMatchTimeout = TimeSpan.FromMilliseconds(500);
-
-            // Pick the strategy that matches your test framework:
             options.Core.FailureStrategy = XunitFailureStrategy.Instance;
-            // options.Core.FailureStrategy = NUnitFailureStrategy.Instance;
-            // options.Core.FailureStrategy = MSTestFailureStrategy.Instance;
 
             options.Equivalency.CollectionOrder = EquivalencyCollectionOrder.Any;
             options.Equivalency.RequireStrictRuntimeTypes = false;
@@ -88,7 +93,7 @@ public static class AxiomSetup
 }
 ```
 
-Call `AxiomSetup.Apply()` once in your test framework's startup hook:
+Set `options.Core.FailureStrategy` to the strategy that matches your test framework. Call `AxiomSetup.Apply()` once in your test framework's startup hook:
 
 - xUnit: call it in a collection fixture constructor.
 - NUnit: call it from `[SetUpFixture]` + `[OneTimeSetUp]`.
@@ -382,6 +387,8 @@ For practical guidance on building domain-specific assertions, see [docs/custom-
 
 For deeper guidance on structural comparison, configuration precedence, and common equivalency recipes, see [docs/equivalency.md](docs/equivalency.md).
 
+For the current analyzer rules and examples, see [docs/analyzers.md](docs/analyzers.md).
+
 High-level categories:
 
 - Values: `Be`, `NotBe`, `BeOneOf`, nullability, type/reference checks, ranges, predicates, numeric approximation, structural equivalency
@@ -454,7 +461,6 @@ public sealed class CustomFailureStrategy : IFailureStrategy
 {
     public void Fail(string message, string? callerFilePath = null, int callerLineNumber = 0)
     {
-        // Replace this with your preferred exception type or framework integration.
         throw new InvalidOperationException(
             $"{message} (at {callerFilePath}:{callerLineNumber})");
     }
@@ -469,13 +475,8 @@ Built-in framework strategies are also available:
 using Axiom.Core.Configuration;
 using Axiom.Core.Failures;
 
-// xUnit projects
 AxiomServices.Configure(c => c.FailureStrategy = XunitFailureStrategy.Instance);
-
-// NUnit projects
 AxiomServices.Configure(c => c.FailureStrategy = NUnitFailureStrategy.Instance);
-
-// MSTest projects
 AxiomServices.Configure(c => c.FailureStrategy = MSTestFailureStrategy.Instance);
 ```
 

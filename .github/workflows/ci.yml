@@ -41,6 +41,10 @@ jobs:
       - name: Test (net8.0)
         run: dotnet test tests/Axiom.Tests/Axiom.Tests.csproj -c Release -f net8.0 --no-build
 
+      - name: Test analyzers
+        if: matrix.os == 'ubuntu-latest'
+        run: dotnet test tests/Axiom.Analyzers.Tests/Axiom.Analyzers.Tests.csproj -c Release --no-build
+
       - name: Coverage Gate
         if: matrix.os == 'ubuntu-latest'
         run: >
@@ -102,6 +106,9 @@ jobs:
 
       - name: Consumer smoke test (xUnit)
         run: bash eng/ci/run-consumer-smoke.sh "$GITHUB_WORKSPACE/artifacts/packages" xunit
+
+      - name: Consumer analyzer smoke test
+        run: bash eng/ci/run-assertions-analyzer-smoke.sh "$GITHUB_WORKSPACE/artifacts/packages"
 
       - name: Consumer smoke test (NUnit)
         run: bash eng/ci/run-consumer-smoke.sh "$GITHUB_WORKSPACE/artifacts/packages" nunit

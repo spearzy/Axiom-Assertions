@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Axiom.Analyzers</PackageId>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Roslyn analyzers for common Axiom assertion mistakes.</Description>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <LangVersion>latest</LangVersion>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <NoWarn>$(NoWarn);RS2007;RS2008</NoWarn>
+    <IncludeSymbols>false</IncludeSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(TargetPath)" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="$(TargetDir)$(AssemblyName).pdb" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="Exists('$(TargetDir)$(AssemblyName).pdb')" />
+    <None Include="../Axiom.Analyzers.CodeFixes/bin/$(Configuration)/$(TargetFramework)/Axiom.Analyzers.CodeFixes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="../Axiom.Analyzers.CodeFixes/bin/$(Configuration)/$(TargetFramework)/Axiom.Analyzers.CodeFixes.pdb" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="Exists('../Axiom.Analyzers.CodeFixes/bin/$(Configuration)/$(TargetFramework)/Axiom.Analyzers.CodeFixes.pdb')" />
+  </ItemGroup>
+
+  <Target Name="BuildCodeFixProjectForPack" BeforeTargets="GenerateNuspec" Condition="'$(NoBuild)' != 'true'">
+    <MSBuild
+      Projects="../Axiom.Analyzers.CodeFixes/Axiom.Analyzers.CodeFixes.csproj"
+      Targets="Build"
+      Properties="Configuration=$(Configuration);TargetFramework=$(TargetFramework);BuildProjectReferences=false" />
+  </Target>
+</Project>
