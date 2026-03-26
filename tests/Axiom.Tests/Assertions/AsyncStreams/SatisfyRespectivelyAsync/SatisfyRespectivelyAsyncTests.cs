@@ -1,3 +1,5 @@
+using Axiom.Core.Failures;
+
 namespace Axiom.Tests.Assertions.AsyncStreams.SatisfyRespectivelyAsync;
 
 public sealed class SatisfyRespectivelyAsyncTests
@@ -17,6 +19,28 @@ public sealed class SatisfyRespectivelyAsyncTests
             third => third.Total.Should().Be(30m));
 
         Assert.Same(assertions, continuation.And);
+    }
+
+    [Fact]
+    public async Task SatisfyRespectivelyAsync_DoesNotUseFailureCapture_OnNonBatchSuccessPath()
+    {
+        AssertionFailureCapture.ResetProbe();
+
+        try
+        {
+            var values = CreateAsyncSequence(10, 20, 30);
+
+            await values.Should().SatisfyRespectivelyAsync(
+                first => first.Should().Be(10),
+                second => second.Should().Be(20),
+                third => third.Should().Be(30));
+
+            Assert.Equal(0, AssertionFailureCapture.CaptureInvocationCount);
+        }
+        finally
+        {
+            AssertionFailureCapture.ResetProbe();
+        }
     }
 
     [Fact]
@@ -63,6 +87,112 @@ public sealed class SatisfyRespectivelyAsyncTests
 
         Assert.Contains("Expected values to satisfy assertions respectively (failing index 1)", ex.Message, StringComparison.Ordinal);
         Assert.Contains("Expected item to be greater than 0, but found -1.", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SatisfyRespectivelyAsync_Throws_WhenAnItemCallbackThrowsInvalidOperationExceptionDirectly()
+    {
+        var values = CreateAsyncSequence(10, 20, 30);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await values.Should().SatisfyRespectivelyAsync(
+                item => item.Should().BeGreaterThan(0),
+                _ => throw new InvalidOperationException("boom"),
+                item => item.Should().BeGreaterThan(0)));
+
+        Assert.Contains("Expected values to satisfy assertions respectively (failing index 1)", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("boom", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SatisfyRespectivelyAsync_AllowsNonInvalidOperationExceptionToEscapeUnwrapped()
+    {
+        var values = CreateAsyncSequence(10, 20, 30);
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await values.Should().SatisfyRespectivelyAsync(
+                item => item.Should().BeGreaterThan(0),
+                _ => throw new ArgumentException("boom"),
+                item => item.Should().BeGreaterThan(0)));
+
+        Assert.Equal("boom", ex.Message);
+    }
+
+    [Fact]
+    public async Task SatisfyRespectivelyAsync_StopsAfterFirstFailingItemAssertion()
+    {
+        var values = CreateAsyncSequence(10, -1, 30);
+        var visitedIndices = new List<int>();
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await values.Should().SatisfyRespectivelyAsync(
+                item =>
+                {
+                    visitedIndices.Add(0);
+                    item.Should().BeGreaterThan(0);
+                },
+                item =>
+                {
+                    visitedIndices.Add(1);
+                    item.Should().BeGreaterThan(0);
+                },
+                item =>
+                {
+                    visitedIndices.Add(2);
+                    item.Should().BeGreaterThan(0);
+                }));
+
+        Assert.Equal([0, 1], visitedIndices);
+        Assert.Contains("Expected values to satisfy assertions respectively (failing index 1)", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SatisfyRespectivelyAsync_StopsAfterFirstDirectInvalidOperationException()
+    {
+        var values = CreateAsyncSequence(10, 20, 30);
+        var visitedIndices = new List<int>();
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await values.Should().SatisfyRespectivelyAsync(
+                item =>
+                {
+                    visitedIndices.Add(0);
+                    item.Should().BeGreaterThan(0);
+                },
+                _ =>
+                {
+                    visitedIndices.Add(1);
+                    throw new InvalidOperationException("boom");
+                },
+                _ => visitedIndices.Add(2)));
+
+        Assert.Equal([0, 1], visitedIndices);
+        Assert.Contains("Expected values to satisfy assertions respectively (failing index 1)", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("boom", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SatisfyRespectivelyAsync_StopsAfterFirstNonInvalidOperationException()
+    {
+        var values = CreateAsyncSequence(10, 20, 30);
+        var visitedIndices = new List<int>();
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await values.Should().SatisfyRespectivelyAsync(
+                item =>
+                {
+                    visitedIndices.Add(0);
+                    item.Should().BeGreaterThan(0);
+                },
+                _ =>
+                {
+                    visitedIndices.Add(1);
+                    throw new ArgumentException("boom");
+                },
+                _ => visitedIndices.Add(2)));
+
+        Assert.Equal([0, 1], visitedIndices);
+        Assert.Equal("boom", ex.Message);
     }
 
     [Fact]

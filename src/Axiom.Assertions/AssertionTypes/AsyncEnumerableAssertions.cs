@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Axiom.Assertions.Chaining;
+using Axiom.Core;
 using Axiom.Core.Configuration;
 using Axiom.Core.Failures;
 namespace Axiom.Assertions.AssertionTypes;
@@ -453,6 +454,7 @@ public sealed class AsyncEnumerableAssertions<T>(IAsyncEnumerable<T>? subject, s
         }
 
         var expectedCount = assertionsForItems.Length;
+        var captureInnerFailures = Batch.Current is not null;
         await using var enumerator = subject.GetAsyncEnumerator();
 
         for (var index = 0; index < expectedCount; index++)
@@ -470,17 +472,19 @@ public sealed class AsyncEnumerableAssertions<T>(IAsyncEnumerable<T>? subject, s
                 return new AndContinuation<AsyncEnumerableAssertions<T>>(this);
             }
 
-            try
-            {
-                assertionsForItems[index](enumerator.Current);
-            }
-            catch (InvalidOperationException ex)
+            var item = enumerator.Current;
+            var itemAssertion = assertionsForItems[index];
+            var itemFailureMessage = captureInnerFailures
+                ? ExecuteItemAssertionInBatch(itemAssertion, item)
+                : ExecuteItemAssertionOutsideBatch(itemAssertion, item);
+
+            if (itemFailureMessage is not null)
             {
                 Fail(
                     new Failure(
                         SubjectLabel(),
                         new Expectation($"to satisfy assertions respectively (failing index {index})", IncludeExpectedValue: false),
-                        new RenderedText(ex.Message),
+                        new RenderedText(itemFailureMessage),
                         because),
                     callerFilePath: null,
                     callerLineNumber: 0);
@@ -509,6 +513,33 @@ public sealed class AsyncEnumerableAssertions<T>(IAsyncEnumerable<T>? subject, s
             callerLineNumber: 0);
 
         return new AndContinuation<AsyncEnumerableAssertions<T>>(this);
+    }
+
+    private static string? ExecuteItemAssertionOutsideBatch(Action<T> itemAssertion, T item)
+    {
+        try
+        {
+            itemAssertion(item);
+            return null;
+        }
+        catch (InvalidOperationException ex)
+        {
+            return ex.Message;
+        }
+    }
+
+    private static string? ExecuteItemAssertionInBatch(Action<T> itemAssertion, T item)
+    {
+        try
+        {
+            var capturedFailures = AssertionFailureCapture.Capture(
+                () => itemAssertion(item));
+            return capturedFailures.FirstFailureMessage;
+        }
+        catch (InvalidOperationException ex)
+        {
+            return ex.Message;
+        }
     }
 
     private async ValueTask<ContainSingleResult> EvaluateContainSingleAsync(string? because)
