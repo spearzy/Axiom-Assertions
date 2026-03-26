@@ -540,5 +540,5 @@ actual.Should().BeEquivalentTo(expected, options =>
 
 ## Related Docs
 
-- [README.md](../README.md)
+- [Getting Started](getting-started.md)
 - [assertion-reference.md](assertion-reference.md)

@@ -1,6 +1,6 @@
 # Assertion Reference
 
-Axiom's [README](../README.md) focuses on adoption and common workflows. This page is the complete consumer-facing catalog of the shipped assertion surface so you can browse available APIs without opening the source or relying on IDE completion.
+This page is the complete consumer-facing catalog of the shipped assertion surface so you can browse available APIs without opening the source or relying on IDE completion. If you want package guidance or first-step examples, start with [Getting Started](getting-started.md).
 
 All fluent assertions either:
 

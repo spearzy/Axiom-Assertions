@@ -1,0 +1,26 @@
+site_name: Axiom Docs
+site_description: Deterministic fluent assertions for modern .NET tests.
+site_url: https://spearzy.github.io/Axiom/
+repo_url: https://github.com/spearzy/Axiom
+repo_name: spearzy/Axiom
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Assertion Reference: assertion-reference.md
+  - Equivalency: equivalency.md
+  - Custom Assertions: custom-assertions.md
+  - Analyzers: analyzers.md
+  - Vectors: vectors.md
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
