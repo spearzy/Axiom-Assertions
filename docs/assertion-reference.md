@@ -224,6 +224,7 @@ ContainAsync(predicate)
 OnlyContainAsync(predicate)
 ContainSingleAsync()
 ContainSingleAsync(predicate)
+SatisfyRespectivelyAsync(assertionsForItems)
 ```
 
 `ContainSingleAsync()` and `ContainSingleAsync(predicate)` return:
@@ -234,6 +235,14 @@ SingleItem
 ```
 
 Use them when you want to assert an async stream directly instead of materializing it into a list first.
+
+`SatisfyRespectivelyAsync(...)` is the ordered async-stream workflow assertion. It applies each assertion action to the corresponding item, fails when the stream is too short or too long, and reports the first failing item index when an item assertion fails.
+
+```csharp
+await orders.Should().SatisfyRespectivelyAsync(
+    first => first.Total.Should().Be(10m),
+    second => second.Total.Should().Be(20m));
+```
 
 ## Vector Assertions
 

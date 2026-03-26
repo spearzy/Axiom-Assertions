@@ -32,6 +32,25 @@ public sealed class AsyncEnumerableBatchRoutingTests
             ex.Message);
     }
 
+    [Fact]
+    public async Task SatisfyRespectivelyAsync_InsideBatch_DoesNotThrowAtAssertionCallSite_WhenStreamEndsEarly()
+    {
+        var values = CreateAsyncSequence(1, 2);
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = await Record.ExceptionAsync(async () =>
+            await values.Should().SatisfyRespectivelyAsync(
+                item => item.Should().BeGreaterThan(0),
+                item => item.Should().BeGreaterThan(0),
+                item => item.Should().BeGreaterThan(0)));
+
+        Assert.Null(callEx);
+
+        var disposeEx = Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+        Assert.Contains("Expected values to satisfy assertions respectively (same order and count)", disposeEx.Message);
+        Assert.Contains("async stream had fewer items than assertions (expected 3, found 2)", disposeEx.Message);
+    }
+
     private static async IAsyncEnumerable<T> CreateAsyncSequence<T>(params T[] items)
     {
         foreach (var item in items)

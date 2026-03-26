@@ -302,6 +302,99 @@ public sealed class AsyncEnumerableAssertions<T>(IAsyncEnumerable<T>? subject, s
             "ContainSingleAsync");
     }
 
+    public ValueTask<AndContinuation<AsyncEnumerableAssertions<T>>> SatisfyRespectivelyAsync(
+        params Action<T>[] assertionsForItems)
+    {
+        return SatisfyRespectivelyAsync(because: null, assertionsForItems);
+    }
+
+    public async ValueTask<AndContinuation<AsyncEnumerableAssertions<T>>> SatisfyRespectivelyAsync(
+        string? because,
+        params Action<T>[] assertionsForItems)
+    {
+        ArgumentNullException.ThrowIfNull(assertionsForItems);
+
+        for (var index = 0; index < assertionsForItems.Length; index++)
+        {
+            if (assertionsForItems[index] is null)
+            {
+                throw new ArgumentNullException(nameof(assertionsForItems), $"assertionsForItems[{index}] must not be null.");
+            }
+        }
+
+        var subject = Subject;
+        if (subject is null)
+        {
+            Fail(
+                new Failure(
+                    SubjectLabel(),
+                    new Expectation("to satisfy assertions respectively (same order and count)", IncludeExpectedValue: false),
+                    subject,
+                    because),
+                callerFilePath: null,
+                callerLineNumber: 0);
+            return new AndContinuation<AsyncEnumerableAssertions<T>>(this);
+        }
+
+        var expectedCount = assertionsForItems.Length;
+        await using var enumerator = subject.GetAsyncEnumerator();
+
+        for (var index = 0; index < expectedCount; index++)
+        {
+            if (!await enumerator.MoveNextAsync().ConfigureAwait(false))
+            {
+                Fail(
+                    new Failure(
+                        SubjectLabel(),
+                        new Expectation("to satisfy assertions respectively (same order and count)", IncludeExpectedValue: false),
+                        new RenderedText($"async stream had fewer items than assertions (expected {expectedCount}, found {index})"),
+                        because),
+                    callerFilePath: null,
+                    callerLineNumber: 0);
+                return new AndContinuation<AsyncEnumerableAssertions<T>>(this);
+            }
+
+            try
+            {
+                assertionsForItems[index](enumerator.Current);
+            }
+            catch (InvalidOperationException ex)
+            {
+                Fail(
+                    new Failure(
+                        SubjectLabel(),
+                        new Expectation($"to satisfy assertions respectively (failing index {index})", IncludeExpectedValue: false),
+                        new RenderedText(ex.Message),
+                        because),
+                    callerFilePath: null,
+                    callerLineNumber: 0);
+                return new AndContinuation<AsyncEnumerableAssertions<T>>(this);
+            }
+        }
+
+        if (!await enumerator.MoveNextAsync().ConfigureAwait(false))
+        {
+            return new AndContinuation<AsyncEnumerableAssertions<T>>(this);
+        }
+
+        var actualCount = expectedCount + 1;
+        while (await enumerator.MoveNextAsync().ConfigureAwait(false))
+        {
+            actualCount++;
+        }
+
+        Fail(
+            new Failure(
+                SubjectLabel(),
+                new Expectation("to satisfy assertions respectively (same order and count)", IncludeExpectedValue: false),
+                new RenderedText($"async stream had more items than assertions (expected {expectedCount}, found {actualCount})"),
+                because),
+            callerFilePath: null,
+            callerLineNumber: 0);
+
+        return new AndContinuation<AsyncEnumerableAssertions<T>>(this);
+    }
+
     private async ValueTask<ContainSingleResult> EvaluateContainSingleAsync(string? because)
     {
         var subject = Subject;
@@ -430,6 +523,14 @@ public sealed class AsyncEnumerableAssertions<T>(IAsyncEnumerable<T>? subject, s
             actual,
             because);
         return FailureMessageRenderer.Render(failure);
+    }
+
+    private readonly record struct RenderedText(string Text)
+    {
+        public override string ToString()
+        {
+            return Text;
+        }
     }
 
     private readonly record struct ContainSingleResult(
