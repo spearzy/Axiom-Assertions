@@ -8,8 +8,9 @@ public sealed class FailureStrategyTests : IDisposable
     }
 
     [Fact]
-    public void Assertions_UseInvalidOperationException_ByDefault()
+    public void Assertions_UseConfiguredInvalidOperationFailureStrategy()
     {
+        AxiomServices.Configure(c => c.FailureStrategy = InvalidOperationFailureStrategy.Instance);
         const int value = 42;
 
         var ex = Assert.Throws<InvalidOperationException>(() => value.Should().Be(7));

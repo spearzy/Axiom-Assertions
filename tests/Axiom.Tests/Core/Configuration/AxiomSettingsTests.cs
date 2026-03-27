@@ -41,11 +41,12 @@ public sealed class AxiomSettingsTests : IDisposable
         AxiomSettings.Reset();
 
         Assert.Equal(TimeSpan.FromMilliseconds(250), AxiomServices.Configuration.RegexMatchTimeout);
+        Assert.IsType<AutoDetectFailureStrategy>(AxiomServices.Configuration.FailureStrategy);
 
         var actual = new ActualShape { Name = "Bob" };
         var expected = new ExpectedShape { Name = "Bob" };
 
-        var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().BeEquivalentTo(expected));
+        var ex = Assert.Throws<Xunit.Sdk.XunitException>(() => actual.Should().BeEquivalentTo(expected));
         Assert.Contains("runtime types differ", ex.Message, StringComparison.Ordinal);
     }
 

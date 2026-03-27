@@ -71,14 +71,14 @@ Expected user.Email to contain "@", but found "invalid-email".
 
 ## Global Setup
 
-Put shared configuration in one `AxiomSetup.cs` file in your test project:
+You can start using `Axiom.Assertions` immediately after install. Axiom automatically uses framework-native assertion exception types for xUnit, NUnit, and MSTest when it detects those frameworks at runtime.
+
+Add a shared `AxiomSetup.cs` only when you want custom defaults such as equivalency options, regex timeout, comparer providers, formatters, modules, or a non-default failure strategy:
 
 ```csharp
 using Axiom.Assertions;
 using Axiom.Assertions.Configuration;
 using Axiom.Assertions.Equivalency;
-using Axiom.Core.Failures;
-
 public static class AxiomSetup
 {
     public static void Apply()
@@ -86,7 +86,6 @@ public static class AxiomSetup
         AxiomSettings.Configure(options =>
         {
             options.Core.RegexMatchTimeout = TimeSpan.FromMilliseconds(500);
-            options.Core.FailureStrategy = XunitFailureStrategy.Instance;
 
             options.Equivalency.CollectionOrder = EquivalencyCollectionOrder.Any;
             options.Equivalency.RequireStrictRuntimeTypes = false;
@@ -97,7 +96,7 @@ public static class AxiomSetup
 }
 ```
 
-Set `options.Core.FailureStrategy` to the strategy that matches your test framework, then call `AxiomSetup.Apply()` once from your framework startup hook (xUnit fixture, NUnit one-time setup, or MSTest assembly initialise).
+Call `AxiomSetup.Apply()` once from your framework startup hook if you want those shared defaults (xUnit fixture, NUnit one-time setup, or MSTest assembly initialise).
 
 If you package shared defaults for several test projects, use `AxiomSettings.UseModule(...)` with an `IAxiomSettingsModule`:
 

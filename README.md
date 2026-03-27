@@ -78,7 +78,9 @@ Expected user.Email to contain "@", but found "invalid-email".
 
 ## Global Setup
 
-For most teams, the clearest approach is one setup file in the test project.
+You can install `Axiom.Assertions` and start writing assertions immediately. Axiom automatically uses framework-native assertion exception types for xUnit, NUnit, and MSTest when it detects those frameworks at runtime.
+
+You only need a shared setup file if you want custom defaults such as regex timeout, equivalency defaults, modules, comparer providers, formatters, or a non-default failure strategy.
 
 Create `AxiomSetup.cs`:
 
@@ -86,8 +88,6 @@ Create `AxiomSetup.cs`:
 using Axiom.Assertions;
 using Axiom.Assertions.Configuration;
 using Axiom.Assertions.Equivalency;
-using Axiom.Core.Failures;
-
 public static class AxiomSetup
 {
     public static void Apply()
@@ -95,7 +95,6 @@ public static class AxiomSetup
         AxiomSettings.Configure(options =>
         {
             options.Core.RegexMatchTimeout = TimeSpan.FromMilliseconds(500);
-            options.Core.FailureStrategy = XunitFailureStrategy.Instance;
 
             options.Equivalency.CollectionOrder = EquivalencyCollectionOrder.Any;
             options.Equivalency.RequireStrictRuntimeTypes = false;
@@ -106,7 +105,7 @@ public static class AxiomSetup
 }
 ```
 
-Set `options.Core.FailureStrategy` to the strategy that matches your test framework. Call `AxiomSetup.Apply()` once in your test framework's startup hook:
+Call `AxiomSetup.Apply()` once in your test framework's startup hook when you want those shared defaults:
 
 - xUnit: call it in a collection fixture constructor.
 - NUnit: call it from `[SetUpFixture]` + `[OneTimeSetUp]`.
@@ -496,9 +495,9 @@ Failure dispatch is configurable through `IFailureStrategy`.
 - Outside a `Batch`, each failed assertion goes through the configured strategy immediately.
 - Inside a `Batch`, assertion failures are aggregated first; when the root batch is disposed, the combined report goes through the configured strategy.
 
-Default behaviour throws `InvalidOperationException`.
+Default behaviour auto-detects xUnit, NUnit, and MSTest and throws the matching framework-native assertion exception type when one of those frameworks is available. If no supported framework is detected, Axiom falls back to `InvalidOperationException`.
 
-Use this when you want Axiom failures to integrate with your test framework's native assertion exception type (for example xUnit/NUnit/MSTest), or when your team wants a custom exception policy.
+Use explicit failure-strategy configuration when your team wants a custom exception policy, a specific built-in framework strategy, or a deliberate override in projects that reference multiple test frameworks.
 
 Failure flow is:
 
@@ -543,8 +542,8 @@ Each built-in strategy requires the corresponding test framework package to be r
 
 Quick selection guide:
 
-- Keep default `InvalidOperationException`: simplest option, no framework coupling.
-- Use `XunitFailureStrategy` / `NUnitFailureStrategy` / `MSTestFailureStrategy`: framework-native assertion exception types.
+- Keep the default auto-detecting strategy: simplest option for normal xUnit, NUnit, or MSTest test projects.
+- Set `XunitFailureStrategy` / `NUnitFailureStrategy` / `MSTestFailureStrategy` explicitly: useful when you want to force a specific framework strategy.
 - Implement custom `IFailureStrategy`: project-specific exception type or reporting policy.
 
 Use a custom comparer provider when your domain equality rules differ from default `.Equals(...)`. For one-off equivalency rules, prefer per-assertion options such as `UseComparerForType(...)`, `UseComparerForPath(...)`, or `UseComparerForMember(...)`.

@@ -28,12 +28,12 @@ dotnet add package Axiom.Vectors
 
 ## Basic Setup
 
-For most teams, one startup hook is enough.
+For most teams, there is no required setup step. Install `Axiom.Assertions`, write assertions, and Axiom will use native xUnit, NUnit, or MSTest assertion exceptions automatically when it detects those frameworks.
+
+Add shared setup only when you want custom defaults across a test project:
 
 ```csharp
 using Axiom.Assertions.Configuration;
-using Axiom.Core.Failures;
-
 public static class AxiomSetup
 {
     public static void Apply()
@@ -41,7 +41,6 @@ public static class AxiomSetup
         AxiomSettings.Configure(options =>
         {
             options.Core.RegexMatchTimeout = TimeSpan.FromMilliseconds(500);
-            options.Core.FailureStrategy = XunitFailureStrategy.Instance;
 
             options.Equivalency.RequireStrictRuntimeTypes = false;
             options.Equivalency.FailOnMissingMembers = false;
@@ -51,7 +50,7 @@ public static class AxiomSetup
 }
 ```
 
-Call `AxiomSetup.Apply()` once from your test framework startup:
+Call `AxiomSetup.Apply()` once from your test framework startup when you want those shared defaults:
 
 - xUnit: fixture constructor
 - NUnit: `[SetUpFixture]` + `[OneTimeSetUp]`
@@ -71,6 +70,8 @@ using var batch = Assert.Batch("profile");
 user.Name.Should().StartWith("A");
 user.Roles.Should().Contain("admin");
 ```
+
+If you want to override the default failure strategy, shared comparers, formatters, or equivalency defaults later, add an `AxiomSetup.cs` like the one above.
 
 ## Async And Equivalency Examples
 

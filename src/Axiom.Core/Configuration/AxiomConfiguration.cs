@@ -10,7 +10,7 @@ public sealed class AxiomConfiguration
 
     public IComparerProvider ComparerProvider { get; set; } = DefaultComparerProvider.Instance;
     public IValueFormatter ValueFormatter { get; set; } = DefaultValueFormatter.Instance;
-    public IFailureStrategy FailureStrategy { get; set; } = InvalidOperationFailureStrategy.Instance;
+    public IFailureStrategy FailureStrategy { get; set; } = AutoDetectFailureStrategy.Instance;
 
     public TimeSpan RegexMatchTimeout
     {
