@@ -525,6 +525,15 @@ public static class AxiomSetup
 
 Call `AxiomSetup.Apply()` once from your framework startup hook when you want those shared defaults (xUnit fixture, NUnit one-time setup, or MSTest assembly initialise).
 
+You only need setup/configuration when you want custom defaults such as:
+
+- equivalency defaults
+- custom comparer provider
+- custom value formatter
+- custom regex timeout
+- explicit failure-strategy override
+- shared reusable modules
+
 Project-wide configuration:
 
 ```csharp
@@ -541,6 +550,8 @@ AxiomServices.Configure(Action<AxiomConfiguration> configure)
 AxiomServices.Reset()
 AxiomServices.UseModule(IAxiomModule module)
 ```
+
+For shared defaults, prefer `AxiomSettings.Configure(...)`. `AxiomServices.Configure(...)` and `EquivalencyDefaults.Configure(...)` remain available for lower-level or isolated configuration.
 
 Low-level configuration surface:
 

@@ -1,6 +1,6 @@
 # Getting Started
 
-## Which Package Should I Install?
+## Install Axiom.Assertions
 
 Most test projects should install `Axiom.Assertions`.
 
@@ -13,6 +13,34 @@ That gives you:
 - the fluent `Should()` API
 - `Axiom.Core` transitively
 - bundled Axiom analyzers/code fixes
+- framework-native failure behavior by default for xUnit, NUnit, and MSTest
+
+You do not need `AxiomSetup.cs` just to start using Axiom.
+
+## Start Using It
+
+```csharp
+using Axiom.Assertions;
+using Axiom.Core;
+
+user.Name.Should().NotBeNull();
+user.Email.Should().Contain("@");
+user.Age.Should().BeGreaterThan(18);
+
+using var batch = Assert.Batch("profile");
+user.Name.Should().StartWith("A");
+user.Roles.Should().Contain("admin");
+```
+
+That default install path also bundles the Axiom analyzers/code fixes automatically, so common diagnostics light up without a second package.
+
+## Optional Packages
+
+Install `Axiom.Vectors` only when you want vector and embedding-focused assertions:
+
+```bash
+dotnet add package Axiom.Vectors
+```
 
 Install `Axiom.Analyzers` separately only if you want the diagnostics without the runtime assertion library:
 
@@ -20,19 +48,14 @@ Install `Axiom.Analyzers` separately only if you want the diagnostics without th
 dotnet add package Axiom.Analyzers
 ```
 
-Install `Axiom.Vectors` when you want vector and embedding-focused assertions:
-
-```bash
-dotnet add package Axiom.Vectors
-```
-
-## Basic Setup
+## Optional Configuration
 
 For most teams, there is no required setup step. Install `Axiom.Assertions`, write assertions, and Axiom will use native xUnit, NUnit, or MSTest assertion exceptions automatically when it detects those frameworks.
 
 Add shared setup only when you want custom defaults across a test project:
 
 ```csharp
+using System;
 using Axiom.Assertions.Configuration;
 public static class AxiomSetup
 {
@@ -56,22 +79,16 @@ Call `AxiomSetup.Apply()` once from your test framework startup when you want th
 - NUnit: `[SetUpFixture]` + `[OneTimeSetUp]`
 - MSTest: `[AssemblyInitialize]`
 
-## First Assertions
+You only need setup/configuration when you want custom defaults such as:
 
-```csharp
-using Axiom.Assertions;
-using Axiom.Core;
+- equivalency defaults
+- custom comparer provider
+- custom value formatter
+- custom regex timeout
+- explicit failure-strategy override
+- shared reusable modules
 
-user.Name.Should().NotBeNull();
-user.Email.Should().Contain("@");
-user.Age.Should().BeGreaterThan(18);
-
-using var batch = Assert.Batch("profile");
-user.Name.Should().StartWith("A");
-user.Roles.Should().Contain("admin");
-```
-
-If you want to override the default failure strategy, shared comparers, formatters, or equivalency defaults later, add an `AxiomSetup.cs` like the one above.
+For shared defaults, prefer `AxiomSettings.Configure(...)`. `AxiomServices.Configure(...)` and `EquivalencyDefaults.Configure(...)` remain available for lower-level or isolated configuration.
 
 ## Async And Equivalency Examples
 
