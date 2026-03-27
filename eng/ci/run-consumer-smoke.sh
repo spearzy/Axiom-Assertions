@@ -304,6 +304,7 @@ create_plain_smoke_program() {
   cat > Program.cs <<'EOF'
 using System;
 using Axiom.Assertions;
+using Axiom.Assertions.Extensions;
 using AAssert = Axiom.Core.Assert;
 
 "abc".Should().StartWith("a").And.EndWith("c");
@@ -329,9 +330,12 @@ catch (InvalidOperationException ex)
 
 try
 {
-    using var batch = AAssert.Batch("smoke");
-    "abc".Should().StartWith("z");
-    1.Should().BeGreaterThan(5);
+    using (var batch = AAssert.Batch("smoke"))
+    {
+        "abc".Should().StartWith("z");
+        1.Should().BeGreaterThan(5);
+    }
+
     throw new Exception("Expected InvalidOperationException from fallback batch failure strategy.");
 }
 catch (InvalidOperationException ex)
