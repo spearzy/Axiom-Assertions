@@ -499,21 +499,20 @@ For cross-type renames:
 
 ## Configuration And Extensibility
 
-Recommended startup pattern in test projects:
+`Axiom.Assertions` works without startup code. By default, Axiom auto-detects xUnit, NUnit, and MSTest at runtime and uses the matching framework-native assertion exception type. If no supported framework is detected, it falls back to `InvalidOperationException`.
+
+Add shared setup only when you want project-wide defaults:
 
 ```csharp
 // AxiomSetup.cs
 using System;
 using Axiom.Assertions;
-using Axiom.Core.Failures;
-
 public static class AxiomSetup
 {
     public static void Apply()
     {
         AxiomSettings.Configure(options =>
         {
-            options.Core.FailureStrategy = XunitFailureStrategy.Instance;
             options.Core.RegexMatchTimeout = TimeSpan.FromMilliseconds(500);
 
             options.Equivalency.RequireStrictRuntimeTypes = false;
@@ -524,7 +523,7 @@ public static class AxiomSetup
 }
 ```
 
-Call `AxiomSetup.Apply()` once from your framework startup hook (xUnit fixture, NUnit one-time setup, or MSTest assembly initialise).
+Call `AxiomSetup.Apply()` once from your framework startup hook when you want those shared defaults (xUnit fixture, NUnit one-time setup, or MSTest assembly initialise).
 
 Project-wide configuration:
 

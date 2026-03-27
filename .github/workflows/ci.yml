@@ -121,3 +121,6 @@ jobs:
 
       - name: Consumer smoke test (MSTest)
         run: bash eng/ci/run-consumer-smoke.sh "$GITHUB_WORKSPACE/artifacts/packages" mstest
+
+      - name: Consumer smoke test (no framework fallback)
+        run: bash eng/ci/run-consumer-smoke.sh "$GITHUB_WORKSPACE/artifacts/packages" plain

@@ -1,10 +1,17 @@
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Axiom.Core.Failures;
 
 internal static class FrameworkFailureExceptionFactory
 {
+    internal static bool IsAvailable(FrameworkFailureStrategyDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        return TryResolveMessageConstructor(definition, out _);
+    }
+
     internal static Func<string, Exception> Create(FrameworkFailureStrategyDefinition definition)
     {
         ArgumentNullException.ThrowIfNull(definition);
@@ -19,8 +26,7 @@ internal static class FrameworkFailureExceptionFactory
             return _ => new InvalidOperationException(message);
         }
 
-        var messageConstructor = exceptionType.GetConstructor([typeof(string)]);
-        if (messageConstructor is null)
+        if (!TryResolveMessageConstructor(definition, out var messageConstructor))
         {
             var message = string.Format(
                 FailureStrategyMessages.MissingStringConstructorTemplate,
@@ -30,6 +36,21 @@ internal static class FrameworkFailureExceptionFactory
         }
 
         return BuildMessageConstructorFactory(messageConstructor);
+    }
+
+    private static bool TryResolveMessageConstructor(
+        FrameworkFailureStrategyDefinition definition,
+        [NotNullWhen(true)] out ConstructorInfo? messageConstructor)
+    {
+        var exceptionType = ResolveExceptionType(definition.ExceptionTypeName, definition.AssemblyNames);
+        if (exceptionType is null)
+        {
+            messageConstructor = null;
+            return false;
+        }
+
+        messageConstructor = exceptionType.GetConstructor([typeof(string)]);
+        return messageConstructor is not null;
     }
 
     private static Func<string, Exception> BuildMessageConstructorFactory(ConstructorInfo messageConstructor)

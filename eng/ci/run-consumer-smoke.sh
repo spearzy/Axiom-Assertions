@@ -4,7 +4,7 @@ set -euo pipefail
 
 if [[ $# -lt 1 || $# -gt 3 ]]; then
   echo "Usage: $0 <package-source-directory> [axiom-assertions-version|smoke-kind] [smoke-kind]"
-  echo "Smoke kinds: xunit (default), nunit, mstest"
+  echo "Smoke kinds: xunit (default), nunit, mstest, plain"
   exit 1
 fi
 
@@ -14,7 +14,7 @@ smoke_kind="xunit"
 
 if [[ $# -eq 2 ]]; then
   case "$2" in
-    xunit|nunit|mstest)
+    xunit|nunit|mstest|plain)
       smoke_kind="$2"
       ;;
     *)
@@ -26,9 +26,9 @@ elif [[ $# -eq 3 ]]; then
   smoke_kind="$3"
 fi
 
-if [[ "$smoke_kind" != "xunit" && "$smoke_kind" != "nunit" && "$smoke_kind" != "mstest" ]]; then
+if [[ "$smoke_kind" != "xunit" && "$smoke_kind" != "nunit" && "$smoke_kind" != "mstest" && "$smoke_kind" != "plain" ]]; then
   echo "Unsupported smoke kind: $smoke_kind"
-  echo "Supported smoke kinds: xunit, nunit, mstest"
+  echo "Supported smoke kinds: xunit, nunit, mstest, plain"
   exit 1
 fi
 
@@ -120,7 +120,7 @@ public sealed class ConsumerSmokeTests
     [Test]
     public void Batch_AggregatesFailures()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<AssertionException>(() =>
         {
             using var batch = AAssert.Batch("smoke");
             "abc".Should().StartWith("z");
@@ -129,6 +129,15 @@ public sealed class ConsumerSmokeTests
 
         Assert.That(ex, Is.Not.Null);
         Assert.That(ex!.Message, Does.Contain("Batch 'smoke' failed with 2 assertion failure(s):"));
+    }
+
+    [Test]
+    public void DefaultFailureStrategy_UsesNativeAssertionException()
+    {
+        var ex = Assert.Throws<AssertionException>(() => 42.Should().Be(7));
+
+        Assert.That(ex, Is.Not.Null);
+        Assert.That(ex!.Message, Does.Contain("Expected 42 to be 7, but found 42."));
     }
 
     private sealed record UserSnapshot(string Name, int Level);
@@ -181,7 +190,7 @@ public sealed class ConsumerSmokeTests
     [Fact]
     public void Batch_AggregatesFailures()
     {
-        var ex = XAssert.Throws<InvalidOperationException>(() =>
+        var ex = XAssert.Throws<global::Xunit.Sdk.XunitException>(() =>
         {
             using var batch = AAssert.Batch("smoke");
             "abc".Should().StartWith("z");
@@ -189,6 +198,14 @@ public sealed class ConsumerSmokeTests
         });
 
         XAssert.Contains("Batch 'smoke' failed with 2 assertion failure(s):", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DefaultFailureStrategy_UsesNativeAssertionException()
+    {
+        var ex = XAssert.Throws<global::Xunit.Sdk.XunitException>(() => 42.Should().Be(7));
+
+        XAssert.Contains("Expected 42 to be 7, but found 42.", ex.Message, StringComparison.Ordinal);
     }
 
     private sealed record UserSnapshot(string Name, int Level);
@@ -242,25 +259,96 @@ public sealed class ConsumerSmokeTests
     [TestMethod]
     public void Batch_AggregatesFailures()
     {
-        InvalidOperationException? ex = null;
+        AssertFailedException? ex = null;
         try
         {
             using var batch = AAssert.Batch("smoke");
             "abc".Should().StartWith("z");
             1.Should().BeGreaterThan(5);
-            Assert.Fail("Expected InvalidOperationException, but no exception was thrown.");
+            Assert.Fail("Expected AssertFailedException, but no exception was thrown.");
         }
-        catch (InvalidOperationException caught)
+        catch (AssertFailedException caught)
         {
             ex = caught;
         }
 
         Assert.IsNotNull(ex);
-        Assert.Contains("Batch 'smoke' failed with 2 assertion failure(s):", ex.Message);
+        StringAssert.Contains(ex.Message, "Batch 'smoke' failed with 2 assertion failure(s):");
+    }
+
+    [TestMethod]
+    public void DefaultFailureStrategy_UsesNativeAssertionException()
+    {
+        AssertFailedException? ex = null;
+        try
+        {
+            42.Should().Be(7);
+            Assert.Fail("Expected AssertFailedException, but no exception was thrown.");
+        }
+        catch (AssertFailedException caught)
+        {
+            ex = caught;
+        }
+
+        Assert.IsNotNull(ex);
+        StringAssert.Contains(ex.Message, "Expected 42 to be 7, but found 42.");
     }
 
     private sealed record UserSnapshot(string Name, int Level);
 }
+EOF
+}
+
+create_plain_smoke_program() {
+  rm -f Program.cs
+  cat > Program.cs <<'EOF'
+using System;
+using Axiom.Assertions;
+using Axiom.Assertions.Extensions;
+using AAssert = Axiom.Core.Assert;
+
+"abc".Should().StartWith("a").And.EndWith("c");
+42.Should().BeGreaterThan(1).And.BeInRange(40, 50);
+new[] { 1, 2, 3 }.Should().Contain(2).And.NotContain(9);
+
+var equivalencyActual = new UserSnapshot("ollie", 3);
+var equivalencyExpected = new UserSnapshot("ollie", 3);
+equivalencyActual.Should().BeEquivalentTo(equivalencyExpected);
+
+try
+{
+    42.Should().Be(7);
+    throw new Exception("Expected InvalidOperationException from fallback failure strategy.");
+}
+catch (InvalidOperationException ex)
+{
+    if (!ex.Message.Contains("Expected 42 to be 7, but found 42.", StringComparison.Ordinal))
+    {
+        throw new Exception($"Unexpected fallback message: {ex.Message}");
+    }
+}
+
+try
+{
+    using (var batch = AAssert.Batch("smoke"))
+    {
+        "abc".Should().StartWith("z");
+        1.Should().BeGreaterThan(5);
+    }
+
+    throw new Exception("Expected InvalidOperationException from fallback batch failure strategy.");
+}
+catch (InvalidOperationException ex)
+{
+    if (!ex.Message.Contains("Batch 'smoke' failed with 2 assertion failure(s):", StringComparison.Ordinal))
+    {
+        throw new Exception($"Unexpected fallback batch message: {ex.Message}");
+    }
+}
+
+Console.WriteLine("Axiom plain consumer smoke passed.");
+
+file sealed record UserSnapshot(string Name, int Level);
 EOF
 }
 
@@ -273,6 +361,9 @@ case "$smoke_kind" in
     ;;
   mstest)
     dotnet new mstest --framework net10.0 --output "$consumer_project" --no-restore
+    ;;
+  plain)
+    dotnet new console --framework net10.0 --output "$consumer_project" --no-restore
     ;;
 esac
 
@@ -289,7 +380,18 @@ case "$smoke_kind" in
   mstest)
     create_mstest_smoke_tests
     ;;
+  plain)
+    create_plain_smoke_program
+    ;;
 esac
 
 dotnet restore --configfile "$nuget_config" --packages "$local_packages_cache"
-dotnet test --configuration Release --no-restore
+
+case "$smoke_kind" in
+  plain)
+    dotnet run --configuration Release --no-restore
+    ;;
+  *)
+    dotnet test --configuration Release --no-restore
+    ;;
+esac

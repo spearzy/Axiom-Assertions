@@ -115,6 +115,13 @@ jobs:
           "${{ steps.version.outputs.version }}"
           mstest
 
+      - name: Consumer smoke test (no framework fallback)
+        run: >
+          bash eng/ci/run-consumer-smoke.sh
+          "$GITHUB_WORKSPACE/artifacts/packages"
+          "${{ steps.version.outputs.version }}"
+          plain
+
       - name: Consumer analyzer smoke test (bundled)
         run: >
           bash eng/ci/run-assertions-analyzer-smoke.sh
