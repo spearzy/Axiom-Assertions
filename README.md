@@ -21,7 +21,7 @@
 [![Version](https://img.shields.io/nuget/v/Axiom.Vectors?label=version)](https://www.nuget.org/packages/Axiom.Vectors)
 [![Downloads](https://img.shields.io/nuget/dt/Axiom.Vectors?label=downloads)](https://www.nuget.org/packages/Axiom.Vectors)
 
-Axiom is a fluent assertion library for modern .NET tests. It is designed around deterministic failure output, explicit batch aggregation, low pass-path overhead, and configurable equivalency.
+Axiom is a fluent assertion library for modern .NET tests. It is designed around deterministic failure output, explicit batch aggregation, strong equivalency support, low pass-path overhead, and bundled analyzers in the default package.
 
 Target frameworks: `net8.0`, `net9.0`, and `net10.0`.
 
@@ -57,6 +57,12 @@ dotnet add package Axiom.Analyzers
 
 ## Quick Start
 
+Install `Axiom.Assertions` and start writing assertions. You do not need `AxiomSetup.cs` just to get started.
+
+```bash
+dotnet add package Axiom.Assertions
+```
+
 ```csharp
 using Axiom.Assertions;
 using Axiom.Core;
@@ -76,15 +82,35 @@ Example failure output is deterministic and stable:
 Expected user.Email to contain "@", but found "invalid-email".
 ```
 
-## Global Setup
+`Axiom.Assertions` also bundles the Axiom analyzers/code fixes automatically, so the normal install path gives you runtime assertions and diagnostics together.
 
-You can install `Axiom.Assertions` and start writing assertions immediately. Axiom automatically uses framework-native assertion exception types for xUnit, NUnit, and MSTest when it detects those frameworks at runtime.
+## Why Axiom
+
+- Deterministic messages you can rely on in CI, code review, and snapshot-like tests.
+- Explicit multi-assertion aggregation with `Batch` instead of hidden ambient scope behavior.
+- Fluent assertions with straightforward chaining via `.And`.
+- Configurable object equivalency with clear per-call and global defaults.
+- Bundled analyzers in `Axiom.Assertions` by default.
+
+## Optional Configuration
+
+You can install `Axiom.Assertions` and start using `Should()` immediately. Axiom automatically uses framework-native assertion exception types for xUnit, NUnit, and MSTest when it detects those frameworks at runtime.
 
 You only need a shared setup file if you want custom defaults such as regex timeout, equivalency defaults, modules, comparer providers, formatters, or a non-default failure strategy.
+
+Examples of when setup is useful:
+
+- project-wide equivalency defaults
+- custom comparer provider
+- custom value formatter
+- custom regex timeout
+- explicit failure-strategy override
+- shared reusable modules
 
 Create `AxiomSetup.cs`:
 
 ```csharp
+using System;
 using Axiom.Assertions;
 using Axiom.Assertions.Configuration;
 using Axiom.Assertions.Equivalency;
@@ -113,6 +139,8 @@ Call `AxiomSetup.Apply()` once in your test framework's startup hook when you wa
 
 `AxiomServices` and `EquivalencyDefaults` still work and remain fully supported for lower-level or separate configuration flows.
 
+When you do want shared defaults, prefer `AxiomSettings.Configure(...)`. Use `AxiomServices.Configure(...)` and `EquivalencyDefaults.Configure(...)` when you want lower-level or isolated configuration.
+
 If your team reuses the same setup across many test projects, package it as a module:
 
 ```csharp
@@ -129,14 +157,6 @@ public sealed class ApiTestModule : IAxiomSettingsModule
     }
 }
 ```
-
-## Why Axiom
-
-- Deterministic messages you can rely on in CI, code review, and snapshot-like tests.
-- Explicit multi-assertion aggregation with `Batch` instead of hidden ambient scope behavior.
-- Fluent assertions with straightforward chaining via `.And`.
-- Configurable object equivalency with clear per-call and global defaults.
-- Extensibility hooks for custom comparers, value formatters, and modules.
 
 ## Core Workflows
 

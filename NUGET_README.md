@@ -16,6 +16,8 @@ dotnet add package Axiom.Assertions
 
 `Axiom.Assertions` bundles the Axiom analyzers/code fixes automatically, including checks for ignored async Axiom assertions and undisposed `Batch` usage.
 
+Install it and start writing assertions. You do not need `AxiomSetup.cs` just to get started.
+
 Install `Axiom.Analyzers` separately only if you want the diagnostics without the runtime assertion library:
 
 ```bash
@@ -69,40 +71,25 @@ Example deterministic failure output:
 Expected user.Email to contain "@", but found "invalid-email".
 ```
 
-## Global Setup
+## Optional Configuration
 
-You can start using `Axiom.Assertions` immediately after install. Axiom automatically uses framework-native assertion exception types for xUnit, NUnit, and MSTest when it detects those frameworks at runtime.
+Axiom automatically uses framework-native assertion exception types for xUnit, NUnit, and MSTest when it detects those frameworks at runtime.
 
-Add a shared `AxiomSetup.cs` only when you want custom defaults such as equivalency options, regex timeout, comparer providers, formatters, modules, or a non-default failure strategy:
+You only need configuration when you want custom defaults such as:
 
-```csharp
-using Axiom.Assertions;
-using Axiom.Assertions.Configuration;
-using Axiom.Assertions.Equivalency;
-public static class AxiomSetup
-{
-    public static void Apply()
-    {
-        AxiomSettings.Configure(options =>
-        {
-            options.Core.RegexMatchTimeout = TimeSpan.FromMilliseconds(500);
+- equivalency defaults
+- custom comparer provider
+- custom value formatter
+- custom regex timeout
+- explicit failure-strategy override
+- shared reusable modules
 
-            options.Equivalency.CollectionOrder = EquivalencyCollectionOrder.Any;
-            options.Equivalency.RequireStrictRuntimeTypes = false;
-            options.Equivalency.FailOnMissingMembers = false;
-            options.Equivalency.FailOnExtraMembers = false;
-        });
-    }
-}
-```
+For shared defaults, prefer `AxiomSettings.Configure(...)`. `AxiomServices.Configure(...)` and `EquivalencyDefaults.Configure(...)` remain available for lower-level or isolated configuration.
 
-Call `AxiomSetup.Apply()` once from your framework startup hook if you want those shared defaults (xUnit fixture, NUnit one-time setup, or MSTest assembly initialise).
+See the docs site for full setup and customization guidance:
 
-If you package shared defaults for several test projects, use `AxiomSettings.UseModule(...)` with an `IAxiomSettingsModule`:
-
-```csharp
-AxiomSettings.UseModule(new ApiTestModule());
-```
+- [Getting Started](https://spearzy.github.io/Axiom/getting-started/)
+- [Assertion Reference](https://spearzy.github.io/Axiom/assertion-reference/)
 
 ## Core Workflows
 
