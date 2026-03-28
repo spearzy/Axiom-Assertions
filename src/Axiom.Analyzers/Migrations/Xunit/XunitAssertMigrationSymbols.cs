@@ -9,6 +9,10 @@ internal sealed class XunitAssertMigrationSymbols
         INamedTypeSymbol? enumerableType,
         INamedTypeSymbol? genericEnumerableType,
         INamedTypeSymbol? asyncEnumerableType,
+        INamedTypeSymbol? dictionaryType,
+        INamedTypeSymbol? readOnlyDictionaryType,
+        INamedTypeSymbol? nonGenericDictionaryType,
+        INamedTypeSymbol? actionType,
         INamedTypeSymbol? spanType,
         INamedTypeSymbol? readOnlySpanType,
         INamedTypeSymbol? memoryType,
@@ -18,6 +22,10 @@ internal sealed class XunitAssertMigrationSymbols
         EnumerableType = enumerableType;
         GenericEnumerableType = genericEnumerableType;
         AsyncEnumerableType = asyncEnumerableType;
+        DictionaryType = dictionaryType;
+        ReadOnlyDictionaryType = readOnlyDictionaryType;
+        NonGenericDictionaryType = nonGenericDictionaryType;
+        ActionType = actionType;
         SpanType = spanType;
         ReadOnlySpanType = readOnlySpanType;
         MemoryType = memoryType;
@@ -29,6 +37,10 @@ internal sealed class XunitAssertMigrationSymbols
     private INamedTypeSymbol? EnumerableType { get; }
     private INamedTypeSymbol? GenericEnumerableType { get; }
     private INamedTypeSymbol? AsyncEnumerableType { get; }
+    private INamedTypeSymbol? DictionaryType { get; }
+    private INamedTypeSymbol? ReadOnlyDictionaryType { get; }
+    private INamedTypeSymbol? NonGenericDictionaryType { get; }
+    public INamedTypeSymbol? ActionType { get; }
     private INamedTypeSymbol? SpanType { get; }
     private INamedTypeSymbol? ReadOnlySpanType { get; }
     private INamedTypeSymbol? MemoryType { get; }
@@ -43,6 +55,10 @@ internal sealed class XunitAssertMigrationSymbols
             compilation.GetTypeByMetadataName("System.Collections.IEnumerable"),
             compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1"),
             compilation.GetTypeByMetadataName("System.Collections.Generic.IAsyncEnumerable`1"),
+            compilation.GetTypeByMetadataName("System.Collections.Generic.IDictionary`2"),
+            compilation.GetTypeByMetadataName("System.Collections.Generic.IReadOnlyDictionary`2"),
+            compilation.GetTypeByMetadataName("System.Collections.IDictionary"),
+            compilation.GetTypeByMetadataName("System.Action"),
             compilation.GetTypeByMetadataName("System.Span`1"),
             compilation.GetTypeByMetadataName("System.ReadOnlySpan`1"),
             compilation.GetTypeByMetadataName("System.Memory`1"),
@@ -82,6 +98,28 @@ internal sealed class XunitAssertMigrationSymbols
         return ImplementsInterface(type, EnumerableType) || ImplementsInterface(type, GenericEnumerableType);
     }
 
+    public bool IsGenericEnumerableLike(ITypeSymbol type)
+    {
+        if (type.SpecialType == SpecialType.System_String)
+        {
+            return false;
+        }
+
+        if (type is IArrayTypeSymbol)
+        {
+            return true;
+        }
+
+        if (GenericEnumerableType is not null &&
+            type is INamedTypeSymbol namedType &&
+            SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, GenericEnumerableType))
+        {
+            return true;
+        }
+
+        return ImplementsInterface(type, GenericEnumerableType);
+    }
+
     public bool IsAsyncEnumerableLike(ITypeSymbol type)
     {
         if (AsyncEnumerableType is null)
@@ -110,6 +148,29 @@ internal sealed class XunitAssertMigrationSymbols
                SymbolEqualityComparer.Default.Equals(originalDefinition, ReadOnlySpanType) ||
                SymbolEqualityComparer.Default.Equals(originalDefinition, MemoryType) ||
                SymbolEqualityComparer.Default.Equals(originalDefinition, ReadOnlyMemoryType);
+    }
+
+    public bool IsDictionaryLike(ITypeSymbol type)
+    {
+        if (NonGenericDictionaryType is not null &&
+            SymbolEqualityComparer.Default.Equals(type, NonGenericDictionaryType))
+        {
+            return true;
+        }
+
+        if (type is INamedTypeSymbol namedType)
+        {
+            var originalDefinition = namedType.OriginalDefinition;
+            if ((DictionaryType is not null && SymbolEqualityComparer.Default.Equals(originalDefinition, DictionaryType)) ||
+                (ReadOnlyDictionaryType is not null && SymbolEqualityComparer.Default.Equals(originalDefinition, ReadOnlyDictionaryType)))
+            {
+                return true;
+            }
+        }
+
+        return ImplementsInterface(type, NonGenericDictionaryType) ||
+               ImplementsInterface(type, DictionaryType) ||
+               ImplementsInterface(type, ReadOnlyDictionaryType);
     }
 
     private static bool ImplementsInterface(ITypeSymbol type, INamedTypeSymbol? interfaceType)

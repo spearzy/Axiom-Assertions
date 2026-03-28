@@ -30,6 +30,7 @@ trap 'rm -rf "$smoke_root"' EXIT
 consumer_project="$smoke_root/Axiom.Analyzers.Smoke"
 local_packages_cache="$smoke_root/.nuget/packages"
 nuget_config="$smoke_root/NuGet.config"
+error_log="$smoke_root/diagnostics.sarif"
 
 cat > "$nuget_config" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
@@ -47,6 +48,7 @@ dotnet add "$consumer_project/Axiom.Analyzers.Smoke.csproj" package Axiom.Analyz
 
 cat > "$consumer_project/AxiomAssertionStubs.cs" <<'EOF'
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Axiom.Assertions
@@ -71,36 +73,53 @@ namespace Axiom.Assertions.AssertionTypes
         }
     }
 }
-EOF
 
-cat > "$consumer_project/Smoke.cs" <<'EOF'
-using System;
-using System.Threading.Tasks;
-using Axiom.Assertions;
-
-public sealed class Smoke
+namespace Xunit
 {
-    public async Task CheckAsync()
+    public static class Assert
     {
-        Action act = static () => { };
-        act.Should().ThrowAsync<InvalidOperationException>();
+        public static void Contains<T>(T expected, IEnumerable<T> collection)
+        {
+        }
     }
 }
 EOF
 
-set +e
-build_output="$(dotnet build "$consumer_project/Axiom.Analyzers.Smoke.csproj" --configfile "$nuget_config" --packages "$local_packages_cache" -warnaserror:AXM0001 2>&1)"
-build_exit_code=$?
-set -e
+cat > "$consumer_project/Smoke.cs" <<'EOF'
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Axiom.Assertions;
+using Xunit;
+
+public sealed class Smoke
+{
+    public async Task CheckAsync(IEnumerable<int> values, int expected)
+    {
+        Action act = static () => { };
+        act.Should().ThrowAsync<InvalidOperationException>();
+        Assert.Contains(expected, values);
+    }
+}
+EOF
+
+build_output="$(dotnet build "$consumer_project/Axiom.Analyzers.Smoke.csproj" --configfile "$nuget_config" --packages "$local_packages_cache" /p:ErrorLog="$error_log" 2>&1)"
 
 echo "$build_output"
 
-if [[ $build_exit_code -eq 0 ]]; then
-  echo "Expected AXM0001 diagnostic, but the build succeeded."
+if [[ ! -f "$error_log" ]]; then
+  echo "Expected SARIF diagnostics log at $error_log."
   exit 1
 fi
 
-if [[ "$build_output" != *"AXM0001"* ]]; then
-  echo "Expected AXM0001 diagnostic in build output."
+error_log_content="$(cat "$error_log")"
+
+if [[ "$error_log_content" != *"AXM0001"* ]]; then
+  echo "Expected AXM0001 diagnostic in SARIF output."
+  exit 1
+fi
+
+if [[ "$error_log_content" != *"AXM1009"* ]]; then
+  echo "Expected AXM1009 diagnostic in SARIF output."
   exit 1
 fi

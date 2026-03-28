@@ -119,4 +119,5 @@ embedding.Should().HaveCosineSimilarityWith(expected).AtLeast(0.995f);
 - Read the [Equivalency](equivalency.md) guide for object-graph configuration
 - Read [Custom Assertions](custom-assertions.md) when you want domain-specific extensions
 - Read [Analyzers](analyzers.md) for the shipped diagnostics
+- Read [Migrating to Axiom](migrating-to-axiom.md) if you are converting an existing xUnit-style suite
 - Read [Vectors](vectors.md) for embedding-style assertions

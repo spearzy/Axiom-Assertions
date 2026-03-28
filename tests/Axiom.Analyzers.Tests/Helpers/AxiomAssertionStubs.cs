@@ -28,6 +28,8 @@ internal static class AxiomAssertionStubs
                 public AndContinuation<ValueAssertions<T>> NotBe(T unexpected) => default;
                 public AndContinuation<ValueAssertions<T>> BeNull() => default;
                 public AndContinuation<ValueAssertions<T>> NotBeNull() => default;
+                public AndContinuation<ValueAssertions<T>> BeSameAs(T? expectedReference) => default;
+                public AndContinuation<ValueAssertions<T>> NotBeSameAs(T? unexpectedReference) => default;
             }
 
             public sealed class StringAssertions
@@ -51,11 +53,23 @@ internal static class AxiomAssertionStubs
 
             public static class CollectionValueAssertionExtensions
             {
+                public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> Contain<TCollection, TItem>(this Axiom.Assertions.ValueAssertions<TCollection> assertions, TItem expected)
+                    where TCollection : IEnumerable<TItem>
+                    => default;
+
+                public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> NotContain<TCollection, TItem>(this Axiom.Assertions.ValueAssertions<TCollection> assertions, TItem expected)
+                    where TCollection : IEnumerable<TItem>
+                    => default;
+
                 public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> BeEmpty<TCollection>(this Axiom.Assertions.ValueAssertions<TCollection> assertions)
                     where TCollection : IEnumerable
                     => default;
 
                 public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> NotBeEmpty<TCollection>(this Axiom.Assertions.ValueAssertions<TCollection> assertions)
+                    where TCollection : IEnumerable
+                    => default;
+
+                public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> ContainSingle<TCollection>(this Axiom.Assertions.ValueAssertions<TCollection> assertions)
                     where TCollection : IEnumerable
                     => default;
             }
@@ -65,6 +79,7 @@ internal static class AxiomAssertionStubs
         {
             public sealed class AsyncActionAssertions
             {
+                public ThrownExceptionAssertions<AsyncActionAssertions, TException> Throw<TException>() where TException : Exception => default;
                 public ValueTask<ThrownExceptionAssertions<AsyncActionAssertions, TException>> ThrowAsync<TException>() where TException : Exception => default;
                 public ValueTask<AndContinuation<AsyncActionAssertions>> NotThrowAsync() => default;
             }

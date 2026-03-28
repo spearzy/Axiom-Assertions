@@ -78,6 +78,54 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
                 Assert.Equal("Migrate xUnit Assert.NotEmpty to Axiom", rule.Title.ToString());
                 Assert.Equal("xUnit Assert.NotEmpty(...) can be migrated to 'subject.Should().NotBeEmpty()'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1009", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.Contains to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.Contains(...) can be migrated to 'collection.Should().Contain(item)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1010", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.DoesNotContain to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.DoesNotContain(...) can be migrated to 'collection.Should().NotContain(item)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1011", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.Single to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.Single(...) can be migrated to 'subject.Should().ContainSingle()'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1012", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.Same to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.Same(...) can be migrated to 'actual.Should().BeSameAs(expected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1013", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.NotSame to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.NotSame(...) can be migrated to 'actual.Should().NotBeSameAs(expected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1014", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.Throws to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.Throws<TException>(...) can be migrated to an Axiom '.Should().Throw<TException>()' assertion", rule.MessageFormat.ToString());
             });
     }
 
@@ -354,6 +402,290 @@ public sealed class XunitAssertMigrationAnalyzerTests
     }
 
     [Fact]
+    public async Task AssertContains_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(List<int> values, int expected)
+                {
+                    {|AXM1009:Assert.Contains(expected, values)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(List<int> values, int expected)
+                {
+                    values.Should().Contain(expected);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertDoesNotContain_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(List<int> values, int unexpected)
+                {
+                    {|AXM1010:Assert.DoesNotContain(unexpected, values)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(List<int> values, int unexpected)
+                {
+                    values.Should().NotContain(unexpected);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertSingle_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(List<int> values)
+                {
+                    {|AXM1011:Assert.Single(values)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(List<int> values)
+                {
+                    values.Should().ContainSingle();
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertSingle_NonGenericEnumerable_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(ArrayList values)
+                {
+                    {|AXM1011:Assert.Single(values)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(ArrayList values)
+                {
+                    values.Should().ContainSingle();
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertSame_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(object expected, object actual)
+                {
+                    {|AXM1012:Assert.Same(expected, actual)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using Xunit;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(object expected, object actual)
+                {
+                    actual.Should().BeSameAs(expected);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertNotSame_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(object expected, object actual)
+                {
+                    {|AXM1013:Assert.NotSame(expected, actual)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using Xunit;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(object expected, object actual)
+                {
+                    actual.Should().NotBeSameAs(expected);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertThrowsActionVariable_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(Action work)
+                {
+                    {|AXM1014:Assert.Throws<InvalidOperationException>(work)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System;
+            using Xunit;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(Action work)
+                {
+                    new global::System.Action(work).Should().Throw<InvalidOperationException>();
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertThrowsLambda_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check()
+                {
+                    {|AXM1014:Assert.Throws<InvalidOperationException>(() => ThrowNow())|};
+                }
+
+                private static void ThrowNow() => throw new InvalidOperationException();
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System;
+            using Xunit;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check()
+                {
+                    new global::System.Action(() => ThrowNow()).Should().Throw<InvalidOperationException>();
+                }
+
+                private static void ThrowNow() => throw new InvalidOperationException();
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
     public async Task FullyQualifiedXunitAssert_IsFlagged()
     {
         const string source =
@@ -363,6 +695,25 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 public void Check(int expected, int actual)
                 {
                     {|AXM1001:Xunit.Assert.Equal(expected, actual)|};
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task FullyQualifiedXunitAssertContains_IsFlagged()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+
+            public sealed class Sample
+            {
+                public void Check(List<int> values, int expected)
+                {
+                    {|AXM1009:Xunit.Assert.Contains(expected, values)|};
                 }
             }
             """;
@@ -390,6 +741,28 @@ public sealed class XunitAssertMigrationAnalyzerTests
     }
 
     [Fact]
+    public async Task StaticUsingThrows_IsFlagged()
+    {
+        const string source =
+            """
+            using System;
+            using static Xunit.Assert;
+
+            public sealed class Sample
+            {
+                public void Check()
+                {
+                    {|AXM1014:Throws<InvalidOperationException>(() => ThrowNow())|};
+                }
+
+                private static void ThrowNow() => throw new InvalidOperationException();
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
     public async Task NonXunitAssert_IsNotFlagged()
     {
         const string source =
@@ -410,6 +783,192 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 {
                     Assert.Equal(expected, actual);
                 }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task StringContainsOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    Assert.Contains("sub", actual);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task StringDoesNotContainOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    Assert.DoesNotContain("sub", actual);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task DictionaryContainsOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(Dictionary<int, string> values, int key)
+                {
+                    Assert.Contains(key, values);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task DictionaryDoesNotContainOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(Dictionary<int, string> values, int key)
+                {
+                    Assert.DoesNotContain(key, values);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertSingle_ReturnValueUsage_IsNotFlagged()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public int Check(List<int> values)
+                {
+                    var value = Assert.Single(values);
+                    return value;
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertSingle_PredicateOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public int Check(List<int> values)
+                {
+                    return Assert.Single(values, static value => value > 0);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertThrows_ReturnValueUsage_IsNotFlagged()
+    {
+        const string source =
+            """
+            using System;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public InvalidOperationException Check()
+                {
+                    var exception = Assert.Throws<InvalidOperationException>(() => ThrowNow());
+                    return exception;
+                }
+
+                private static void ThrowNow() => throw new InvalidOperationException();
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertThrows_ParamNameOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+            using System;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check()
+                {
+                    Assert.Throws<ArgumentNullException>("name", () => ThrowNow());
+                }
+
+                private static void ThrowNow() => throw new ArgumentNullException("name");
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertThrows_FuncOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+            using System;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check()
+                {
+                    Assert.Throws<InvalidOperationException>(() => GetValue());
+                }
+
+                private static object? GetValue() => throw new InvalidOperationException();
             }
             """;
 
@@ -577,6 +1136,43 @@ public sealed class XunitAssertMigrationAnalyzerTests
     }
 
     [Fact]
+    public async Task CodeFix_AddsExtensionsUsing_ForContainmentMigration()
+    {
+        const string source =
+            """
+            using Axiom.Assertions;
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(List<int> values, int expected)
+                {
+                    {|AXM1009:Assert.Contains(expected, values)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using Axiom.Assertions;
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(List<int> values, int expected)
+                {
+                    values.Should().Contain(expected);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
     public async Task CodeFix_AddsOnlyMissingExtensionsUsing_WhenAxiomUsingAlreadyExists()
     {
         const string source =
@@ -604,6 +1200,44 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 public void Check(bool condition)
                 {
                     condition.Should().BeTrue();
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task MultipleContainAssertions_AreAllFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(List<int> values, int expected, int otherExpected)
+                {
+                    {|AXM1009:Assert.Contains(expected, values)|};
+                    {|AXM1009:Assert.Contains(otherExpected, values)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(List<int> values, int expected, int otherExpected)
+                {
+                    values.Should().Contain(expected);
+                    values.Should().Contain(otherExpected);
                 }
             }
             """;
