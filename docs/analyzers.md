@@ -14,10 +14,11 @@ Install the standalone package only if you want the diagnostics on their own:
 dotnet add package Axiom.Analyzers
 ```
 
-The current rules focus on two high-value Axiom mistakes:
+The current rules focus on three high-value areas:
 
 - ignored async Axiom assertion results
 - `Batch` instances created without `using`
+- high-confidence xUnit `Assert.*` migration suggestions
 
 ## Async Assertions Must Be Awaited
 
@@ -79,3 +80,36 @@ user.Name.Should().NotBeNull();
 `Batch` flushes aggregated failures when it is disposed. If it is created without `using`, failures may never be emitted at the end of the scope.
 
 The analyzer offers a code fix for the common local declaration case by converting `var batch = ...;` to `using var batch = ...;`.
+
+## xUnit Assert Migration Suggestions
+
+Rules:
+
+- `AXM1001` for `Assert.Equal(expected, actual)`
+- `AXM1002` for `Assert.NotEqual(expected, actual)`
+- `AXM1003` for `Assert.Null(value)`
+- `AXM1004` for `Assert.NotNull(value)`
+- `AXM1005` for `Assert.True(condition)`
+- `AXM1006` for `Assert.False(condition)`
+- `AXM1007` for `Assert.Empty(subject)`
+- `AXM1008` for `Assert.NotEmpty(subject)`
+
+This first migration wave is intentionally narrow. It only offers diagnostics and code fixes for high-confidence xUnit assertion shapes that map cleanly to Axiom's fluent API.
+
+Before:
+
+```csharp
+Assert.Equal(expected, actual);
+Assert.True(condition);
+Assert.Empty(values);
+```
+
+After:
+
+```csharp
+actual.Should().Be(expected);
+condition.Should().BeTrue();
+values.Should().BeEmpty();
+```
+
+The migration suggestions use semantic matching, so they only target xUnit's real `Assert` API. They do not flag custom helper classes named `Assert`, and they intentionally skip overloads with extra semantics such as custom comparers, precision, string-comparison options, or other non-trivial behavior that does not map one-to-one in this first wave.

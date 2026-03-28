@@ -15,6 +15,7 @@ internal static class AnalyzerVerifier
         };
 
         test.TestState.Sources.Add(AxiomAssertionStubs.Source);
+        test.TestState.Sources.Add(XunitAssertStubs.Source);
         await test.RunAsync();
     }
 
@@ -29,7 +30,9 @@ internal static class AnalyzerVerifier
         };
 
         test.TestState.Sources.Add(AxiomAssertionStubs.Source);
+        test.TestState.Sources.Add(XunitAssertStubs.Source);
         test.FixedState.Sources.Add(AxiomAssertionStubs.Source);
+        test.FixedState.Sources.Add(XunitAssertStubs.Source);
         await test.RunAsync();
     }
 }
