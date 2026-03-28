@@ -14,7 +14,7 @@ Most test projects should install `Axiom.Assertions`:
 dotnet add package Axiom.Assertions
 ```
 
-`Axiom.Assertions` bundles the Axiom analyzers/code fixes automatically, including checks for ignored async Axiom assertions and undisposed `Batch` usage.
+`Axiom.Assertions` bundles the Axiom analyzers/code fixes automatically, including checks for ignored async Axiom assertions, undisposed `Batch` usage, and a first wave of high-confidence xUnit `Assert.*` migration suggestions.
 
 Install it and start writing assertions. You do not need `AxiomSetup.cs` just to get started.
 
