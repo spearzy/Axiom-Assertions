@@ -80,6 +80,11 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
         var rewrittenRoot = compilationUnit.ReplaceNode(match.InvocationSyntax, replacementExpression);
         rewrittenRoot = AddUsingIfMissing(rewrittenRoot, "Axiom.Assertions");
 
+        if (RequiresSystemNamespace(match, semanticModel))
+        {
+            rewrittenRoot = AddUsingIfMissing(rewrittenRoot, "System");
+        }
+
         if (match.RequiresAssertionsExtensionsNamespace)
         {
             rewrittenRoot = AddUsingIfMissing(rewrittenRoot, "Axiom.Assertions.Extensions");
@@ -145,7 +150,7 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
         var actionExpression = CanUseDirectThrowReceiver(match.SubjectExpression, semanticModel)
             ? PrepareSubjectExpression(match.SubjectExpression)
             : SyntaxFactory.ObjectCreationExpression(
-                SyntaxFactory.ParseTypeName("global::System.Action"),
+                SyntaxFactory.IdentifierName("Action"),
                 SyntaxFactory.ArgumentList(
                     SyntaxFactory.SingletonSeparatedList(
                         SyntaxFactory.Argument(match.SubjectExpression.WithoutTrivia()))),
@@ -189,6 +194,14 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
 
         return SymbolEqualityComparer.Default.Equals(typeInfo.Type, actionType) ||
                SymbolEqualityComparer.Default.Equals(typeInfo.ConvertedType, actionType);
+    }
+
+    private static bool RequiresSystemNamespace(
+        XunitAssertMigrationMatch match,
+        SemanticModel semanticModel)
+    {
+        return match.Spec.Kind is XunitAssertMigrationKind.Throw &&
+               !CanUseDirectThrowReceiver(match.SubjectExpression, semanticModel);
     }
 
     private static ExpressionSyntax PrepareSubjectExpression(ExpressionSyntax subjectExpression)
