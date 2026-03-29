@@ -67,7 +67,13 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        var replacementExpression = BuildReplacementExpression(match)
+        var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+        if (semanticModel is null)
+        {
+            return document;
+        }
+
+        var replacementExpression = BuildReplacementExpression(match, semanticModel)
             .WithTriviaFrom(match.InvocationSyntax)
             .WithAdditionalAnnotations(Formatter.Annotation);
 
@@ -101,11 +107,13 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
                 .WithAdditionalAnnotations(Formatter.Annotation));
     }
 
-    private static ExpressionSyntax BuildReplacementExpression(XunitAssertMigrationMatch match)
+    private static ExpressionSyntax BuildReplacementExpression(
+        XunitAssertMigrationMatch match,
+        SemanticModel semanticModel)
     {
         if (match.Spec.Kind is XunitAssertMigrationKind.Throw)
         {
-            return BuildThrowReplacementExpression(match);
+            return BuildThrowReplacementExpression(match, semanticModel);
         }
 
         var subjectExpression = PrepareSubjectExpression(match.SubjectExpression);
@@ -130,9 +138,13 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
                         SyntaxFactory.Argument(match.ExpectedExpression.WithoutTrivia()))));
     }
 
-    private static ExpressionSyntax BuildThrowReplacementExpression(XunitAssertMigrationMatch match)
+    private static ExpressionSyntax BuildThrowReplacementExpression(
+        XunitAssertMigrationMatch match,
+        SemanticModel semanticModel)
     {
-        var actionObjectCreation = SyntaxFactory.ObjectCreationExpression(
+        var actionExpression = CanUseDirectThrowReceiver(match.SubjectExpression, semanticModel)
+            ? PrepareSubjectExpression(match.SubjectExpression)
+            : SyntaxFactory.ObjectCreationExpression(
                 SyntaxFactory.ParseTypeName("global::System.Action"),
                 SyntaxFactory.ArgumentList(
                     SyntaxFactory.SingletonSeparatedList(
@@ -142,7 +154,7 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
         var shouldInvocation = SyntaxFactory.InvocationExpression(
             SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
-                actionObjectCreation,
+                actionExpression,
                 SyntaxFactory.IdentifierName("Should")),
             SyntaxFactory.ArgumentList());
 
@@ -155,6 +167,28 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
                     SyntaxFactory.SingletonSeparatedList(match.TypeArgumentSyntax!.WithoutTrivia()))));
 
         return SyntaxFactory.InvocationExpression(throwMethod, SyntaxFactory.ArgumentList());
+    }
+
+    private static bool CanUseDirectThrowReceiver(
+        ExpressionSyntax subjectExpression,
+        SemanticModel semanticModel)
+    {
+        var symbolInfo = semanticModel.GetSymbolInfo(subjectExpression);
+        if (symbolInfo.Symbol is IMethodSymbol ||
+            symbolInfo.CandidateSymbols.Any(static symbol => symbol is IMethodSymbol))
+        {
+            return false;
+        }
+
+        var typeInfo = semanticModel.GetTypeInfo(subjectExpression);
+        var actionType = semanticModel.Compilation.GetTypeByMetadataName("System.Action");
+        if (actionType is null)
+        {
+            return false;
+        }
+
+        return SymbolEqualityComparer.Default.Equals(typeInfo.Type, actionType) ||
+               SymbolEqualityComparer.Default.Equals(typeInfo.ConvertedType, actionType);
     }
 
     private static ExpressionSyntax PrepareSubjectExpression(ExpressionSyntax subjectExpression)

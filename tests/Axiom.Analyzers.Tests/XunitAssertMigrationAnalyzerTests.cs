@@ -776,7 +776,7 @@ public sealed class XunitAssertMigrationAnalyzerTests
             {
                 public void Check(Action work)
                 {
-                    new global::System.Action(work).Should().Throw<InvalidOperationException>();
+                    work.Should().Throw<InvalidOperationException>();
                 }
             }
             """;
@@ -814,6 +814,45 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 public void Check()
                 {
                     new global::System.Action(() => ThrowNow()).Should().Throw<InvalidOperationException>();
+                }
+
+                private static void ThrowNow() => throw new InvalidOperationException();
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertThrowsMethodGroup_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check()
+                {
+                    {|AXM1014:Assert.Throws<InvalidOperationException>(ThrowNow)|};
+                }
+
+                private static void ThrowNow() => throw new InvalidOperationException();
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System;
+            using Xunit;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check()
+                {
+                    new global::System.Action(ThrowNow).Should().Throw<InvalidOperationException>();
                 }
 
                 private static void ThrowNow() => throw new InvalidOperationException();
