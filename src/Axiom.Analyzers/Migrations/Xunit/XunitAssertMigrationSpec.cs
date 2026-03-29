@@ -13,6 +13,12 @@ internal enum XunitAssertMigrationKind
     BeFalse,
     BeEmpty,
     NotBeEmpty,
+    Contain,
+    NotContain,
+    ContainSingle,
+    BeSameAs,
+    NotBeSameAs,
+    Throw,
 }
 
 internal sealed class XunitAssertMigrationSpec
@@ -122,6 +128,54 @@ internal static class XunitAssertMigrationSpecs
             "Migrate xUnit Assert.NotEmpty to Axiom",
             "xUnit Assert.NotEmpty(...) can be migrated to 'subject.Should().NotBeEmpty()'",
             "Convert to 'subject.Should().NotBeEmpty()'"),
+        new(
+            AxiomAnalyzerIds.MigrateXunitAssertContains,
+            "Contains",
+            2,
+            XunitAssertMigrationKind.Contain,
+            "Migrate xUnit Assert.Contains to Axiom",
+            "xUnit Assert.Contains(...) can be migrated to 'collection.Should().Contain(item)'",
+            "Convert to 'collection.Should().Contain(item)'"),
+        new(
+            AxiomAnalyzerIds.MigrateXunitAssertDoesNotContain,
+            "DoesNotContain",
+            2,
+            XunitAssertMigrationKind.NotContain,
+            "Migrate xUnit Assert.DoesNotContain to Axiom",
+            "xUnit Assert.DoesNotContain(...) can be migrated to 'collection.Should().NotContain(item)'",
+            "Convert to 'collection.Should().NotContain(item)'"),
+        new(
+            AxiomAnalyzerIds.MigrateXunitAssertSingle,
+            "Single",
+            1,
+            XunitAssertMigrationKind.ContainSingle,
+            "Migrate xUnit Assert.Single to Axiom",
+            "xUnit Assert.Single(...) can be migrated to 'subject.Should().ContainSingle()'",
+            "Convert to 'subject.Should().ContainSingle()'"),
+        new(
+            AxiomAnalyzerIds.MigrateXunitAssertSame,
+            "Same",
+            2,
+            XunitAssertMigrationKind.BeSameAs,
+            "Migrate xUnit Assert.Same to Axiom",
+            "xUnit Assert.Same(...) can be migrated to 'actual.Should().BeSameAs(expected)'",
+            "Convert to 'actual.Should().BeSameAs(expected)'"),
+        new(
+            AxiomAnalyzerIds.MigrateXunitAssertNotSame,
+            "NotSame",
+            2,
+            XunitAssertMigrationKind.NotBeSameAs,
+            "Migrate xUnit Assert.NotSame to Axiom",
+            "xUnit Assert.NotSame(...) can be migrated to 'actual.Should().NotBeSameAs(expected)'",
+            "Convert to 'actual.Should().NotBeSameAs(expected)'"),
+        new(
+            AxiomAnalyzerIds.MigrateXunitAssertThrows,
+            "Throws",
+            1,
+            XunitAssertMigrationKind.Throw,
+            "Migrate xUnit Assert.Throws to Axiom",
+            "xUnit Assert.Throws<TException>(...) can be migrated to an Axiom '.Should().Throw<TException>()' assertion",
+            "Convert to '.Should().Throw<TException>()'"),
     ];
 
     public static ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =

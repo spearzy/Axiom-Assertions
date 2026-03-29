@@ -103,6 +103,11 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
 
     private static ExpressionSyntax BuildReplacementExpression(XunitAssertMigrationMatch match)
     {
+        if (match.Spec.Kind is XunitAssertMigrationKind.Throw)
+        {
+            return BuildThrowReplacementExpression(match);
+        }
+
         var subjectExpression = PrepareSubjectExpression(match.SubjectExpression);
         var shouldInvocation = SyntaxFactory.InvocationExpression(
             SyntaxFactory.MemberAccessExpression(
@@ -123,6 +128,33 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
                 SyntaxFactory.ArgumentList(
                     SyntaxFactory.SingletonSeparatedList(
                         SyntaxFactory.Argument(match.ExpectedExpression.WithoutTrivia()))));
+    }
+
+    private static ExpressionSyntax BuildThrowReplacementExpression(XunitAssertMigrationMatch match)
+    {
+        var actionObjectCreation = SyntaxFactory.ObjectCreationExpression(
+                SyntaxFactory.ParseTypeName("global::System.Action"),
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.Argument(match.SubjectExpression.WithoutTrivia()))),
+                initializer: null);
+
+        var shouldInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                actionObjectCreation,
+                SyntaxFactory.IdentifierName("Should")),
+            SyntaxFactory.ArgumentList());
+
+        var throwMethod = SyntaxFactory.MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            shouldInvocation,
+            SyntaxFactory.GenericName(
+                SyntaxFactory.Identifier("Throw"),
+                SyntaxFactory.TypeArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(match.TypeArgumentSyntax!.WithoutTrivia()))));
+
+        return SyntaxFactory.InvocationExpression(throwMethod, SyntaxFactory.ArgumentList());
     }
 
     private static ExpressionSyntax PrepareSubjectExpression(ExpressionSyntax subjectExpression)
@@ -167,6 +199,11 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
             XunitAssertMigrationKind.BeFalse => "BeFalse",
             XunitAssertMigrationKind.BeEmpty => "BeEmpty",
             XunitAssertMigrationKind.NotBeEmpty => "NotBeEmpty",
+            XunitAssertMigrationKind.Contain => "Contain",
+            XunitAssertMigrationKind.NotContain => "NotContain",
+            XunitAssertMigrationKind.ContainSingle => "ContainSingle",
+            XunitAssertMigrationKind.BeSameAs => "BeSameAs",
+            XunitAssertMigrationKind.NotBeSameAs => "NotBeSameAs",
             _ => throw new ArgumentOutOfRangeException(nameof(kind)),
         };
     }

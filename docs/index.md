@@ -47,6 +47,7 @@ dotnet add package Axiom.Vectors
 - Working with structural comparison: go to [Equivalency](equivalency.md)
 - Building team/domain assertions: go to [Custom Assertions](custom-assertions.md)
 - Using the diagnostics only: go to [Analyzers](analyzers.md)
+- Migrating an existing xUnit-style suite: go to [Migrating to Axiom](migrating-to-axiom.md)
 - Testing embeddings or vector outputs: go to [Vectors](vectors.md)
 
 ## What Axiom Is Good At

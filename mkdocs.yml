@@ -29,6 +29,7 @@ nav:
   - Equivalency: equivalency.md
   - Custom Assertions: custom-assertions.md
   - Analyzers: analyzers.md
+  - Migrating to Axiom: migrating-to-axiom.md
   - Vectors: vectors.md
   - Benchmarks: benchmarks.md
 markdown_extensions:

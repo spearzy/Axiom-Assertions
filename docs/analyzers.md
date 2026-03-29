@@ -93,8 +93,14 @@ Rules:
 - `AXM1006` for `Assert.False(condition)`
 - `AXM1007` for `Assert.Empty(subject)`
 - `AXM1008` for `Assert.NotEmpty(subject)`
+- `AXM1009` for `Assert.Contains(item, collection)`
+- `AXM1010` for `Assert.DoesNotContain(item, collection)`
+- `AXM1011` for `Assert.Single(subject)` when the return value is not consumed
+- `AXM1012` for `Assert.Same(expected, actual)`
+- `AXM1013` for `Assert.NotSame(expected, actual)`
+- `AXM1014` for `Assert.Throws<TException>(...)` when the returned exception is not consumed
 
-This first migration wave is intentionally narrow. It only offers diagnostics and code fixes for high-confidence xUnit assertion shapes that map cleanly to Axiom's fluent API.
+The migration support is intentionally narrow and high-confidence. It only offers diagnostics and code fixes for xUnit assertion shapes that map cleanly to Axiom's fluent API without changing value flow or subtle overload semantics.
 
 Before:
 
@@ -102,6 +108,8 @@ Before:
 Assert.Equal(expected, actual);
 Assert.True(condition);
 Assert.Empty(values);
+Assert.Contains(expected, values);
+Assert.Throws<InvalidOperationException>(() => work());
 ```
 
 After:
@@ -110,6 +118,18 @@ After:
 actual.Should().Be(expected);
 condition.Should().BeTrue();
 values.Should().BeEmpty();
+values.Should().Contain(expected);
+new Action(() => work()).Should().Throw<InvalidOperationException>();
 ```
 
-The migration suggestions use semantic matching, so they only target xUnit's real `Assert` API. They do not flag custom helper classes named `Assert`, and they intentionally skip overloads with extra semantics such as custom comparers, precision, string-comparison options, or other non-trivial behavior that does not map one-to-one in this first wave.
+The migration suggestions use semantic matching, so they only target xUnit's real `Assert` API. They do not flag custom helper classes named `Assert`.
+
+They also intentionally skip shapes that are not obviously semantics-preserving yet, including:
+
+- overloads with custom comparers, precision, inspectors, or user messages
+- `Assert.Contains` and `Assert.DoesNotContain` string overloads
+- dictionary-key containment overloads
+- `Assert.Single(...)` when the returned item is consumed
+- `Assert.Throws<TException>(...)` when the returned exception is consumed
+
+For a broader mapping table and practical migration notes, see [Migrating to Axiom](migrating-to-axiom.md).

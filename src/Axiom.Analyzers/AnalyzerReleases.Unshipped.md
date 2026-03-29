@@ -10,3 +10,9 @@ AXM1005 | Migration | Info | Suggest migrating xUnit Assert.True(condition) to c
 AXM1006 | Migration | Info | Suggest migrating xUnit Assert.False(condition) to condition.Should().BeFalse().
 AXM1007 | Migration | Info | Suggest migrating xUnit Assert.Empty(subject) to subject.Should().BeEmpty().
 AXM1008 | Migration | Info | Suggest migrating xUnit Assert.NotEmpty(subject) to subject.Should().NotBeEmpty().
+AXM1009 | Migration | Info | Suggest migrating xUnit Assert.Contains(item, collection) to collection.Should().Contain(item).
+AXM1010 | Migration | Info | Suggest migrating xUnit Assert.DoesNotContain(item, collection) to collection.Should().NotContain(item).
+AXM1011 | Migration | Info | Suggest migrating xUnit Assert.Single(subject) to subject.Should().ContainSingle().
+AXM1012 | Migration | Info | Suggest migrating xUnit Assert.Same(expected, actual) to actual.Should().BeSameAs(expected).
+AXM1013 | Migration | Info | Suggest migrating xUnit Assert.NotSame(expected, actual) to actual.Should().NotBeSameAs(expected).
+AXM1014 | Migration | Info | Suggest migrating xUnit Assert.Throws<TException>(...) to an Axiom .Should().Throw<TException>() assertion when the result is not consumed.

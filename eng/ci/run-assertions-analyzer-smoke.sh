@@ -33,6 +33,7 @@ trap 'rm -rf "$smoke_root"' EXIT
 consumer_project="$smoke_root/Axiom.Assertions.Analyzers.Smoke"
 local_packages_cache="$smoke_root/.nuget/packages"
 nuget_config="$smoke_root/NuGet.config"
+error_log="$smoke_root/diagnostics.sarif"
 
 cat > "$nuget_config" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
@@ -51,32 +52,49 @@ dotnet add package Axiom.Assertions --version "$package_version" --source "$pack
 
 cat > Smoke.cs <<'EOF'
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Axiom.Assertions;
+using Xunit;
+
+namespace Xunit
+{
+    public static class Assert
+    {
+        public static void Contains<T>(T expected, IEnumerable<T> collection)
+        {
+        }
+    }
+}
 
 public sealed class Smoke
 {
-    public async Task CheckAsync()
+    public async Task CheckAsync(IEnumerable<int> values, int expected)
     {
         Func<Task> work = async () => await Task.Yield();
         work.Should().NotThrowAsync();
+        Assert.Contains(expected, values);
     }
 }
 EOF
 
-set +e
-build_output="$(dotnet build Axiom.Assertions.Analyzers.Smoke.csproj --configfile "$nuget_config" --packages "$local_packages_cache" -warnaserror:AXM0001 2>&1)"
-build_exit_code=$?
-set -e
+build_output="$(dotnet build Axiom.Assertions.Analyzers.Smoke.csproj --configfile "$nuget_config" --packages "$local_packages_cache" /p:ErrorLog="$error_log" 2>&1)"
 
 echo "$build_output"
 
-if [[ $build_exit_code -eq 0 ]]; then
-  echo "Expected AXM0001 diagnostic from the Axiom.Assertions package, but the build succeeded."
+if [[ ! -f "$error_log" ]]; then
+  echo "Expected SARIF diagnostics log at $error_log."
   exit 1
 fi
 
-if [[ "$build_output" != *"AXM0001"* ]]; then
-  echo "Expected AXM0001 diagnostic in build output."
+error_log_content="$(cat "$error_log")"
+
+if [[ "$error_log_content" != *"AXM0001"* ]]; then
+  echo "Expected AXM0001 diagnostic in SARIF output."
+  exit 1
+fi
+
+if [[ "$error_log_content" != *"AXM1009"* ]]; then
+  echo "Expected AXM1009 diagnostic in SARIF output."
   exit 1
 fi

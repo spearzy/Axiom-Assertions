@@ -4,6 +4,7 @@ internal static class XunitAssertStubs
 {
     public const string Source =
         """
+        using System;
         using System.Collections;
         using System.Collections.Generic;
 
@@ -41,6 +42,25 @@ internal static class XunitAssertStubs
                 public static void NotEmpty(IEnumerable collection) { }
                 public static void NotEmpty(string value) { }
                 public static void NotEmpty<T>(IAsyncEnumerable<T> value) { }
+
+                public static void Contains<T>(T expected, IEnumerable<T> collection) { }
+                public static void Contains(string expectedSubstring, string actualString) { }
+                public static void Contains<TKey, TValue>(TKey expected, IDictionary<TKey, TValue> collection) { }
+
+                public static void DoesNotContain<T>(T expected, IEnumerable<T> collection) { }
+                public static void DoesNotContain(string expectedSubstring, string actualString) { }
+                public static void DoesNotContain<TKey, TValue>(TKey expected, IDictionary<TKey, TValue> collection) { }
+
+                public static T Single<T>(IEnumerable<T> collection) => default!;
+                public static object Single(IEnumerable collection) => default!;
+                public static T Single<T>(IEnumerable<T> collection, Predicate<T> predicate) => default!;
+
+                public static void Same(object? expected, object? actual) { }
+                public static void NotSame(object? expected, object? actual) { }
+
+                public static T Throws<T>(Action testCode) where T : Exception => default!;
+                public static T Throws<T>(Func<object?> testCode) where T : Exception => default!;
+                public static T Throws<T>(string? paramName, Action testCode) where T : Exception => default!;
             }
         }
         """;
