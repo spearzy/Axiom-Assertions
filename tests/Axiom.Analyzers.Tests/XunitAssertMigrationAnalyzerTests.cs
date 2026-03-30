@@ -126,6 +126,14 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
                 Assert.Equal("Migrate xUnit Assert.Throws to Axiom", rule.Title.ToString());
                 Assert.Equal("xUnit Assert.Throws<TException>(...) can be migrated to an Axiom '.Should().Throw<TException>()' assertion", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1015", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.IsType to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.IsType<T>(...) can be migrated to 'value.Should().BeOfType<T>()'", rule.MessageFormat.ToString());
             });
     }
 
@@ -901,6 +909,98 @@ public sealed class XunitAssertMigrationAnalyzerTests
     }
 
     [Fact]
+    public async Task AssertIsType_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(object actual)
+                {
+                    {|AXM1015:Assert.IsType<string>(actual)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using Xunit;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(object actual)
+                {
+                    actual.Should().BeOfType<string>();
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertIsType_StringActual_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    Assert.IsType<string>(actual);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertIsType_NonGenericOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+            using System;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(object actual)
+                {
+                    Assert.IsType(typeof(string), actual);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertIsType_ResultIsConsumed_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public string Check(object actual)
+                {
+                    var typed = Assert.IsType<string>(actual);
+                    return typed;
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
     public async Task FullyQualifiedXunitAssert_IsFlagged()
     {
         const string source =
@@ -910,6 +1010,23 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 public void Check(int expected, int actual)
                 {
                     {|AXM1001:Xunit.Assert.Equal(expected, actual)|};
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task FullyQualifiedXunitAssertIsType_IsFlagged()
+    {
+        const string source =
+            """
+            public sealed class Sample
+            {
+                public void Check(object actual)
+                {
+                    {|AXM1015:Xunit.Assert.IsType<string>(actual)|};
                 }
             }
             """;

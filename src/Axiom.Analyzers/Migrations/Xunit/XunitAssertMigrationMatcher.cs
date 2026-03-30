@@ -66,7 +66,8 @@ internal static class XunitAssertMigrationMatcher
         var expectedExpression = GetExpectedExpression(spec.Kind, arguments);
         var typeArgumentSyntax = GetTypeArgumentSyntax(spec.Kind, invocationSyntax);
 
-        if (spec.Kind is XunitAssertMigrationKind.Throw && typeArgumentSyntax is null)
+        if (spec.Kind is XunitAssertMigrationKind.Throw or XunitAssertMigrationKind.BeOfType &&
+            typeArgumentSyntax is null)
         {
             return false;
         }
@@ -134,6 +135,9 @@ internal static class XunitAssertMigrationMatcher
 
             case XunitAssertMigrationKind.Throw:
                 return IsSupportedThrowsOverload(method, symbols);
+
+            case XunitAssertMigrationKind.BeOfType:
+                return IsSupportedIsTypeOverload(invocation, symbols);
 
             default:
                 return false;
@@ -249,6 +253,23 @@ internal static class XunitAssertMigrationMatcher
                SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, symbols.ActionType);
     }
 
+    private static bool IsSupportedIsTypeOverload(
+        IInvocationOperation invocation,
+        XunitAssertMigrationSymbols symbols)
+    {
+        var method = invocation.TargetMethod;
+        if (!method.IsGenericMethod ||
+            method.TypeArguments.Length != 1 ||
+            method.Parameters.Length != 1 ||
+            invocation.Arguments.Length != 1)
+        {
+            return false;
+        }
+
+        var subjectType = GetArgumentType(invocation.Arguments[0]);
+        return subjectType is not null && symbols.SupportsTypeAssertionMigrationReceiver(subjectType);
+    }
+
     private static ExpressionSyntax GetSubjectExpression(
         XunitAssertMigrationKind kind,
         SeparatedSyntaxList<ArgumentSyntax> arguments)
@@ -277,7 +298,7 @@ internal static class XunitAssertMigrationMatcher
         XunitAssertMigrationKind kind,
         InvocationExpressionSyntax invocationSyntax)
     {
-        if (kind is not XunitAssertMigrationKind.Throw)
+        if (kind is not XunitAssertMigrationKind.Throw and not XunitAssertMigrationKind.BeOfType)
         {
             return null;
         }

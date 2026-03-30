@@ -185,6 +185,11 @@ internal sealed class XunitAssertMigrationSymbols
         return !UsesSpecializedShouldReceiver(type);
     }
 
+    public bool SupportsTypeAssertionMigrationReceiver(ITypeSymbol type)
+    {
+        return !UsesSpecializedShouldReceiver(type);
+    }
+
     private bool UsesSpecializedShouldReceiver(ITypeSymbol type)
     {
         if (ActionType is not null &&
