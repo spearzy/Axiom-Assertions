@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -40,53 +41,71 @@ internal static class XunitAssertMigrationMatcher
     {
         match = null!;
 
+        // Stop early unless this is a normal xUnit Assert call.
         if (!symbols.IsEnabled ||
             invocation.Syntax is not InvocationExpressionSyntax invocationSyntax ||
-            !symbols.IsXunitAssert(invocation.TargetMethod.ContainingType) ||
-            !XunitAssertMigrationSpecs.TryGetByMethodName(invocation.TargetMethod.Name, out var spec))
+            !symbols.IsXunitAssert(invocation.TargetMethod.ContainingType))
         {
             return false;
         }
 
-        if (invocation.TargetMethod.Parameters.Length != spec.RequiredArgumentCount ||
-            invocation.Arguments.Length != spec.RequiredArgumentCount ||
-            invocationSyntax.ArgumentList.Arguments.Count != spec.RequiredArgumentCount ||
-            !HasOnlyPositionalArguments(invocationSyntax))
+        // We only rewrite simple positional calls for now.
+        if (!HasOnlyPositionalArguments(invocationSyntax))
         {
             return false;
         }
 
-        if (!IsSafeSupportedOverload(invocation, spec, symbols))
+        // One xUnit method name can map to more than one migration rule. `Contains(...)` is the
+        // main example: collection containment and string containment use the same method name.
+        foreach (var spec in XunitAssertMigrationSpecs.GetByMethodName(invocation.TargetMethod.Name))
         {
-            return false;
+            // If the basic shape does not match this rule, try the next rule.
+            if (invocation.TargetMethod.Parameters.Length != spec.RequiredArgumentCount ||
+                invocation.Arguments.Length != spec.RequiredArgumentCount ||
+                invocationSyntax.ArgumentList.Arguments.Count != spec.RequiredArgumentCount)
+            {
+                continue;
+            }
+
+            // Each rule has its own safety check. If this call is not a clean fit, keep looking.
+            if (!IsSafeSupportedOverload(invocation, spec, symbols))
+            {
+                continue;
+            }
+
+            // Pull out the parts the code fix needs: the receiver, the expected value, and any
+            // generic type argument.
+            var arguments = invocationSyntax.ArgumentList.Arguments;
+            var subjectExpression = GetSubjectExpression(spec.Kind, arguments);
+            var expectedExpression = GetExpectedExpression(spec.Kind, arguments);
+            var typeArgumentSyntax = GetTypeArgumentSyntax(spec.Kind, invocationSyntax);
+
+            // Some fixes only make sense for generic source calls.
+            if (spec.Kind is XunitAssertMigrationKind.Throw or XunitAssertMigrationKind.BeOfType or XunitAssertMigrationKind.BeAssignableTo &&
+                typeArgumentSyntax is null)
+            {
+                continue;
+            }
+
+            match = new XunitAssertMigrationMatch(
+                spec,
+                invocationSyntax,
+                subjectExpression,
+                expectedExpression,
+                typeArgumentSyntax,
+                RequiresAssertionsExtensionsNamespace(spec.Kind, GetSubjectType(spec.Kind, invocation.TargetMethod.Parameters)));
+
+            return true;
         }
 
-        var arguments = invocationSyntax.ArgumentList.Arguments;
-        var subjectExpression = GetSubjectExpression(spec.Kind, arguments);
-        var expectedExpression = GetExpectedExpression(spec.Kind, arguments);
-        var typeArgumentSyntax = GetTypeArgumentSyntax(spec.Kind, invocationSyntax);
-
-        if (spec.Kind is XunitAssertMigrationKind.Throw or XunitAssertMigrationKind.BeOfType or XunitAssertMigrationKind.BeAssignableTo &&
-            typeArgumentSyntax is null)
-        {
-            return false;
-        }
-
-        match = new XunitAssertMigrationMatch(
-            spec,
-            invocationSyntax,
-            subjectExpression,
-            expectedExpression,
-            typeArgumentSyntax,
-            RequiresAssertionsExtensionsNamespace(spec.Kind, invocation.TargetMethod.Parameters[0].Type));
-
-        return true;
+        return false;
     }
 
     private static bool HasOnlyPositionalArguments(InvocationExpressionSyntax invocationSyntax)
     {
         foreach (var argument in invocationSyntax.ArgumentList.Arguments)
         {
+            // Named arguments and ref/out arguments need a different rewrite path.
             if (argument.NameColon is not null ||
                 !argument.RefKindKeyword.IsKind(SyntaxKind.None))
             {
@@ -102,6 +121,7 @@ internal static class XunitAssertMigrationMatcher
         XunitAssertMigrationSpec spec,
         XunitAssertMigrationSymbols symbols)
     {
+        // Pick the safety check that matches the rule we are trying to apply.
         var method = invocation.TargetMethod;
 
         switch (spec.Kind)
@@ -125,6 +145,10 @@ internal static class XunitAssertMigrationMatcher
             case XunitAssertMigrationKind.Contain:
             case XunitAssertMigrationKind.NotContain:
                 return IsSupportedCollectionContainmentOverload(method, symbols);
+
+            case XunitAssertMigrationKind.ContainSubstring:
+            case XunitAssertMigrationKind.NotContainSubstring:
+                return IsSupportedStringContainmentOverload(invocation, symbols);
 
             case XunitAssertMigrationKind.ContainSingle:
                 return IsSupportedSingleOverload(method, symbols);
@@ -170,6 +194,8 @@ internal static class XunitAssertMigrationMatcher
 
     private static ITypeSymbol? GetArgumentType(IArgumentOperation argument)
     {
+        // Roslyn keeps conversions as separate nodes. We usually want the original expression type,
+        // not the final parameter type after conversion.
         var operation = argument.Value;
         while (operation is IConversionOperation conversion)
         {
@@ -227,6 +253,26 @@ internal static class XunitAssertMigrationMatcher
         return symbols.IsGenericEnumerableLike(collectionType) &&
                !symbols.IsAsyncEnumerableLike(collectionType) &&
                !symbols.IsDictionaryLike(collectionType);
+    }
+
+    private static bool IsSupportedStringContainmentOverload(
+        IInvocationOperation invocation,
+        XunitAssertMigrationSymbols symbols)
+    {
+        var method = invocation.TargetMethod;
+        // First make sure xUnit picked the simple string/string overload.
+        if (method.Parameters.Length != 2 ||
+            method.Parameters[0].Type.SpecialType != SpecialType.System_String ||
+            method.Parameters[1].Type.SpecialType != SpecialType.System_String ||
+            invocation.Arguments.Length != 2)
+        {
+            return false;
+        }
+
+        // Then make sure the source expression itself is really a string. This avoids producing
+        // wrapper.Should().Contain(...) when xUnit only got here through an implicit conversion.
+        var subjectType = GetArgumentType(invocation.Arguments[1]);
+        return subjectType is not null && symbols.SupportsStringContainmentMigrationReceiver(subjectType);
     }
 
     private static bool IsSupportedSingleOverload(
@@ -293,14 +339,33 @@ internal static class XunitAssertMigrationMatcher
     private static ExpressionSyntax GetSubjectExpression(
         XunitAssertMigrationKind kind,
         SeparatedSyntaxList<ArgumentSyntax> arguments)
+        // xUnit does not always put the future fluent receiver in the same argument position.
+        // This helper hides that detail from the code fix.
         => kind is XunitAssertMigrationKind.Be or
                  XunitAssertMigrationKind.NotBe or
                  XunitAssertMigrationKind.Contain or
                  XunitAssertMigrationKind.NotContain or
+                 XunitAssertMigrationKind.ContainSubstring or
+                 XunitAssertMigrationKind.NotContainSubstring or
                  XunitAssertMigrationKind.BeSameAs or
                  XunitAssertMigrationKind.NotBeSameAs
             ? arguments[1].Expression
             : arguments[0].Expression;
+
+    private static ITypeSymbol GetSubjectType(
+        XunitAssertMigrationKind kind,
+        ImmutableArray<IParameterSymbol> parameters)
+        // This is only used when deciding which using directives the fix needs.
+        => kind is XunitAssertMigrationKind.Be or
+                 XunitAssertMigrationKind.NotBe or
+                 XunitAssertMigrationKind.Contain or
+                 XunitAssertMigrationKind.NotContain or
+                 XunitAssertMigrationKind.ContainSubstring or
+                 XunitAssertMigrationKind.NotContainSubstring or
+                 XunitAssertMigrationKind.BeSameAs or
+                 XunitAssertMigrationKind.NotBeSameAs
+            ? parameters[1].Type
+            : parameters[0].Type;
 
     private static ExpressionSyntax? GetExpectedExpression(
         XunitAssertMigrationKind kind,
@@ -310,7 +375,9 @@ internal static class XunitAssertMigrationMatcher
                  XunitAssertMigrationKind.BeSameAs or
                  XunitAssertMigrationKind.NotBeSameAs or
                  XunitAssertMigrationKind.Contain or
-                 XunitAssertMigrationKind.NotContain
+                 XunitAssertMigrationKind.NotContain or
+                 XunitAssertMigrationKind.ContainSubstring or
+                 XunitAssertMigrationKind.NotContainSubstring
             ? arguments[0].Expression
             : null;
 
@@ -318,6 +385,7 @@ internal static class XunitAssertMigrationMatcher
         XunitAssertMigrationKind kind,
         InvocationExpressionSyntax invocationSyntax)
     {
+        // Only generic source calls give us a type argument to copy into the Axiom call.
         if (kind is not XunitAssertMigrationKind.Throw and not XunitAssertMigrationKind.BeOfType and not XunitAssertMigrationKind.BeAssignableTo)
         {
             return null;
@@ -340,14 +408,18 @@ internal static class XunitAssertMigrationMatcher
         XunitAssertMigrationKind kind,
         ITypeSymbol subjectType)
     {
+        // Some generated calls need `Axiom.Assertions.Extensions`; others do not. This tells the
+        // code fix which using directive to add.
         return kind switch
         {
             XunitAssertMigrationKind.BeTrue => true,
             XunitAssertMigrationKind.BeFalse => true,
             XunitAssertMigrationKind.BeEmpty => subjectType.SpecialType != SpecialType.System_String,
             XunitAssertMigrationKind.NotBeEmpty => subjectType.SpecialType != SpecialType.System_String,
-            XunitAssertMigrationKind.Contain => true,
-            XunitAssertMigrationKind.NotContain => true,
+            XunitAssertMigrationKind.Contain => subjectType.SpecialType != SpecialType.System_String,
+            XunitAssertMigrationKind.NotContain => subjectType.SpecialType != SpecialType.System_String,
+            XunitAssertMigrationKind.ContainSubstring => false,
+            XunitAssertMigrationKind.NotContainSubstring => false,
             XunitAssertMigrationKind.ContainSingle => true,
             _ => false,
         };

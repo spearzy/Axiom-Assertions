@@ -255,6 +255,8 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
             XunitAssertMigrationKind.NotBeEmpty => "NotBeEmpty",
             XunitAssertMigrationKind.Contain => "Contain",
             XunitAssertMigrationKind.NotContain => "NotContain",
+            XunitAssertMigrationKind.ContainSubstring => "Contain",
+            XunitAssertMigrationKind.NotContainSubstring => "NotContain",
             XunitAssertMigrationKind.ContainSingle => "ContainSingle",
             XunitAssertMigrationKind.BeSameAs => "BeSameAs",
             XunitAssertMigrationKind.NotBeSameAs => "NotBeSameAs",
