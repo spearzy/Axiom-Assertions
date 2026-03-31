@@ -20,6 +20,7 @@ internal enum XunitAssertMigrationKind
     NotBeSameAs,
     Throw,
     BeOfType,
+    BeAssignableTo,
 }
 
 internal sealed class XunitAssertMigrationSpec
@@ -185,6 +186,14 @@ internal static class XunitAssertMigrationSpecs
             "Migrate xUnit Assert.IsType to Axiom",
             "xUnit Assert.IsType<T>(...) can be migrated to 'value.Should().BeOfType<T>()'",
             "Convert to 'value.Should().BeOfType<T>()'"),
+        new(
+            AxiomAnalyzerIds.MigrateXunitAssertIsAssignableFrom,
+            "IsAssignableFrom",
+            1,
+            XunitAssertMigrationKind.BeAssignableTo,
+            "Migrate xUnit Assert.IsAssignableFrom to Axiom",
+            "xUnit Assert.IsAssignableFrom<T>(...) can be migrated to 'value.Should().BeAssignableTo<T>()'",
+            "Convert to 'value.Should().BeAssignableTo<T>()'"),
     ];
 
     public static ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =

@@ -66,7 +66,7 @@ internal static class XunitAssertMigrationMatcher
         var expectedExpression = GetExpectedExpression(spec.Kind, arguments);
         var typeArgumentSyntax = GetTypeArgumentSyntax(spec.Kind, invocationSyntax);
 
-        if (spec.Kind is XunitAssertMigrationKind.Throw or XunitAssertMigrationKind.BeOfType &&
+        if (spec.Kind is XunitAssertMigrationKind.Throw or XunitAssertMigrationKind.BeOfType or XunitAssertMigrationKind.BeAssignableTo &&
             typeArgumentSyntax is null)
         {
             return false;
@@ -138,6 +138,9 @@ internal static class XunitAssertMigrationMatcher
 
             case XunitAssertMigrationKind.BeOfType:
                 return IsSupportedIsTypeOverload(invocation, symbols);
+
+            case XunitAssertMigrationKind.BeAssignableTo:
+                return IsSupportedIsAssignableFromOverload(invocation, symbols);
 
             default:
                 return false;
@@ -270,6 +273,23 @@ internal static class XunitAssertMigrationMatcher
         return subjectType is not null && symbols.SupportsTypeAssertionMigrationReceiver(subjectType);
     }
 
+    private static bool IsSupportedIsAssignableFromOverload(
+        IInvocationOperation invocation,
+        XunitAssertMigrationSymbols symbols)
+    {
+        var method = invocation.TargetMethod;
+        if (!method.IsGenericMethod ||
+            method.TypeArguments.Length != 1 ||
+            method.Parameters.Length != 1 ||
+            invocation.Arguments.Length != 1)
+        {
+            return false;
+        }
+
+        var subjectType = GetArgumentType(invocation.Arguments[0]);
+        return subjectType is not null && symbols.SupportsTypeAssertionMigrationReceiver(subjectType);
+    }
+
     private static ExpressionSyntax GetSubjectExpression(
         XunitAssertMigrationKind kind,
         SeparatedSyntaxList<ArgumentSyntax> arguments)
@@ -298,7 +318,7 @@ internal static class XunitAssertMigrationMatcher
         XunitAssertMigrationKind kind,
         InvocationExpressionSyntax invocationSyntax)
     {
-        if (kind is not XunitAssertMigrationKind.Throw and not XunitAssertMigrationKind.BeOfType)
+        if (kind is not XunitAssertMigrationKind.Throw and not XunitAssertMigrationKind.BeOfType and not XunitAssertMigrationKind.BeAssignableTo)
         {
             return null;
         }

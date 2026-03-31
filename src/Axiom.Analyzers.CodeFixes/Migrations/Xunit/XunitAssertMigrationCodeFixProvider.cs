@@ -259,6 +259,7 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
             XunitAssertMigrationKind.BeSameAs => "BeSameAs",
             XunitAssertMigrationKind.NotBeSameAs => "NotBeSameAs",
             XunitAssertMigrationKind.BeOfType => "BeOfType",
+            XunitAssertMigrationKind.BeAssignableTo => "BeAssignableTo",
             _ => throw new ArgumentOutOfRangeException(nameof(kind)),
         };
     }
