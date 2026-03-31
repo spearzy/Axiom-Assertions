@@ -57,6 +57,10 @@ internal static class XunitAssertStubs
 
                 public static void Same(object? expected, object? actual) { }
                 public static void NotSame(object? expected, object? actual) { }
+                public static T IsType<T>(object? value) => default!;
+                public static object IsType(Type expectedType, object? value) => default!;
+                public static T IsAssignableFrom<T>(object? value) => default!;
+                public static object IsAssignableFrom(Type expectedType, object? value) => default!;
 
                 public static T Throws<T>(Action testCode) where T : Exception => default!;
                 public static T Throws<T>(Func<object?> testCode) where T : Exception => default!;

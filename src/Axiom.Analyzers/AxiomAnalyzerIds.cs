@@ -18,4 +18,6 @@ public static class AxiomAnalyzerIds
     public const string MigrateXunitAssertSame = "AXM1012";
     public const string MigrateXunitAssertNotSame = "AXM1013";
     public const string MigrateXunitAssertThrows = "AXM1014";
+    public const string MigrateXunitAssertIsType = "AXM1015";
+    public const string MigrateXunitAssertIsAssignableFrom = "AXM1016";
 }

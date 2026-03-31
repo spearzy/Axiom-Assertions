@@ -129,10 +129,17 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
                 SyntaxFactory.IdentifierName("Should")),
             SyntaxFactory.ArgumentList());
 
+        var assertionMethodName = match.TypeArgumentSyntax is null
+            ? (SimpleNameSyntax)SyntaxFactory.IdentifierName(GetAxiomMethodName(match.Spec.Kind))
+            : SyntaxFactory.GenericName(
+                SyntaxFactory.Identifier(GetAxiomMethodName(match.Spec.Kind)),
+                SyntaxFactory.TypeArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(match.TypeArgumentSyntax.WithoutTrivia())));
+
         var assertionMethod = SyntaxFactory.MemberAccessExpression(
             SyntaxKind.SimpleMemberAccessExpression,
             shouldInvocation,
-            SyntaxFactory.IdentifierName(GetAxiomMethodName(match.Spec.Kind)));
+            assertionMethodName);
 
         return match.ExpectedExpression is null
             ? SyntaxFactory.InvocationExpression(assertionMethod, SyntaxFactory.ArgumentList())
@@ -251,6 +258,8 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
             XunitAssertMigrationKind.ContainSingle => "ContainSingle",
             XunitAssertMigrationKind.BeSameAs => "BeSameAs",
             XunitAssertMigrationKind.NotBeSameAs => "NotBeSameAs",
+            XunitAssertMigrationKind.BeOfType => "BeOfType",
+            XunitAssertMigrationKind.BeAssignableTo => "BeAssignableTo",
             _ => throw new ArgumentOutOfRangeException(nameof(kind)),
         };
     }
