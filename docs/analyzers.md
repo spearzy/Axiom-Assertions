@@ -99,6 +99,10 @@ Rules:
 - `AXM1012` for `Assert.Same(expected, actual)`
 - `AXM1013` for `Assert.NotSame(expected, actual)`
 - `AXM1014` for `Assert.Throws<TException>(...)` when the returned exception is not consumed
+- `AXM1015` for `Assert.IsType<T>(actual)`
+- `AXM1016` for `Assert.IsAssignableFrom<T>(actual)`
+- `AXM1017` for `Assert.Contains(expectedSubstring, actualString)`
+- `AXM1018` for `Assert.DoesNotContain(expectedSubstring, actualString)`
 
 The migration support is intentionally narrow and high-confidence. It only offers diagnostics and code fixes for xUnit assertion shapes that map cleanly to Axiom's fluent API without changing value flow or subtle overload semantics.
 
@@ -109,6 +113,7 @@ Assert.Equal(expected, actual);
 Assert.True(condition);
 Assert.Empty(values);
 Assert.Contains(expected, values);
+Assert.Contains("sub", actual);
 Assert.Throws<InvalidOperationException>(() => work());
 ```
 
@@ -119,6 +124,7 @@ actual.Should().Be(expected);
 condition.Should().BeTrue();
 values.Should().BeEmpty();
 values.Should().Contain(expected);
+actual.Should().Contain("sub");
 new Action(() => work()).Should().Throw<InvalidOperationException>();
 ```
 
@@ -127,7 +133,6 @@ The migration suggestions use semantic matching, so they only target xUnit's rea
 They also intentionally skip shapes that are not obviously semantics-preserving yet, including:
 
 - overloads with custom comparers, precision, inspectors, or user messages
-- `Assert.Contains` and `Assert.DoesNotContain` string overloads
 - dictionary-key containment overloads
 - `Assert.Single(...)` when the returned item is consumed
 - `Assert.Throws<TException>(...)` when the returned exception is consumed

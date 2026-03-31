@@ -20,4 +20,6 @@ public static class AxiomAnalyzerIds
     public const string MigrateXunitAssertThrows = "AXM1014";
     public const string MigrateXunitAssertIsType = "AXM1015";
     public const string MigrateXunitAssertIsAssignableFrom = "AXM1016";
+    public const string MigrateXunitAssertContainsSubstring = "AXM1017";
+    public const string MigrateXunitAssertDoesNotContainSubstring = "AXM1018";
 }

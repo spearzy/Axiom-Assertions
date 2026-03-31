@@ -15,6 +15,8 @@ internal enum XunitAssertMigrationKind
     NotBeEmpty,
     Contain,
     NotContain,
+    ContainSubstring,
+    NotContainSubstring,
     ContainSingle,
     BeSameAs,
     NotBeSameAs,
@@ -147,6 +149,22 @@ internal static class XunitAssertMigrationSpecs
             "xUnit Assert.DoesNotContain(...) can be migrated to 'collection.Should().NotContain(item)'",
             "Convert to 'collection.Should().NotContain(item)'"),
         new(
+            AxiomAnalyzerIds.MigrateXunitAssertContainsSubstring,
+            "Contains",
+            2,
+            XunitAssertMigrationKind.ContainSubstring,
+            "Migrate xUnit Assert.Contains string overload to Axiom",
+            "xUnit Assert.Contains(expectedSubstring, actualString) can be migrated to 'actualString.Should().Contain(expectedSubstring)'",
+            "Convert to 'actualString.Should().Contain(expectedSubstring)'"),
+        new(
+            AxiomAnalyzerIds.MigrateXunitAssertDoesNotContainSubstring,
+            "DoesNotContain",
+            2,
+            XunitAssertMigrationKind.NotContainSubstring,
+            "Migrate xUnit Assert.DoesNotContain string overload to Axiom",
+            "xUnit Assert.DoesNotContain(expectedSubstring, actualString) can be migrated to 'actualString.Should().NotContain(expectedSubstring)'",
+            "Convert to 'actualString.Should().NotContain(expectedSubstring)'"),
+        new(
             AxiomAnalyzerIds.MigrateXunitAssertSingle,
             "Single",
             1,
@@ -199,20 +217,8 @@ internal static class XunitAssertMigrationSpecs
     public static ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         All.Select(static spec => spec.Rule).ToImmutableArray();
 
-    public static bool TryGetByMethodName(string methodName, out XunitAssertMigrationSpec spec)
-    {
-        foreach (var candidate in All)
-        {
-            if (candidate.XunitMethodName == methodName)
-            {
-                spec = candidate;
-                return true;
-            }
-        }
-
-        spec = null!;
-        return false;
-    }
+    public static IEnumerable<XunitAssertMigrationSpec> GetByMethodName(string methodName)
+        => All.Where(candidate => candidate.XunitMethodName == methodName);
 
     public static bool TryGetByDiagnosticId(string diagnosticId, out XunitAssertMigrationSpec spec)
     {

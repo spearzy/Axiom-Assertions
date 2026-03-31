@@ -40,6 +40,8 @@ internal static class AxiomAssertionStubs
                 public AndContinuation<StringAssertions> NotBe(string? unexpected) => default;
                 public AndContinuation<StringAssertions> BeNull() => default;
                 public AndContinuation<StringAssertions> NotBeNull() => default;
+                public AndContinuation<StringAssertions> Contain(string expectedSubstring) => default;
+                public AndContinuation<StringAssertions> NotContain(string unexpectedSubstring) => default;
                 public AndContinuation<StringAssertions> BeEmpty() => default;
                 public AndContinuation<StringAssertions> NotBeEmpty() => default;
             }

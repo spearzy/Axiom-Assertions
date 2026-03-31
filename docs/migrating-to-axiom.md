@@ -20,9 +20,13 @@ The current analyzer and code-fix wave focuses on high-confidence xUnit `Assert.
 | `Assert.NotEmpty(subject)` | `subject.Should().NotBeEmpty()` |
 | `Assert.Contains(item, collection)` | `collection.Should().Contain(item)` |
 | `Assert.DoesNotContain(item, collection)` | `collection.Should().NotContain(item)` |
+| `Assert.Contains(expectedSubstring, actualString)` | `actualString.Should().Contain(expectedSubstring)` |
+| `Assert.DoesNotContain(expectedSubstring, actualString)` | `actualString.Should().NotContain(expectedSubstring)` |
 | `Assert.Single(subject)` | `subject.Should().ContainSingle()` |
 | `Assert.Same(expected, actual)` | `actual.Should().BeSameAs(expected)` |
 | `Assert.NotSame(expected, actual)` | `actual.Should().NotBeSameAs(expected)` |
+| `Assert.IsType<T>(actual)` | `actual.Should().BeOfType<T>()` |
+| `Assert.IsAssignableFrom<T>(actual)` | `actual.Should().BeAssignableTo<T>()` |
 | `Assert.Throws<TException>(() => work())` | `new Action(() => work()).Should().Throw<TException>()` |
 
 These suggestions ship in:
@@ -36,7 +40,6 @@ The migration tooling is conservative on purpose.
 
 It skips cases where the rewrite is not obviously semantics-preserving yet, including:
 
-- string-specific containment overloads
 - dictionary-key containment overloads
 - overloads with custom comparers, precision, inspectors, or messages
 - `Assert.Single(...)` when you use the returned value

@@ -142,6 +142,22 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
                 Assert.Equal("Migrate xUnit Assert.IsAssignableFrom to Axiom", rule.Title.ToString());
                 Assert.Equal("xUnit Assert.IsAssignableFrom<T>(...) can be migrated to 'value.Should().BeAssignableTo<T>()'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1017", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.Contains string overload to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.Contains(expectedSubstring, actualString) can be migrated to 'actualString.Should().Contain(expectedSubstring)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1018", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.DoesNotContain string overload to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.DoesNotContain(expectedSubstring, actualString) can be migrated to 'actualString.Should().NotContain(expectedSubstring)'", rule.MessageFormat.ToString());
             });
     }
 
@@ -579,6 +595,188 @@ public sealed class XunitAssertMigrationAnalyzerTests
             public sealed class Sample
             {
                 public void Check(List<int> values, int unexpected)
+                {
+                    values.Should().NotContain(unexpected);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertContains_StringOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    {|AXM1017:Assert.Contains("sub", actual)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using Xunit;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    actual.Should().Contain("sub");
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertContains_StringCollectionOverload_UsesCollectionDiagnostic()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string[] values, string expected)
+                {
+                    {|AXM1009:Assert.Contains(expected, values)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(string[] values, string expected)
+                {
+                    values.Should().Contain(expected);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertContains_StringOverload_WithImplicitStringReceiver_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class StringWrapper
+            {
+                public static implicit operator string(StringWrapper value) => "";
+            }
+
+            public sealed class Sample
+            {
+                public void Check(StringWrapper wrapper)
+                {
+                    Assert.Contains("sub", wrapper);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertDoesNotContain_StringOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    {|AXM1018:Assert.DoesNotContain("sub", actual)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using Xunit;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    actual.Should().NotContain("sub");
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertDoesNotContain_StringOverload_WithImplicitStringReceiver_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class StringWrapper
+            {
+                public static implicit operator string(StringWrapper value) => "";
+            }
+
+            public sealed class Sample
+            {
+                public void Check(StringWrapper wrapper)
+                {
+                    Assert.DoesNotContain("sub", wrapper);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertDoesNotContain_StringCollectionOverload_UsesCollectionDiagnostic()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string[] values, string unexpected)
+                {
+                    {|AXM1010:Assert.DoesNotContain(unexpected, values)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(string[] values, string unexpected)
                 {
                     values.Should().NotContain(unexpected);
                 }
@@ -1213,6 +1411,72 @@ public sealed class XunitAssertMigrationAnalyzerTests
     }
 
     [Fact]
+    public async Task StaticUsingContains_StringOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using static Xunit.Assert;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    {|AXM1017:Contains("sub", actual)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using static Xunit.Assert;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    actual.Should().Contain("sub");
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task StaticUsingDoesNotContain_StringOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using static Xunit.Assert;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    {|AXM1018:DoesNotContain("sub", actual)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using static Xunit.Assert;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    actual.Should().NotContain("sub");
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
     public async Task NonXunitAssert_IsNotFlagged()
     {
         const string source =
@@ -1240,17 +1504,15 @@ public sealed class XunitAssertMigrationAnalyzerTests
     }
 
     [Fact]
-    public async Task StringContainsOverload_IsNotFlagged()
+    public async Task FullyQualifiedXunitAssertContains_StringOverload_IsFlagged()
     {
         const string source =
             """
-            using Xunit;
-
             public sealed class Sample
             {
                 public void Check(string actual)
                 {
-                    Assert.Contains("sub", actual);
+                    {|AXM1017:Xunit.Assert.Contains("sub", actual)|};
                 }
             }
             """;
@@ -1259,17 +1521,15 @@ public sealed class XunitAssertMigrationAnalyzerTests
     }
 
     [Fact]
-    public async Task StringDoesNotContainOverload_IsNotFlagged()
+    public async Task FullyQualifiedXunitAssertDoesNotContain_StringOverload_IsFlagged()
     {
         const string source =
             """
-            using Xunit;
-
             public sealed class Sample
             {
                 public void Check(string actual)
                 {
-                    Assert.DoesNotContain("sub", actual);
+                    {|AXM1018:Xunit.Assert.DoesNotContain("sub", actual)|};
                 }
             }
             """;
