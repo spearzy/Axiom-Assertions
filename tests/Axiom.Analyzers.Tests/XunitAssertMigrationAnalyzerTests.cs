@@ -166,6 +166,22 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
                 Assert.Equal("Migrate xUnit Assert.Single predicate overload to Axiom", rule.Title.ToString());
                 Assert.Equal("xUnit Assert.Single(collection, predicate) can be migrated to Axiom 'collection.Should().ContainSingle(...)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1020", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.Contains dictionary overload to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.Contains(key, dictionary) can be migrated to 'dictionary.Should().ContainKey(key)' and append '.WhoseValue' when the associated value is used", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1021", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.DoesNotContain dictionary overload to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.DoesNotContain(key, dictionary) can be migrated to 'dictionary.Should().NotContainKey(key)'", rule.MessageFormat.ToString());
             });
     }
 
@@ -701,6 +717,474 @@ public sealed class XunitAssertMigrationAnalyzerTests
             """;
 
         await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertContains_DictionaryOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(Dictionary<int, string> values, int key)
+                {
+                    Assert.Contains(key, values);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(Dictionary<int, string> values, int key)
+                {
+                    values.Should().ContainKey(key);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertDoesNotContain_DictionaryOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(Dictionary<int, string> values, int key)
+                {
+                    Assert.DoesNotContain(key, values);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(Dictionary<int, string> values, int key)
+                {
+                    values.Should().NotContainKey(key);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertContains_ReadOnlyDictionaryOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(IReadOnlyDictionary<int, string> values, int key)
+                {
+                    Assert.Contains(key, values);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(IReadOnlyDictionary<int, string> values, int key)
+                {
+                    values.Should().ContainKey(key);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertContains_IDictionaryOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(IDictionary<int, string> values, int key)
+                {
+                    Assert.Contains(key, values);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(IDictionary<int, string> values, int key)
+                {
+                    values.Should().ContainKey(key);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertContains_ConcreteReadOnlyDictionaryOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using System.Collections.ObjectModel;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(ReadOnlyDictionary<int, string> values, int key)
+                {
+                    Assert.Contains(key, values);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using System.Collections.ObjectModel;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(ReadOnlyDictionary<int, string> values, int key)
+                {
+                    values.Should().ContainKey(key);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertContains_ImmutableDictionaryOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Immutable;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(ImmutableDictionary<int, string> values, int key)
+                {
+                    Assert.Contains(key, values);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Immutable;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(ImmutableDictionary<int, string> values, int key)
+                {
+                    values.Should().ContainKey(key);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertContains_DictionaryOverload_UsedResult_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public string Check(Dictionary<int, string> values, int key)
+                {
+                    var value = Assert.Contains(key, values);
+                    return value;
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public string Check(Dictionary<int, string> values, int key)
+                {
+                    var value = values.Should().ContainKey(key).WhoseValue;
+                    return value;
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertContains_ReadOnlyDictionaryOverload_UsedResult_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections;
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public string Check(Lookup values, int key)
+                {
+                    return Assert.Contains(key, values);
+                }
+
+                private sealed class Lookup : IReadOnlyDictionary<int, string>
+                {
+                    public IEnumerable<int> Keys => throw null!;
+                    public IEnumerable<string> Values => throw null!;
+                    public int Count => throw null!;
+                    public string this[int key] => throw null!;
+
+                    public bool ContainsKey(int key) => throw null!;
+                    public bool TryGetValue(int key, out string value) => throw null!;
+                    public IEnumerator<KeyValuePair<int, string>> GetEnumerator() => throw null!;
+                    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections;
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public string Check(Lookup values, int key)
+                {
+                    return values.Should().ContainKey(key).WhoseValue;
+                }
+
+                private sealed class Lookup : IReadOnlyDictionary<int, string>
+                {
+                    public IEnumerable<int> Keys => throw null!;
+                    public IEnumerable<string> Values => throw null!;
+                    public int Count => throw null!;
+                    public string this[int key] => throw null!;
+
+                    public bool ContainsKey(int key) => throw null!;
+                    public bool TryGetValue(int key, out string value) => throw null!;
+                    public IEnumerator<KeyValuePair<int, string>> GetEnumerator() => throw null!;
+                    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertContains_DictionaryOverload_InArgumentPosition_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(IDictionary<int, string> values, int key)
+                {
+                    Use(Assert.Contains(key, values));
+                }
+
+                private static void Use(string value) { }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(IDictionary<int, string> values, int key)
+                {
+                    Use(values.Should().ContainKey(key).WhoseValue);
+                }
+
+                private static void Use(string value) { }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertDoesNotContain_ReadOnlyDictionaryOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(IReadOnlyDictionary<int, string> values, int key)
+                {
+                    Assert.DoesNotContain(key, values);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(IReadOnlyDictionary<int, string> values, int key)
+                {
+                    values.Should().NotContainKey(key);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertDoesNotContain_IDictionaryOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(IDictionary<int, string> values, int key)
+                {
+                    Assert.DoesNotContain(key, values);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(IDictionary<int, string> values, int key)
+                {
+                    values.Should().NotContainKey(key);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertDoesNotContain_ConcurrentDictionaryOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Concurrent;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(ConcurrentDictionary<int, string> values, int key)
+                {
+                    Assert.DoesNotContain(key, values);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Concurrent;
+            using Xunit;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(ConcurrentDictionary<int, string> values, int key)
+                {
+                    values.Should().NotContainKey(key);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
     }
 
     [Fact]
@@ -1922,6 +2406,78 @@ public sealed class XunitAssertMigrationAnalyzerTests
     }
 
     [Fact]
+    public async Task StaticUsingContains_DictionaryOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using static Xunit.Assert;
+
+            public sealed class Sample
+            {
+                public void Check(IReadOnlyDictionary<int, string> values, int key)
+                {
+                    Contains(key, values);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using static Xunit.Assert;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(IReadOnlyDictionary<int, string> values, int key)
+                {
+                    values.Should().ContainKey(key);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task StaticUsingDoesNotContain_DictionaryOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using static Xunit.Assert;
+
+            public sealed class Sample
+            {
+                public void Check(IReadOnlyDictionary<int, string> values, int key)
+                {
+                    DoesNotContain(key, values);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using System.Collections.Generic;
+            using static Xunit.Assert;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(IReadOnlyDictionary<int, string> values, int key)
+                {
+                    values.Should().NotContainKey(key);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
     public async Task NonXunitAssert_IsNotFlagged()
     {
         const string source =
@@ -1983,18 +2539,17 @@ public sealed class XunitAssertMigrationAnalyzerTests
     }
 
     [Fact]
-    public async Task DictionaryContainsOverload_IsNotFlagged()
+    public async Task FullyQualifiedXunitAssertContains_DictionaryOverload_IsFlagged()
     {
         const string source =
             """
             using System.Collections.Generic;
-            using Xunit;
 
             public sealed class Sample
             {
-                public void Check(Dictionary<int, string> values, int key)
+                public void Check(IReadOnlyDictionary<int, string> values, int key)
                 {
-                    Assert.Contains(key, values);
+                    {|AXM1020:Xunit.Assert.Contains(key, values)|};
                 }
             }
             """;
@@ -2003,18 +2558,55 @@ public sealed class XunitAssertMigrationAnalyzerTests
     }
 
     [Fact]
-    public async Task DictionaryDoesNotContainOverload_IsNotFlagged()
+    public async Task FullyQualifiedXunitAssertDoesNotContain_DictionaryOverload_IsFlagged()
     {
         const string source =
             """
             using System.Collections.Generic;
-            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(IReadOnlyDictionary<int, string> values, int key)
+                {
+                    {|AXM1021:Xunit.Assert.DoesNotContain(key, values)|};
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task FullyQualifiedXunitAssertContains_DictionaryConcreteOverload_IsFlagged()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
 
             public sealed class Sample
             {
                 public void Check(Dictionary<int, string> values, int key)
                 {
-                    Assert.DoesNotContain(key, values);
+                    {|AXM1020:Xunit.Assert.Contains(key, values)|};
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task FullyQualifiedXunitAssertDoesNotContain_DictionaryConcreteOverload_IsFlagged()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+
+            public sealed class Sample
+            {
+                public void Check(Dictionary<int, string> values, int key)
+                {
+                    {|AXM1021:Xunit.Assert.DoesNotContain(key, values)|};
                 }
             }
             """;
@@ -2179,6 +2771,29 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 public void Check(int expected, int actual)
                 {
                     actual.Should().Be(expected);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AlreadyMigratedAxiomDictionaryAssertion_IsNotFlagged()
+    {
+        const string source =
+            """
+            using System.Collections.Generic;
+            using Axiom.Assertions;
+            using Axiom.Assertions.Extensions;
+
+            public sealed class Sample
+            {
+                public void Check(Dictionary<int, string> values, int key)
+                {
+                    values.Should().ContainKey(key);
+                    var value = values.Should().ContainKey(key).WhoseValue;
+                    values.Should().NotContainKey(key);
                 }
             }
             """;

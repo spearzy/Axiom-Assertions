@@ -6,7 +6,10 @@ internal static class XunitAssertStubs
         """
         using System;
         using System.Collections;
+        using System.Collections.Concurrent;
         using System.Collections.Generic;
+        using System.Collections.Immutable;
+        using System.Collections.ObjectModel;
 
         namespace Xunit
         {
@@ -45,11 +48,21 @@ internal static class XunitAssertStubs
 
                 public static void Contains<T>(T expected, IEnumerable<T> collection) { }
                 public static void Contains(string expectedSubstring, string actualString) { }
-                public static void Contains<TKey, TValue>(TKey expected, IDictionary<TKey, TValue> collection) { }
+                public static TValue Contains<TKey, TValue>(TKey expected, IDictionary<TKey, TValue> collection) => default!;
+                public static TValue Contains<TKey, TValue>(TKey expected, IReadOnlyDictionary<TKey, TValue> collection) => default!;
+                public static TValue Contains<TKey, TValue>(TKey expected, ConcurrentDictionary<TKey, TValue> collection) => default!;
+                public static TValue Contains<TKey, TValue>(TKey expected, Dictionary<TKey, TValue> collection) => default!;
+                public static TValue Contains<TKey, TValue>(TKey expected, ImmutableDictionary<TKey, TValue> collection) => default!;
+                public static TValue Contains<TKey, TValue>(TKey expected, ReadOnlyDictionary<TKey, TValue> collection) => default!;
 
                 public static void DoesNotContain<T>(T expected, IEnumerable<T> collection) { }
                 public static void DoesNotContain(string expectedSubstring, string actualString) { }
                 public static void DoesNotContain<TKey, TValue>(TKey expected, IDictionary<TKey, TValue> collection) { }
+                public static void DoesNotContain<TKey, TValue>(TKey expected, IReadOnlyDictionary<TKey, TValue> collection) { }
+                public static void DoesNotContain<TKey, TValue>(TKey expected, ConcurrentDictionary<TKey, TValue> collection) { }
+                public static void DoesNotContain<TKey, TValue>(TKey expected, Dictionary<TKey, TValue> collection) { }
+                public static void DoesNotContain<TKey, TValue>(TKey expected, ImmutableDictionary<TKey, TValue> collection) { }
+                public static void DoesNotContain<TKey, TValue>(TKey expected, ReadOnlyDictionary<TKey, TValue> collection) { }
 
                 public static T Single<T>(IEnumerable<T> collection) => default!;
                 public static object Single(IEnumerable collection) => default!;

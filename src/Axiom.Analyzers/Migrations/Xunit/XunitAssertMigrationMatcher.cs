@@ -15,7 +15,8 @@ internal sealed class XunitAssertMigrationMatch
         ExpressionSyntax? expectedExpression,
         TypeSyntax? typeArgumentSyntax,
         bool requiresAssertionsExtensionsNamespace,
-        bool appendSingleItem)
+        bool appendSingleItem,
+        bool appendWhoseValue)
     {
         Spec = spec;
         InvocationSyntax = invocationSyntax;
@@ -24,6 +25,7 @@ internal sealed class XunitAssertMigrationMatch
         TypeArgumentSyntax = typeArgumentSyntax;
         RequiresAssertionsExtensionsNamespace = requiresAssertionsExtensionsNamespace;
         AppendSingleItem = appendSingleItem;
+        AppendWhoseValue = appendWhoseValue;
     }
 
     public XunitAssertMigrationSpec Spec { get; }
@@ -33,6 +35,7 @@ internal sealed class XunitAssertMigrationMatch
     public TypeSyntax? TypeArgumentSyntax { get; }
     public bool RequiresAssertionsExtensionsNamespace { get; }
     public bool AppendSingleItem { get; }
+    public bool AppendWhoseValue { get; }
 }
 
 internal static class XunitAssertMigrationMatcher
@@ -61,7 +64,7 @@ internal static class XunitAssertMigrationMatcher
         var resultIsConsumed = IsResultConsumed(invocation);
 
         // One xUnit method name can map to more than one migration rule. `Contains(...)` is the
-        // main example: collection containment and string containment use the same method name.
+        // main example: collection, string, and dictionary-key containment share the same method name.
         foreach (var spec in XunitAssertMigrationSpecs.GetByMethodName(invocation.TargetMethod.Name))
         {
             // If the basic shape does not match this rule, try the next rule.
@@ -99,7 +102,8 @@ internal static class XunitAssertMigrationMatcher
                 expectedExpression,
                 typeArgumentSyntax,
                 RequiresAssertionsExtensionsNamespace(spec.Kind, GetSubjectType(spec.Kind, invocation.TargetMethod.Parameters)),
-                appendSingleItem: resultIsConsumed && spec.Kind is XunitAssertMigrationKind.ContainSingle or XunitAssertMigrationKind.ContainSingleMatching);
+                appendSingleItem: resultIsConsumed && spec.Kind is XunitAssertMigrationKind.ContainSingle or XunitAssertMigrationKind.ContainSingleMatching,
+                appendWhoseValue: resultIsConsumed && spec.Kind is XunitAssertMigrationKind.ContainKey);
 
             return true;
         }
@@ -156,6 +160,12 @@ internal static class XunitAssertMigrationMatcher
             case XunitAssertMigrationKind.ContainSubstring:
             case XunitAssertMigrationKind.NotContainSubstring:
                 return !resultIsConsumed && IsSupportedStringContainmentOverload(invocation, symbols);
+
+            case XunitAssertMigrationKind.ContainKey:
+                return IsSupportedDictionaryKeyContainmentOverload(invocation, symbols, resultIsConsumed);
+
+            case XunitAssertMigrationKind.NotContainKey:
+                return !resultIsConsumed && IsSupportedDictionaryKeyContainmentOverload(invocation, symbols, resultIsConsumed: false);
 
             case XunitAssertMigrationKind.ContainSingle:
                 return resultIsConsumed
@@ -291,6 +301,31 @@ internal static class XunitAssertMigrationMatcher
         // wrapper.Should().Contain(...) when xUnit only got here through an implicit conversion.
         var subjectType = GetArgumentType(invocation.Arguments[1]);
         return subjectType is not null && symbols.SupportsStringContainmentMigrationReceiver(subjectType);
+    }
+
+    private static bool IsSupportedDictionaryKeyContainmentOverload(
+        IInvocationOperation invocation,
+        XunitAssertMigrationSymbols symbols,
+        bool resultIsConsumed)
+    {
+        var method = invocation.TargetMethod;
+        if (!method.IsGenericMethod ||
+            method.TypeArguments.Length != 2 ||
+            method.Parameters.Length != 2 ||
+            invocation.Arguments.Length != 2 ||
+            method.Parameters[1].Type is not INamedTypeSymbol dictionaryParameter ||
+            !symbols.IsDictionaryParameterType(dictionaryParameter))
+        {
+            return false;
+        }
+
+        if (resultIsConsumed && method.ReturnsVoid)
+        {
+            return false;
+        }
+
+        var subjectType = GetArgumentType(invocation.Arguments[1]);
+        return subjectType is not null && symbols.SupportsDictionaryKeyContainmentMigrationReceiver(subjectType);
     }
 
     private static bool IsSupportedSingleOverload(
@@ -445,6 +480,8 @@ internal static class XunitAssertMigrationMatcher
                  XunitAssertMigrationKind.NotContain or
                  XunitAssertMigrationKind.ContainSubstring or
                  XunitAssertMigrationKind.NotContainSubstring or
+                 XunitAssertMigrationKind.ContainKey or
+                 XunitAssertMigrationKind.NotContainKey or
                  XunitAssertMigrationKind.BeSameAs or
                  XunitAssertMigrationKind.NotBeSameAs
             ? arguments[1].Expression
@@ -460,6 +497,8 @@ internal static class XunitAssertMigrationMatcher
                  XunitAssertMigrationKind.NotContain or
                  XunitAssertMigrationKind.ContainSubstring or
                  XunitAssertMigrationKind.NotContainSubstring or
+                 XunitAssertMigrationKind.ContainKey or
+                 XunitAssertMigrationKind.NotContainKey or
                  XunitAssertMigrationKind.BeSameAs or
                  XunitAssertMigrationKind.NotBeSameAs
             ? parameters[1].Type
@@ -477,7 +516,9 @@ internal static class XunitAssertMigrationMatcher
             XunitAssertMigrationKind.Contain or
             XunitAssertMigrationKind.NotContain or
             XunitAssertMigrationKind.ContainSubstring or
-            XunitAssertMigrationKind.NotContainSubstring
+            XunitAssertMigrationKind.NotContainSubstring or
+            XunitAssertMigrationKind.ContainKey or
+            XunitAssertMigrationKind.NotContainKey
                 => arguments[0].Expression,
             XunitAssertMigrationKind.ContainSingleMatching
                 => arguments[1].Expression,
@@ -523,6 +564,8 @@ internal static class XunitAssertMigrationMatcher
             XunitAssertMigrationKind.NotContain => subjectType.SpecialType != SpecialType.System_String,
             XunitAssertMigrationKind.ContainSubstring => false,
             XunitAssertMigrationKind.NotContainSubstring => false,
+            XunitAssertMigrationKind.ContainKey => true,
+            XunitAssertMigrationKind.NotContainKey => true,
             XunitAssertMigrationKind.ContainSingle => true,
             XunitAssertMigrationKind.ContainSingleMatching => true,
             _ => false,

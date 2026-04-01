@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Axiom.Assertions.AssertionTypes;
@@ -688,6 +689,33 @@ public static class CollectionValueAssertionExtensions
             callerLineNumber);
     }
 
+    public static ContainKeyContinuation<ValueAssertions<IDictionary<TKey, TValue>>, TValue> ContainKey<TKey, TValue>(
+        this ValueAssertions<IDictionary<TKey, TValue>> assertions,
+        TKey expectedKey,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+        where TKey : notnull
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        var subject = AsReadOnlyDictionary(assertions.Subject);
+
+        var result = CollectionAssertionEngine.AssertContainKeyAndCaptureResult(
+            subject,
+            assertions.SubjectExpression,
+            expectedKey,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new ContainKeyContinuation<ValueAssertions<IDictionary<TKey, TValue>>, TValue>(
+            assertions,
+            result.HasValue,
+            result.Value,
+            result.FailureMessage);
+    }
+
     public static AndContinuation<ValueAssertions<TDictionary>> NotContainKey<TDictionary, TKey, TValue>(
         this ValueAssertions<TDictionary> assertions,
         TKey unexpectedKey,
@@ -739,6 +767,41 @@ public static class CollectionValueAssertionExtensions
             because,
             callerFilePath,
             callerLineNumber);
+    }
+
+    public static AndContinuation<ValueAssertions<IDictionary<TKey, TValue>>> NotContainKey<TKey, TValue>(
+        this ValueAssertions<IDictionary<TKey, TValue>> assertions,
+        TKey unexpectedKey,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+        where TKey : notnull
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        var subject = AsReadOnlyDictionary(assertions.Subject);
+
+        CollectionAssertionEngine.AssertNotContainKey(
+            subject,
+            assertions.SubjectExpression,
+            unexpectedKey,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<ValueAssertions<IDictionary<TKey, TValue>>>(assertions);
+    }
+
+    private static IReadOnlyDictionary<TKey, TValue>? AsReadOnlyDictionary<TKey, TValue>(
+        IDictionary<TKey, TValue>? subject)
+        where TKey : notnull
+    {
+        return subject switch
+        {
+            null => null,
+            IReadOnlyDictionary<TKey, TValue> readOnly => readOnly,
+            _ => new ReadOnlyDictionary<TKey, TValue>(subject),
+        };
     }
 
     public static AndContinuation<ValueAssertions<TDictionary>> ContainValue<TDictionary, TKey, TValue>(

@@ -11,6 +11,10 @@ internal sealed class XunitAssertMigrationSymbols
         INamedTypeSymbol? asyncEnumerableType,
         INamedTypeSymbol? dictionaryType,
         INamedTypeSymbol? readOnlyDictionaryType,
+        INamedTypeSymbol? concreteDictionaryType,
+        INamedTypeSymbol? concreteReadOnlyDictionaryType,
+        INamedTypeSymbol? concurrentDictionaryType,
+        INamedTypeSymbol? immutableDictionaryType,
         INamedTypeSymbol? nonGenericDictionaryType,
         INamedTypeSymbol? predicateType,
         INamedTypeSymbol? actionType,
@@ -30,6 +34,10 @@ internal sealed class XunitAssertMigrationSymbols
         AsyncEnumerableType = asyncEnumerableType;
         DictionaryType = dictionaryType;
         ReadOnlyDictionaryType = readOnlyDictionaryType;
+        ConcreteDictionaryType = concreteDictionaryType;
+        ConcreteReadOnlyDictionaryType = concreteReadOnlyDictionaryType;
+        ConcurrentDictionaryType = concurrentDictionaryType;
+        ImmutableDictionaryType = immutableDictionaryType;
         NonGenericDictionaryType = nonGenericDictionaryType;
         PredicateType = predicateType;
         ActionType = actionType;
@@ -51,6 +59,10 @@ internal sealed class XunitAssertMigrationSymbols
     private INamedTypeSymbol? AsyncEnumerableType { get; }
     private INamedTypeSymbol? DictionaryType { get; }
     private INamedTypeSymbol? ReadOnlyDictionaryType { get; }
+    private INamedTypeSymbol? ConcreteDictionaryType { get; }
+    private INamedTypeSymbol? ConcreteReadOnlyDictionaryType { get; }
+    private INamedTypeSymbol? ConcurrentDictionaryType { get; }
+    private INamedTypeSymbol? ImmutableDictionaryType { get; }
     private INamedTypeSymbol? NonGenericDictionaryType { get; }
     public INamedTypeSymbol? PredicateType { get; }
     public INamedTypeSymbol? ActionType { get; }
@@ -75,6 +87,10 @@ internal sealed class XunitAssertMigrationSymbols
             compilation.GetTypeByMetadataName("System.Collections.Generic.IAsyncEnumerable`1"),
             compilation.GetTypeByMetadataName("System.Collections.Generic.IDictionary`2"),
             compilation.GetTypeByMetadataName("System.Collections.Generic.IReadOnlyDictionary`2"),
+            compilation.GetTypeByMetadataName("System.Collections.Generic.Dictionary`2"),
+            compilation.GetTypeByMetadataName("System.Collections.ObjectModel.ReadOnlyDictionary`2"),
+            compilation.GetTypeByMetadataName("System.Collections.Concurrent.ConcurrentDictionary`2"),
+            compilation.GetTypeByMetadataName("System.Collections.Immutable.ImmutableDictionary`2"),
             compilation.GetTypeByMetadataName("System.Collections.IDictionary"),
             compilation.GetTypeByMetadataName("System.Predicate`1"),
             compilation.GetTypeByMetadataName("System.Action"),
@@ -197,6 +213,45 @@ internal sealed class XunitAssertMigrationSymbols
     public bool SupportsStringContainmentMigrationReceiver(ITypeSymbol type)
     {
         return IsStringType(type);
+    }
+
+    public bool SupportsDictionaryKeyContainmentMigrationReceiver(ITypeSymbol type)
+    {
+        if (DictionaryType is not null &&
+            type is INamedTypeSymbol namedType &&
+            SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, DictionaryType))
+        {
+            return true;
+        }
+
+        if (ReadOnlyDictionaryType is null)
+        {
+            return false;
+        }
+
+        if (type is INamedTypeSymbol readOnlyNamedType &&
+            SymbolEqualityComparer.Default.Equals(readOnlyNamedType.OriginalDefinition, ReadOnlyDictionaryType))
+        {
+            return true;
+        }
+
+        return ImplementsInterface(type, ReadOnlyDictionaryType);
+    }
+
+    public bool IsDictionaryParameterType(ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol namedType)
+        {
+            return false;
+        }
+
+        var originalDefinition = namedType.OriginalDefinition;
+        return (DictionaryType is not null && SymbolEqualityComparer.Default.Equals(originalDefinition, DictionaryType)) ||
+               (ReadOnlyDictionaryType is not null && SymbolEqualityComparer.Default.Equals(originalDefinition, ReadOnlyDictionaryType)) ||
+               (ConcreteDictionaryType is not null && SymbolEqualityComparer.Default.Equals(originalDefinition, ConcreteDictionaryType)) ||
+               (ConcreteReadOnlyDictionaryType is not null && SymbolEqualityComparer.Default.Equals(originalDefinition, ConcreteReadOnlyDictionaryType)) ||
+               (ConcurrentDictionaryType is not null && SymbolEqualityComparer.Default.Equals(originalDefinition, ConcurrentDictionaryType)) ||
+               (ImmutableDictionaryType is not null && SymbolEqualityComparer.Default.Equals(originalDefinition, ImmutableDictionaryType));
     }
 
     public bool IsPredicateType(ITypeSymbol type)
