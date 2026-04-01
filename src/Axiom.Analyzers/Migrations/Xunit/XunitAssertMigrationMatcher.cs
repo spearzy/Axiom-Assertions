@@ -349,7 +349,8 @@ internal static class XunitAssertMigrationMatcher
     private static IOperation UnwrapSinglePredicateExpression(IOperation operation)
     {
         // Roslyn can wrap the user's predicate in conversion/delegate nodes.
-        // Remove them so we can inspect the expression they actually wrote.        while (true)
+        // Remove them so we can inspect the expression they actually wrote.
+        while (true)
         {
             switch (operation)
             {
