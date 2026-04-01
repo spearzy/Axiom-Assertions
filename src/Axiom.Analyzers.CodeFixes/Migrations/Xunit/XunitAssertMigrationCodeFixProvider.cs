@@ -337,6 +337,8 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
             XunitAssertMigrationKind.NotContain => "NotContain",
             XunitAssertMigrationKind.ContainSubstring => "Contain",
             XunitAssertMigrationKind.NotContainSubstring => "NotContain",
+            XunitAssertMigrationKind.StartWith => "StartWith",
+            XunitAssertMigrationKind.EndWith => "EndWith",
             XunitAssertMigrationKind.ContainKey => "ContainKey",
             XunitAssertMigrationKind.NotContainKey => "NotContainKey",
             XunitAssertMigrationKind.ContainSingle => "ContainSingle",

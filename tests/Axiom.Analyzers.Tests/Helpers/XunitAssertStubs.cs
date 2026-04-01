@@ -64,6 +64,11 @@ internal static class XunitAssertStubs
                 public static void DoesNotContain<TKey, TValue>(TKey expected, ImmutableDictionary<TKey, TValue> collection) { }
                 public static void DoesNotContain<TKey, TValue>(TKey expected, ReadOnlyDictionary<TKey, TValue> collection) { }
 
+                public static void StartsWith(string expectedPrefix, string actualString) { }
+                public static void StartsWith(string expectedPrefix, string actualString, StringComparison comparisonType) { }
+                public static void EndsWith(string expectedSuffix, string actualString) { }
+                public static void EndsWith(string expectedSuffix, string actualString, StringComparison comparisonType) { }
+
                 public static T Single<T>(IEnumerable<T> collection) => default!;
                 public static object Single(IEnumerable collection) => default!;
                 public static T Single<T>(IEnumerable<T> collection, Predicate<T> predicate) => default!;

@@ -171,6 +171,10 @@ internal static class XunitAssertMigrationMatcher
             case XunitAssertMigrationKind.NotContainSubstring:
                 return !resultIsConsumed && IsSupportedStringContainmentOverload(invocation, symbols);
 
+            case XunitAssertMigrationKind.StartWith:
+            case XunitAssertMigrationKind.EndWith:
+                return !resultIsConsumed && IsSupportedStringPrefixSuffixOverload(invocation, symbols);
+
             case XunitAssertMigrationKind.ContainKey:
                 return IsSupportedDictionaryKeyContainmentOverload(invocation, symbols, resultIsConsumed);
 
@@ -309,8 +313,42 @@ internal static class XunitAssertMigrationMatcher
 
         // Then make sure the source expression itself is really a string. This avoids producing
         // wrapper.Should().Contain(...) when xUnit only got here through an implicit conversion.
-        var subjectType = GetArgumentType(invocation.Arguments[1]);
-        return subjectType is not null && symbols.SupportsStringContainmentMigrationReceiver(subjectType);
+        return IsSupportedStringReceiverExpression(invocation.Arguments[1], symbols);
+    }
+
+    private static bool IsSupportedStringPrefixSuffixOverload(
+        IInvocationOperation invocation,
+        XunitAssertMigrationSymbols symbols)
+    {
+        var method = invocation.TargetMethod;
+        if (method.Parameters.Length != 2 ||
+            method.Parameters[0].Type.SpecialType != SpecialType.System_String ||
+            method.Parameters[1].Type.SpecialType != SpecialType.System_String ||
+            invocation.Arguments.Length != 2)
+        {
+            return false;
+        }
+
+        return IsSupportedExpectedConstantStringExpression(invocation.Arguments[0]) &&
+               IsSupportedStringReceiverExpression(invocation.Arguments[1], symbols);
+    }
+
+    private static bool IsSupportedStringReceiverExpression(
+        IArgumentOperation argument,
+        XunitAssertMigrationSymbols symbols)
+    {
+        // Target-typed null/default can bind to xUnit's string overload, but they are not safe
+        // fluent receivers because `null.Should()` and `default.Should()` do not compile.
+        var operation = UnwrapConversions(argument.Value);
+        if (operation.Syntax is LiteralExpressionSyntax literalExpression &&
+            (literalExpression.IsKind(SyntaxKind.NullLiteralExpression) ||
+             literalExpression.IsKind(SyntaxKind.DefaultLiteralExpression)))
+        {
+            return false;
+        }
+
+        return operation.Type is not null &&
+               symbols.SupportsStringContainmentMigrationReceiver(operation.Type);
     }
 
     private static bool IsSupportedDictionaryKeyContainmentOverload(
@@ -462,10 +500,13 @@ internal static class XunitAssertMigrationMatcher
     }
 
     private static bool IsSupportedThrowsParamNameExpression(IArgumentOperation paramNameArgument)
+        => IsSupportedExpectedConstantStringExpression(paramNameArgument);
+
+    private static bool IsSupportedExpectedConstantStringExpression(IArgumentOperation argument)
     {
-        // Keep this rewrite high-confidence. We only migrate param-name throws when the source
-        // param name is an obvious non-null constant string like "name" or nameof(name).
-        var operation = UnwrapConversions(paramNameArgument.Value);
+        // Keep these rewrites high-confidence. We only migrate when the source expression is an
+        // obvious non-null constant string like "name" or nameof(name).
+        var operation = UnwrapConversions(argument.Value);
         var constantValue = operation.ConstantValue;
 
         return constantValue.HasValue && constantValue.Value is string;
@@ -516,6 +557,8 @@ internal static class XunitAssertMigrationMatcher
                  XunitAssertMigrationKind.NotContain or
                  XunitAssertMigrationKind.ContainSubstring or
                  XunitAssertMigrationKind.NotContainSubstring or
+                 XunitAssertMigrationKind.StartWith or
+                 XunitAssertMigrationKind.EndWith or
                  XunitAssertMigrationKind.ContainKey or
                  XunitAssertMigrationKind.NotContainKey or
                  XunitAssertMigrationKind.BeSameAs or
@@ -535,6 +578,8 @@ internal static class XunitAssertMigrationMatcher
                  XunitAssertMigrationKind.NotContain or
                  XunitAssertMigrationKind.ContainSubstring or
                  XunitAssertMigrationKind.NotContainSubstring or
+                 XunitAssertMigrationKind.StartWith or
+                 XunitAssertMigrationKind.EndWith or
                  XunitAssertMigrationKind.ContainKey or
                  XunitAssertMigrationKind.NotContainKey or
                  XunitAssertMigrationKind.BeSameAs or
@@ -557,6 +602,8 @@ internal static class XunitAssertMigrationMatcher
             XunitAssertMigrationKind.NotContain or
             XunitAssertMigrationKind.ContainSubstring or
             XunitAssertMigrationKind.NotContainSubstring or
+            XunitAssertMigrationKind.StartWith or
+            XunitAssertMigrationKind.EndWith or
             XunitAssertMigrationKind.ContainKey or
             XunitAssertMigrationKind.NotContainKey
                 => arguments[0].Expression,
@@ -606,6 +653,8 @@ internal static class XunitAssertMigrationMatcher
             XunitAssertMigrationKind.NotContain => subjectType.SpecialType != SpecialType.System_String,
             XunitAssertMigrationKind.ContainSubstring => false,
             XunitAssertMigrationKind.NotContainSubstring => false,
+            XunitAssertMigrationKind.StartWith => false,
+            XunitAssertMigrationKind.EndWith => false,
             XunitAssertMigrationKind.ContainKey => true,
             XunitAssertMigrationKind.NotContainKey => true,
             XunitAssertMigrationKind.ContainSingle => true,

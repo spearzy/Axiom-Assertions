@@ -182,6 +182,22 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
                 Assert.Equal("Migrate xUnit Assert.DoesNotContain dictionary overload to Axiom", rule.Title.ToString());
                 Assert.Equal("xUnit Assert.DoesNotContain(key, dictionary) can be migrated to 'dictionary.Should().NotContainKey(key)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1022", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.StartsWith to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.StartsWith(expectedPrefix, actualString) can be migrated to 'actualString.Should().StartWith(expectedPrefix)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1023", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.EndsWith to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.EndsWith(expectedSuffix, actualString) can be migrated to 'actualString.Should().EndWith(expectedSuffix)'", rule.MessageFormat.ToString());
             });
     }
 
@@ -1237,6 +1253,274 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 public void Check(StringWrapper wrapper)
                 {
                     Assert.DoesNotContain("sub", wrapper);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertStartsWith_StringOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    {|AXM1022:Assert.StartsWith("pre", actual)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using Xunit;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    actual.Should().StartWith("pre");
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertStartsWith_StringOverload_WithImplicitStringReceiver_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class StringWrapper
+            {
+                public static implicit operator string(StringWrapper value) => "";
+            }
+
+            public sealed class Sample
+            {
+                public void Check(StringWrapper wrapper)
+                {
+                    Assert.StartsWith("pre", wrapper);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertStartsWith_StringOverload_WithNullReceiver_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check()
+                {
+                    Assert.StartsWith("pre", null);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertStartsWith_StringOverload_WithNullExpectedPrefix_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    Assert.StartsWith(null, actual);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertStartsWith_StringOverload_WithVariableExpectedPrefix_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string expectedPrefix, string actual)
+                {
+                    Assert.StartsWith(expectedPrefix, actual);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertStartsWith_StringComparisonOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+            using System;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    Assert.StartsWith("pre", actual, StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertEndsWith_StringOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    {|AXM1023:Assert.EndsWith("suf", actual)|};
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using Xunit;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    actual.Should().EndWith("suf");
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertEndsWith_StringOverload_WithImplicitStringReceiver_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class StringWrapper
+            {
+                public static implicit operator string(StringWrapper value) => "";
+            }
+
+            public sealed class Sample
+            {
+                public void Check(StringWrapper wrapper)
+                {
+                    Assert.EndsWith("suf", wrapper);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertEndsWith_StringOverload_WithDefaultReceiver_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check()
+                {
+                    Assert.EndsWith("suf", default);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertEndsWith_StringOverload_WithDefaultExpectedSuffix_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    Assert.EndsWith(default(string), actual);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertEndsWith_StringOverload_WithVariableExpectedSuffix_IsNotFlagged()
+    {
+        const string source =
+            """
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string expectedSuffix, string actual)
+                {
+                    Assert.EndsWith(expectedSuffix, actual);
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertEndsWith_StringComparisonOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+            using System;
+            using Xunit;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    Assert.EndsWith("suf", actual, StringComparison.OrdinalIgnoreCase);
                 }
             }
             """;
@@ -2445,6 +2729,72 @@ public sealed class XunitAssertMigrationAnalyzerTests
     }
 
     [Fact]
+    public async Task StaticUsingStartsWith_StringOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using static Xunit.Assert;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    StartsWith("pre", actual);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using static Xunit.Assert;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    actual.Should().StartWith("pre");
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task StaticUsingEndsWith_StringOverload_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+            using static Xunit.Assert;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    EndsWith("suf", actual);
+                }
+            }
+            """;
+
+        const string fixedSource =
+            """
+            using static Xunit.Assert;
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    actual.Should().EndWith("suf");
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
     public async Task StaticUsingContains_DictionaryOverload_IsFlagged_AndFixed()
     {
         const string source =
@@ -2591,6 +2941,40 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 public void Check(string actual)
                 {
                     {|AXM1018:Xunit.Assert.DoesNotContain("sub", actual)|};
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task FullyQualifiedXunitAssertStartsWith_StringOverload_IsFlagged()
+    {
+        const string source =
+            """
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    {|AXM1022:Xunit.Assert.StartsWith("pre", actual)|};
+                }
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task FullyQualifiedXunitAssertEndsWith_StringOverload_IsFlagged()
+    {
+        const string source =
+            """
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    {|AXM1023:Xunit.Assert.EndsWith("suf", actual)|};
                 }
             }
             """;
@@ -3125,6 +3509,26 @@ public sealed class XunitAssertMigrationAnalyzerTests
                 }
 
                 private static void ThrowNow() => throw new ArgumentNullException("name");
+            }
+            """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AlreadyMigratedAxiomStringPrefixSuffixAssertions_AreNotFlagged()
+    {
+        const string source =
+            """
+            using Axiom.Assertions;
+
+            public sealed class Sample
+            {
+                public void Check(string actual)
+                {
+                    actual.Should().StartWith("pre");
+                    actual.Should().EndWith("suf");
+                }
             }
             """;
 
