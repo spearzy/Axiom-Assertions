@@ -22,6 +22,8 @@ The current analyzer and code-fix wave focuses on high-confidence xUnit `Assert.
 | `Assert.DoesNotContain(item, collection)` | `collection.Should().NotContain(item)` |
 | `Assert.Contains(expectedSubstring, actualString)` | `actualString.Should().Contain(expectedSubstring)` |
 | `Assert.DoesNotContain(expectedSubstring, actualString)` | `actualString.Should().NotContain(expectedSubstring)` |
+| `Assert.Contains(key, dictionary)` | `dictionary.Should().ContainKey(key)` or `.WhoseValue` when you use the associated value |
+| `Assert.DoesNotContain(key, dictionary)` | `dictionary.Should().NotContainKey(key)` |
 | `Assert.Single(subject)` | `subject.Should().ContainSingle()` or `.SingleItem` when you use the item |
 | `Assert.Single(subject, predicate)` | `subject.Should().ContainSingle(predicate)` or `.SingleItem` when you use the matched item |
 | `Assert.Same(expected, actual)` | `actual.Should().BeSameAs(expected)` |
@@ -29,6 +31,8 @@ The current analyzer and code-fix wave focuses on high-confidence xUnit `Assert.
 | `Assert.IsType<T>(actual)` | `actual.Should().BeOfType<T>()` |
 | `Assert.IsAssignableFrom<T>(actual)` | `actual.Should().BeAssignableTo<T>()` |
 | `Assert.Throws<TException>(() => work())` | `new Action(() => work()).Should().Throw<TException>()` |
+
+For dictionary-key migration, the receiver has to fit Axiom's `ContainKey` / `NotContainKey` surface. The current support covers `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`, `Dictionary<TKey, TValue>`, `ReadOnlyDictionary<TKey, TValue>`, `ConcurrentDictionary<TKey, TValue>`, and `ImmutableDictionary<TKey, TValue>`.
 
 These suggestions ship in:
 
@@ -41,7 +45,6 @@ The migration tooling is conservative on purpose.
 
 It skips cases where the rewrite is not obviously semantics-preserving yet, including:
 
-- dictionary-key containment overloads
 - overloads with custom comparers, precision, inspectors, or messages
 - nongeneric `Assert.Single(subject)` when you use the returned value
 - `Assert.Throws<TException>(...)` when you use the returned exception

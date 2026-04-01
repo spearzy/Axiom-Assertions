@@ -65,6 +65,32 @@ internal static class AxiomAssertionStubs
                     where TCollection : IEnumerable<TItem>
                     => default;
 
+                public static ContainKeyContinuation<Axiom.Assertions.ValueAssertions<TDictionary>, TValue> ContainKey<TDictionary, TKey, TValue>(this Axiom.Assertions.ValueAssertions<TDictionary> assertions, TKey expectedKey)
+                    where TDictionary : IReadOnlyDictionary<TKey, TValue>
+                    => default;
+
+                public static ContainKeyContinuation<Axiom.Assertions.ValueAssertions<Dictionary<TKey, TValue>>, TValue> ContainKey<TKey, TValue>(this Axiom.Assertions.ValueAssertions<Dictionary<TKey, TValue>> assertions, TKey expectedKey)
+                    => default;
+
+                public static ContainKeyContinuation<Axiom.Assertions.ValueAssertions<IReadOnlyDictionary<TKey, TValue>>, TValue> ContainKey<TKey, TValue>(this Axiom.Assertions.ValueAssertions<IReadOnlyDictionary<TKey, TValue>> assertions, TKey expectedKey)
+                    => default;
+
+                public static ContainKeyContinuation<Axiom.Assertions.ValueAssertions<IDictionary<TKey, TValue>>, TValue> ContainKey<TKey, TValue>(this Axiom.Assertions.ValueAssertions<IDictionary<TKey, TValue>> assertions, TKey expectedKey)
+                    => default;
+
+                public static AndContinuation<Axiom.Assertions.ValueAssertions<TDictionary>> NotContainKey<TDictionary, TKey, TValue>(this Axiom.Assertions.ValueAssertions<TDictionary> assertions, TKey expectedKey)
+                    where TDictionary : IReadOnlyDictionary<TKey, TValue>
+                    => default;
+
+                public static AndContinuation<Axiom.Assertions.ValueAssertions<Dictionary<TKey, TValue>>> NotContainKey<TKey, TValue>(this Axiom.Assertions.ValueAssertions<Dictionary<TKey, TValue>> assertions, TKey expectedKey)
+                    => default;
+
+                public static AndContinuation<Axiom.Assertions.ValueAssertions<IReadOnlyDictionary<TKey, TValue>>> NotContainKey<TKey, TValue>(this Axiom.Assertions.ValueAssertions<IReadOnlyDictionary<TKey, TValue>> assertions, TKey expectedKey)
+                    => default;
+
+                public static AndContinuation<Axiom.Assertions.ValueAssertions<IDictionary<TKey, TValue>>> NotContainKey<TKey, TValue>(this Axiom.Assertions.ValueAssertions<IDictionary<TKey, TValue>> assertions, TKey expectedKey)
+                    => default;
+
                 public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> BeEmpty<TCollection>(this Axiom.Assertions.ValueAssertions<TCollection> assertions)
                     where TCollection : IEnumerable
                     => default;
@@ -154,6 +180,12 @@ internal static class AxiomAssertionStubs
             {
                 public TAssertions And => throw null!;
                 public TItem SingleItem => throw null!;
+            }
+
+            public readonly struct ContainKeyContinuation<TAssertions, TValue>
+            {
+                public TAssertions And => throw null!;
+                public TValue WhoseValue => throw null!;
             }
 
             public readonly struct SuccessfulTaskContinuation<TParent, TResult> { }

@@ -157,6 +157,14 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
                 SyntaxFactory.IdentifierName("SingleItem"));
         }
 
+        if (match.AppendWhoseValue)
+        {
+            rewrittenExpression = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                rewrittenExpression,
+                SyntaxFactory.IdentifierName("WhoseValue"));
+        }
+
         return rewrittenExpression;
     }
 
@@ -251,6 +259,11 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
             return "Convert to 'subject.Should().ContainSingle(...).SingleItem'";
         }
 
+        if (match.AppendWhoseValue && match.Spec.Kind is XunitAssertMigrationKind.ContainKey)
+        {
+            return "Convert to 'dictionary.Should().ContainKey(key).WhoseValue'";
+        }
+
         return match.Spec.CodeFixTitle;
     }
 
@@ -289,6 +302,8 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
             XunitAssertMigrationKind.NotContain => "NotContain",
             XunitAssertMigrationKind.ContainSubstring => "Contain",
             XunitAssertMigrationKind.NotContainSubstring => "NotContain",
+            XunitAssertMigrationKind.ContainKey => "ContainKey",
+            XunitAssertMigrationKind.NotContainKey => "NotContainKey",
             XunitAssertMigrationKind.ContainSingle => "ContainSingle",
             XunitAssertMigrationKind.ContainSingleMatching => "ContainSingle",
             XunitAssertMigrationKind.BeSameAs => "BeSameAs",
