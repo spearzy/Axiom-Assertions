@@ -99,7 +99,7 @@ internal static class XunitAssertMigrationMatcher
                 expectedExpression,
                 typeArgumentSyntax,
                 RequiresAssertionsExtensionsNamespace(spec.Kind, GetSubjectType(spec.Kind, invocation.TargetMethod.Parameters)),
-                appendSingleItem: resultIsConsumed && spec.Kind is XunitAssertMigrationKind.ContainSingleMatching);
+                appendSingleItem: resultIsConsumed && spec.Kind is XunitAssertMigrationKind.ContainSingle or XunitAssertMigrationKind.ContainSingleMatching);
 
             return true;
         }
@@ -158,7 +158,9 @@ internal static class XunitAssertMigrationMatcher
                 return !resultIsConsumed && IsSupportedStringContainmentOverload(invocation, symbols);
 
             case XunitAssertMigrationKind.ContainSingle:
-                return !resultIsConsumed && IsSupportedSingleOverload(method, symbols);
+                return resultIsConsumed
+                    ? IsSupportedConsumedSingleOverload(invocation, symbols)
+                    : IsSupportedSingleOverload(method, symbols);
 
             case XunitAssertMigrationKind.ContainSingleMatching:
                 return IsSupportedSinglePredicateOverload(invocation, symbols);
@@ -303,6 +305,27 @@ internal static class XunitAssertMigrationMatcher
         var subjectType = method.Parameters[0].Type;
         return subjectType.SpecialType != SpecialType.System_String &&
                symbols.IsEnumerableLike(subjectType) &&
+               !symbols.IsAsyncEnumerableLike(subjectType) &&
+               !symbols.IsSpanOrMemoryLike(subjectType);
+    }
+
+    private static bool IsSupportedConsumedSingleOverload(
+        IInvocationOperation invocation,
+        XunitAssertMigrationSymbols symbols)
+    {
+        var method = invocation.TargetMethod;
+        if (!method.IsGenericMethod ||
+            method.TypeArguments.Length != 1 ||
+            method.Parameters.Length != 1 ||
+            invocation.Arguments.Length != 1)
+        {
+            return false;
+        }
+
+        var subjectType = GetArgumentType(invocation.Arguments[0]);
+        return subjectType is not null &&
+               subjectType.SpecialType != SpecialType.System_String &&
+               symbols.IsGenericEnumerableLike(subjectType) &&
                !symbols.IsAsyncEnumerableLike(subjectType) &&
                !symbols.IsSpanOrMemoryLike(subjectType);
     }
