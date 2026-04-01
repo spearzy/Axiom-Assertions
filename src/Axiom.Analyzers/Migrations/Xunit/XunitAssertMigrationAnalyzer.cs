@@ -25,18 +25,17 @@ public sealed class XunitAssertMigrationAnalyzer : DiagnosticAnalyzer
             }
 
             startContext.RegisterOperationAction(
-                operationContext => AnalyzeExpressionStatement(operationContext, symbols),
-                OperationKind.ExpressionStatement);
+                operationContext => AnalyzeInvocation(operationContext, symbols),
+                OperationKind.Invocation);
         });
     }
 
-    private static void AnalyzeExpressionStatement(
+    private static void AnalyzeInvocation(
         OperationAnalysisContext context,
         XunitAssertMigrationSymbols symbols)
     {
-        var statement = (IExpressionStatementOperation)context.Operation;
-        if (statement.Operation is not IInvocationOperation invocation ||
-            !XunitAssertMigrationMatcher.TryMatch(invocation, symbols, out var match))
+        var invocation = (IInvocationOperation)context.Operation;
+        if (!XunitAssertMigrationMatcher.TryMatch(invocation, symbols, out var match))
         {
             return;
         }

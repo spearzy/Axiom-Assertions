@@ -23,6 +23,7 @@ The current analyzer and code-fix wave focuses on high-confidence xUnit `Assert.
 | `Assert.Contains(expectedSubstring, actualString)` | `actualString.Should().Contain(expectedSubstring)` |
 | `Assert.DoesNotContain(expectedSubstring, actualString)` | `actualString.Should().NotContain(expectedSubstring)` |
 | `Assert.Single(subject)` | `subject.Should().ContainSingle()` |
+| `Assert.Single(subject, predicate)` | `subject.Should().ContainSingle(predicate)` or `.SingleItem` when you use the matched item |
 | `Assert.Same(expected, actual)` | `actual.Should().BeSameAs(expected)` |
 | `Assert.NotSame(expected, actual)` | `actual.Should().NotBeSameAs(expected)` |
 | `Assert.IsType<T>(actual)` | `actual.Should().BeOfType<T>()` |
@@ -42,7 +43,7 @@ It skips cases where the rewrite is not obviously semantics-preserving yet, incl
 
 - dictionary-key containment overloads
 - overloads with custom comparers, precision, inspectors, or messages
-- `Assert.Single(...)` when you use the returned value
+- `Assert.Single(subject)` when you use the returned value
 - `Assert.Throws<TException>(...)` when you use the returned exception
 - most structural-comparison assertions
 

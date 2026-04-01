@@ -141,13 +141,23 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
             shouldInvocation,
             assertionMethodName);
 
-        return match.ExpectedExpression is null
+        ExpressionSyntax rewrittenExpression = match.ExpectedExpression is null
             ? SyntaxFactory.InvocationExpression(assertionMethod, SyntaxFactory.ArgumentList())
             : SyntaxFactory.InvocationExpression(
                 assertionMethod,
                 SyntaxFactory.ArgumentList(
                     SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.Argument(match.ExpectedExpression.WithoutTrivia()))));
+                        SyntaxFactory.Argument(GetAssertionArgumentExpression(match).WithoutTrivia()))));
+
+        if (match.AppendSingleItem)
+        {
+            rewrittenExpression = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                rewrittenExpression,
+                SyntaxFactory.IdentifierName("SingleItem"));
+        }
+
+        return rewrittenExpression;
     }
 
     private static ExpressionSyntax BuildThrowReplacementExpression(
@@ -222,6 +232,13 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
         return withoutTrivia;
     }
 
+    private static ExpressionSyntax GetAssertionArgumentExpression(XunitAssertMigrationMatch match)
+    {
+        // The matcher already filtered AXM1019 down to safe predicate shapes.
+        // At this point we can forward the source expression as-is.
+        return match.ExpectedExpression!;
+    }
+
     private static bool NeedsParentheses(ExpressionSyntax expression)
     {
         return expression switch
@@ -258,6 +275,7 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
             XunitAssertMigrationKind.ContainSubstring => "Contain",
             XunitAssertMigrationKind.NotContainSubstring => "NotContain",
             XunitAssertMigrationKind.ContainSingle => "ContainSingle",
+            XunitAssertMigrationKind.ContainSingleMatching => "ContainSingle",
             XunitAssertMigrationKind.BeSameAs => "BeSameAs",
             XunitAssertMigrationKind.NotBeSameAs => "NotBeSameAs",
             XunitAssertMigrationKind.BeOfType => "BeOfType",

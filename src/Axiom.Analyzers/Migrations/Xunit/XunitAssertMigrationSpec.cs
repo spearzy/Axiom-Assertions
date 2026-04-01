@@ -18,6 +18,7 @@ internal enum XunitAssertMigrationKind
     ContainSubstring,
     NotContainSubstring,
     ContainSingle,
+    ContainSingleMatching,
     BeSameAs,
     NotBeSameAs,
     Throw,
@@ -172,6 +173,14 @@ internal static class XunitAssertMigrationSpecs
             "Migrate xUnit Assert.Single to Axiom",
             "xUnit Assert.Single(...) can be migrated to 'subject.Should().ContainSingle()'",
             "Convert to 'subject.Should().ContainSingle()'"),
+        new(
+            AxiomAnalyzerIds.MigrateXunitAssertSingleWithPredicate,
+            "Single",
+            2,
+            XunitAssertMigrationKind.ContainSingleMatching,
+            "Migrate xUnit Assert.Single predicate overload to Axiom",
+            "xUnit Assert.Single(collection, predicate) can be migrated to Axiom 'collection.Should().ContainSingle(...)'",
+            "Convert to 'collection.Should().ContainSingle(...)'"),
         new(
             AxiomAnalyzerIds.MigrateXunitAssertSame,
             "Same",

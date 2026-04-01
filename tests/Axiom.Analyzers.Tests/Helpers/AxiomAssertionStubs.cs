@@ -76,6 +76,10 @@ internal static class AxiomAssertionStubs
                 public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> ContainSingle<TCollection>(this Axiom.Assertions.ValueAssertions<TCollection> assertions)
                     where TCollection : IEnumerable
                     => default;
+
+                public static ContainSingleContinuation<Axiom.Assertions.ValueAssertions<TCollection>, TItem> ContainSingle<TCollection, TItem>(this Axiom.Assertions.ValueAssertions<TCollection> assertions, Func<TItem, bool> predicate)
+                    where TCollection : IEnumerable<TItem>
+                    => default;
             }
         }
 
@@ -119,6 +123,12 @@ internal static class AxiomAssertionStubs
             public readonly struct AndContinuation<TAssertions>
             {
                 public TAssertions And => throw null!;
+            }
+
+            public readonly struct ContainSingleContinuation<TAssertions, TItem>
+            {
+                public TAssertions And => throw null!;
+                public TItem SingleItem => throw null!;
             }
 
             public readonly struct SuccessfulTaskContinuation<TParent, TResult> { }
