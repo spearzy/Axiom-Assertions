@@ -14,7 +14,8 @@ internal sealed class XunitAssertMigrationMatch
         ExpressionSyntax subjectExpression,
         ExpressionSyntax? expectedExpression,
         TypeSyntax? typeArgumentSyntax,
-        bool requiresAssertionsExtensionsNamespace)
+        bool requiresAssertionsExtensionsNamespace,
+        bool appendSingleItem)
     {
         Spec = spec;
         InvocationSyntax = invocationSyntax;
@@ -22,6 +23,7 @@ internal sealed class XunitAssertMigrationMatch
         ExpectedExpression = expectedExpression;
         TypeArgumentSyntax = typeArgumentSyntax;
         RequiresAssertionsExtensionsNamespace = requiresAssertionsExtensionsNamespace;
+        AppendSingleItem = appendSingleItem;
     }
 
     public XunitAssertMigrationSpec Spec { get; }
@@ -30,6 +32,7 @@ internal sealed class XunitAssertMigrationMatch
     public ExpressionSyntax? ExpectedExpression { get; }
     public TypeSyntax? TypeArgumentSyntax { get; }
     public bool RequiresAssertionsExtensionsNamespace { get; }
+    public bool AppendSingleItem { get; }
 }
 
 internal static class XunitAssertMigrationMatcher
@@ -55,6 +58,8 @@ internal static class XunitAssertMigrationMatcher
             return false;
         }
 
+        var resultIsConsumed = IsResultConsumed(invocation);
+
         // One xUnit method name can map to more than one migration rule. `Contains(...)` is the
         // main example: collection containment and string containment use the same method name.
         foreach (var spec in XunitAssertMigrationSpecs.GetByMethodName(invocation.TargetMethod.Name))
@@ -68,7 +73,7 @@ internal static class XunitAssertMigrationMatcher
             }
 
             // Each rule has its own safety check. If this call is not a clean fit, keep looking.
-            if (!IsSafeSupportedOverload(invocation, spec, symbols))
+            if (!IsSafeSupportedOverload(invocation, spec, symbols, resultIsConsumed))
             {
                 continue;
             }
@@ -93,7 +98,8 @@ internal static class XunitAssertMigrationMatcher
                 subjectExpression,
                 expectedExpression,
                 typeArgumentSyntax,
-                RequiresAssertionsExtensionsNamespace(spec.Kind, GetSubjectType(spec.Kind, invocation.TargetMethod.Parameters)));
+                RequiresAssertionsExtensionsNamespace(spec.Kind, GetSubjectType(spec.Kind, invocation.TargetMethod.Parameters)),
+                appendSingleItem: resultIsConsumed && spec.Kind is XunitAssertMigrationKind.ContainSingleMatching);
 
             return true;
         }
@@ -119,7 +125,8 @@ internal static class XunitAssertMigrationMatcher
     private static bool IsSafeSupportedOverload(
         IInvocationOperation invocation,
         XunitAssertMigrationSpec spec,
-        XunitAssertMigrationSymbols symbols)
+        XunitAssertMigrationSymbols symbols,
+        bool resultIsConsumed)
     {
         // Pick the safety check that matches the rule we are trying to apply.
         var method = invocation.TargetMethod;
@@ -128,43 +135,46 @@ internal static class XunitAssertMigrationMatcher
         {
             case XunitAssertMigrationKind.Be:
             case XunitAssertMigrationKind.NotBe:
-                return IsSupportedEqualityOverload(invocation, symbols);
+                return !resultIsConsumed && IsSupportedEqualityOverload(invocation, symbols);
 
             case XunitAssertMigrationKind.BeTrue:
             case XunitAssertMigrationKind.BeFalse:
-                return method.Parameters[0].Type.SpecialType == SpecialType.System_Boolean;
+                return !resultIsConsumed && method.Parameters[0].Type.SpecialType == SpecialType.System_Boolean;
 
             case XunitAssertMigrationKind.BeEmpty:
             case XunitAssertMigrationKind.NotBeEmpty:
-                return !symbols.IsAsyncEnumerableLike(method.Parameters[0].Type);
+                return !resultIsConsumed && !symbols.IsAsyncEnumerableLike(method.Parameters[0].Type);
 
             case XunitAssertMigrationKind.BeNull:
             case XunitAssertMigrationKind.NotBeNull:
-                return IsSupportedNullOverload(invocation, symbols);
+                return !resultIsConsumed && IsSupportedNullOverload(invocation, symbols);
 
             case XunitAssertMigrationKind.Contain:
             case XunitAssertMigrationKind.NotContain:
-                return IsSupportedCollectionContainmentOverload(method, symbols);
+                return !resultIsConsumed && IsSupportedCollectionContainmentOverload(method, symbols);
 
             case XunitAssertMigrationKind.ContainSubstring:
             case XunitAssertMigrationKind.NotContainSubstring:
-                return IsSupportedStringContainmentOverload(invocation, symbols);
+                return !resultIsConsumed && IsSupportedStringContainmentOverload(invocation, symbols);
 
             case XunitAssertMigrationKind.ContainSingle:
-                return IsSupportedSingleOverload(method, symbols);
+                return !resultIsConsumed && IsSupportedSingleOverload(method, symbols);
+
+            case XunitAssertMigrationKind.ContainSingleMatching:
+                return IsSupportedSinglePredicateOverload(invocation, symbols);
 
             case XunitAssertMigrationKind.BeSameAs:
             case XunitAssertMigrationKind.NotBeSameAs:
-                return IsSupportedReferenceEqualityOverload(invocation, symbols);
+                return !resultIsConsumed && IsSupportedReferenceEqualityOverload(invocation, symbols);
 
             case XunitAssertMigrationKind.Throw:
-                return IsSupportedThrowsOverload(method, symbols);
+                return !resultIsConsumed && IsSupportedThrowsOverload(method, symbols);
 
             case XunitAssertMigrationKind.BeOfType:
-                return IsSupportedIsTypeOverload(invocation, symbols);
+                return !resultIsConsumed && IsSupportedIsTypeOverload(invocation, symbols);
 
             case XunitAssertMigrationKind.BeAssignableTo:
-                return IsSupportedIsAssignableFromOverload(invocation, symbols);
+                return !resultIsConsumed && IsSupportedIsAssignableFromOverload(invocation, symbols);
 
             default:
                 return false;
@@ -196,13 +206,19 @@ internal static class XunitAssertMigrationMatcher
     {
         // Roslyn keeps conversions as separate nodes. We usually want the original expression type,
         // not the final parameter type after conversion.
-        var operation = argument.Value;
+        var operation = UnwrapConversions(argument.Value);
+
+        return operation.Type ?? argument.Parameter?.Type;
+    }
+
+    private static IOperation UnwrapConversions(IOperation operation)
+    {
         while (operation is IConversionOperation conversion)
         {
             operation = conversion.Operand;
         }
 
-        return operation.Type ?? argument.Parameter?.Type;
+        return operation;
     }
 
     private static bool IsSupportedNullOverload(
@@ -291,6 +307,64 @@ internal static class XunitAssertMigrationMatcher
                !symbols.IsSpanOrMemoryLike(subjectType);
     }
 
+    private static bool IsSupportedSinglePredicateOverload(
+        IInvocationOperation invocation,
+        XunitAssertMigrationSymbols symbols)
+    {
+        var method = invocation.TargetMethod;
+        // This rule only covers the generic xUnit shape:
+        // Assert.Single<T>(IEnumerable<T> collection, Predicate<T> predicate)
+        if (!method.IsGenericMethod ||
+            method.TypeArguments.Length != 1 ||
+            method.Parameters.Length != 2 ||
+            invocation.Arguments.Length != 2)
+        {
+            return false;
+        }
+
+        var subjectType = GetArgumentType(invocation.Arguments[0]);
+        if (subjectType is null ||
+            subjectType.SpecialType == SpecialType.System_String ||
+            !symbols.IsGenericEnumerableLike(subjectType) ||
+            symbols.IsAsyncEnumerableLike(subjectType) ||
+            symbols.IsSpanOrMemoryLike(subjectType))
+        {
+            return false;
+        }
+
+        // The second argument must stand on its own as a callable expression.
+        // We skip target-typed cases like null/default and delegate variables.
+        return symbols.IsPredicateType(method.Parameters[1].Type) &&
+               IsSupportedSinglePredicateExpression(invocation.Arguments[1]);
+    }
+
+    private static bool IsSupportedSinglePredicateExpression(IArgumentOperation predicateArgument)
+    {
+        // Roslyn wraps lambdas and method groups in delegate creation/conversion nodes.
+        // Peel those away, then check the real expression underneath.
+        var operation = UnwrapSinglePredicateExpression(predicateArgument.Value);
+        return operation is IAnonymousFunctionOperation or IMethodReferenceOperation;
+    }
+
+    private static IOperation UnwrapSinglePredicateExpression(IOperation operation)
+    {
+        // Roslyn can wrap the user's predicate in conversion/delegate nodes.
+        // Remove them so we can inspect the expression they actually wrote.        while (true)
+        {
+            switch (operation)
+            {
+                case IConversionOperation conversion:
+                    operation = conversion.Operand;
+                    continue;
+                case IDelegateCreationOperation delegateCreation:
+                    operation = delegateCreation.Target;
+                    continue;
+                default:
+                    return operation;
+            }
+        }
+    }
+
     private static bool IsSupportedThrowsOverload(
         IMethodSymbol method,
         XunitAssertMigrationSymbols symbols)
@@ -370,16 +444,21 @@ internal static class XunitAssertMigrationMatcher
     private static ExpressionSyntax? GetExpectedExpression(
         XunitAssertMigrationKind kind,
         SeparatedSyntaxList<ArgumentSyntax> arguments)
-        => kind is XunitAssertMigrationKind.Be or
-                 XunitAssertMigrationKind.NotBe or
-                 XunitAssertMigrationKind.BeSameAs or
-                 XunitAssertMigrationKind.NotBeSameAs or
-                 XunitAssertMigrationKind.Contain or
-                 XunitAssertMigrationKind.NotContain or
-                 XunitAssertMigrationKind.ContainSubstring or
-                 XunitAssertMigrationKind.NotContainSubstring
-            ? arguments[0].Expression
-            : null;
+        => kind switch
+        {
+            XunitAssertMigrationKind.Be or
+            XunitAssertMigrationKind.NotBe or
+            XunitAssertMigrationKind.BeSameAs or
+            XunitAssertMigrationKind.NotBeSameAs or
+            XunitAssertMigrationKind.Contain or
+            XunitAssertMigrationKind.NotContain or
+            XunitAssertMigrationKind.ContainSubstring or
+            XunitAssertMigrationKind.NotContainSubstring
+                => arguments[0].Expression,
+            XunitAssertMigrationKind.ContainSingleMatching
+                => arguments[1].Expression,
+            _ => null,
+        };
 
     private static TypeSyntax? GetTypeArgumentSyntax(
         XunitAssertMigrationKind kind,
@@ -421,7 +500,19 @@ internal static class XunitAssertMigrationMatcher
             XunitAssertMigrationKind.ContainSubstring => false,
             XunitAssertMigrationKind.NotContainSubstring => false,
             XunitAssertMigrationKind.ContainSingle => true,
+            XunitAssertMigrationKind.ContainSingleMatching => true,
             _ => false,
         };
+    }
+
+    private static bool IsResultConsumed(IInvocationOperation invocation)
+    {
+        IOperation current = invocation;
+        while (current.Parent is IConversionOperation conversion)
+        {
+            current = conversion;
+        }
+
+        return current.Parent is not IExpressionStatementOperation;
     }
 }

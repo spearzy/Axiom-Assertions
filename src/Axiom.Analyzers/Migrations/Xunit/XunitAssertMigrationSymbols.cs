@@ -12,6 +12,7 @@ internal sealed class XunitAssertMigrationSymbols
         INamedTypeSymbol? dictionaryType,
         INamedTypeSymbol? readOnlyDictionaryType,
         INamedTypeSymbol? nonGenericDictionaryType,
+        INamedTypeSymbol? predicateType,
         INamedTypeSymbol? actionType,
         INamedTypeSymbol? funcType,
         INamedTypeSymbol? taskType,
@@ -30,6 +31,7 @@ internal sealed class XunitAssertMigrationSymbols
         DictionaryType = dictionaryType;
         ReadOnlyDictionaryType = readOnlyDictionaryType;
         NonGenericDictionaryType = nonGenericDictionaryType;
+        PredicateType = predicateType;
         ActionType = actionType;
         FuncType = funcType;
         TaskType = taskType;
@@ -50,6 +52,7 @@ internal sealed class XunitAssertMigrationSymbols
     private INamedTypeSymbol? DictionaryType { get; }
     private INamedTypeSymbol? ReadOnlyDictionaryType { get; }
     private INamedTypeSymbol? NonGenericDictionaryType { get; }
+    public INamedTypeSymbol? PredicateType { get; }
     public INamedTypeSymbol? ActionType { get; }
     private INamedTypeSymbol? FuncType { get; }
     private INamedTypeSymbol? TaskType { get; }
@@ -73,6 +76,7 @@ internal sealed class XunitAssertMigrationSymbols
             compilation.GetTypeByMetadataName("System.Collections.Generic.IDictionary`2"),
             compilation.GetTypeByMetadataName("System.Collections.Generic.IReadOnlyDictionary`2"),
             compilation.GetTypeByMetadataName("System.Collections.IDictionary"),
+            compilation.GetTypeByMetadataName("System.Predicate`1"),
             compilation.GetTypeByMetadataName("System.Action"),
             compilation.GetTypeByMetadataName("System.Func`1"),
             compilation.GetTypeByMetadataName("System.Threading.Tasks.Task"),
@@ -193,6 +197,13 @@ internal sealed class XunitAssertMigrationSymbols
     public bool SupportsStringContainmentMigrationReceiver(ITypeSymbol type)
     {
         return IsStringType(type);
+    }
+
+    public bool IsPredicateType(ITypeSymbol type)
+    {
+        return PredicateType is not null &&
+               type is INamedTypeSymbol namedType &&
+               SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, PredicateType);
     }
 
     private bool UsesSpecializedShouldReceiver(ITypeSymbol type)

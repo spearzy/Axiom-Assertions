@@ -103,6 +103,7 @@ Rules:
 - `AXM1016` for `Assert.IsAssignableFrom<T>(actual)`
 - `AXM1017` for `Assert.Contains(expectedSubstring, actualString)`
 - `AXM1018` for `Assert.DoesNotContain(expectedSubstring, actualString)`
+- `AXM1019` for `Assert.Single(collection, predicate)`, appending `.SingleItem` when the matched item is used
 
 The migration support is intentionally narrow and high-confidence. It only offers diagnostics and code fixes for xUnit assertion shapes that map cleanly to Axiom's fluent API without changing value flow or subtle overload semantics.
 
@@ -114,6 +115,7 @@ Assert.True(condition);
 Assert.Empty(values);
 Assert.Contains(expected, values);
 Assert.Contains("sub", actual);
+var match = Assert.Single(values, value => value > 0);
 Assert.Throws<InvalidOperationException>(() => work());
 ```
 
@@ -125,6 +127,7 @@ condition.Should().BeTrue();
 values.Should().BeEmpty();
 values.Should().Contain(expected);
 actual.Should().Contain("sub");
+var match = values.Should().ContainSingle(value => value > 0).SingleItem;
 new Action(() => work()).Should().Throw<InvalidOperationException>();
 ```
 
@@ -134,7 +137,7 @@ They also intentionally skip shapes that are not obviously semantics-preserving 
 
 - overloads with custom comparers, precision, inspectors, or user messages
 - dictionary-key containment overloads
-- `Assert.Single(...)` when the returned item is consumed
+- `Assert.Single(subject)` when the returned item is consumed
 - `Assert.Throws<TException>(...)` when the returned exception is consumed
 
 For a broader mapping table and practical migration notes, see [Migrating to Axiom](migrating-to-axiom.md).
