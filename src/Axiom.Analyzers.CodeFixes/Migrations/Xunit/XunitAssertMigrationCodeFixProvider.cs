@@ -50,7 +50,7 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
 
         context.RegisterCodeFix(
             CodeAction.Create(
-                match.Spec.CodeFixTitle,
+                GetCodeFixTitle(match),
                 cancellationToken => ApplyFixAsync(context.Document, match, cancellationToken),
                 equivalenceKey: match.Spec.DiagnosticId),
             context.Diagnostics);
@@ -237,6 +237,21 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
         // The matcher already filtered AXM1019 down to safe predicate shapes.
         // At this point we can forward the source expression as-is.
         return match.ExpectedExpression!;
+    }
+
+    private static string GetCodeFixTitle(XunitAssertMigrationMatch match)
+    {
+        if (match.AppendSingleItem && match.Spec.Kind is XunitAssertMigrationKind.ContainSingle)
+        {
+            return "Convert to 'subject.Should().ContainSingle().SingleItem'";
+        }
+
+        if (match.AppendSingleItem && match.Spec.Kind is XunitAssertMigrationKind.ContainSingleMatching)
+        {
+            return "Convert to 'subject.Should().ContainSingle(...).SingleItem'";
+        }
+
+        return match.Spec.CodeFixTitle;
     }
 
     private static bool NeedsParentheses(ExpressionSyntax expression)

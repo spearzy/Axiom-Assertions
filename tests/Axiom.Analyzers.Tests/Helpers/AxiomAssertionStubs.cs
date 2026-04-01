@@ -73,6 +73,31 @@ internal static class AxiomAssertionStubs
                     where TCollection : IEnumerable
                     => default;
 
+                public static ContainSingleContinuation<Axiom.Assertions.ValueAssertions<TCollection>, TItem> ContainSingle<TCollection, TItem>(this Axiom.Assertions.ValueAssertions<TCollection> assertions)
+                    where TCollection : IEnumerable<TItem>
+                    => default;
+
+                public static ContainSingleContinuation<Axiom.Assertions.ValueAssertions<TItem[]>, TItem> ContainSingle<TItem>(this Axiom.Assertions.ValueAssertions<TItem[]> assertions)
+                    => default;
+
+                public static ContainSingleContinuation<Axiom.Assertions.ValueAssertions<List<TItem>>, TItem> ContainSingle<TItem>(this Axiom.Assertions.ValueAssertions<List<TItem>> assertions)
+                    => default;
+
+                public static ContainSingleContinuation<Axiom.Assertions.ValueAssertions<IEnumerable<TItem>>, TItem> ContainSingle<TItem>(this Axiom.Assertions.ValueAssertions<IEnumerable<TItem>> assertions)
+                    => default;
+
+                public static ContainSingleContinuation<Axiom.Assertions.ValueAssertions<ICollection<TItem>>, TItem> ContainSingle<TItem>(this Axiom.Assertions.ValueAssertions<ICollection<TItem>> assertions)
+                    => default;
+
+                public static ContainSingleContinuation<Axiom.Assertions.ValueAssertions<IList<TItem>>, TItem> ContainSingle<TItem>(this Axiom.Assertions.ValueAssertions<IList<TItem>> assertions)
+                    => default;
+
+                public static ContainSingleContinuation<Axiom.Assertions.ValueAssertions<IReadOnlyCollection<TItem>>, TItem> ContainSingle<TItem>(this Axiom.Assertions.ValueAssertions<IReadOnlyCollection<TItem>> assertions)
+                    => default;
+
+                public static ContainSingleContinuation<Axiom.Assertions.ValueAssertions<IReadOnlyList<TItem>>, TItem> ContainSingle<TItem>(this Axiom.Assertions.ValueAssertions<IReadOnlyList<TItem>> assertions)
+                    => default;
+
                 public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> ContainSingle<TCollection>(this Axiom.Assertions.ValueAssertions<TCollection> assertions)
                     where TCollection : IEnumerable
                     => default;

@@ -171,7 +171,7 @@ internal static class XunitAssertMigrationSpecs
             1,
             XunitAssertMigrationKind.ContainSingle,
             "Migrate xUnit Assert.Single to Axiom",
-            "xUnit Assert.Single(...) can be migrated to 'subject.Should().ContainSingle()'",
+            "xUnit Assert.Single(...) can be migrated to 'subject.Should().ContainSingle()' and append '.SingleItem' when the single item is used",
             "Convert to 'subject.Should().ContainSingle()'"),
         new(
             AxiomAnalyzerIds.MigrateXunitAssertSingleWithPredicate,

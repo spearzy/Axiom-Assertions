@@ -95,7 +95,7 @@ Rules:
 - `AXM1008` for `Assert.NotEmpty(subject)`
 - `AXM1009` for `Assert.Contains(item, collection)`
 - `AXM1010` for `Assert.DoesNotContain(item, collection)`
-- `AXM1011` for `Assert.Single(subject)` when the return value is not consumed
+- `AXM1011` for `Assert.Single(subject)`, appending `.SingleItem` when the single item is used
 - `AXM1012` for `Assert.Same(expected, actual)`
 - `AXM1013` for `Assert.NotSame(expected, actual)`
 - `AXM1014` for `Assert.Throws<TException>(...)` when the returned exception is not consumed
@@ -115,6 +115,7 @@ Assert.True(condition);
 Assert.Empty(values);
 Assert.Contains(expected, values);
 Assert.Contains("sub", actual);
+var item = Assert.Single(values);
 var match = Assert.Single(values, value => value > 0);
 Assert.Throws<InvalidOperationException>(() => work());
 ```
@@ -127,6 +128,7 @@ condition.Should().BeTrue();
 values.Should().BeEmpty();
 values.Should().Contain(expected);
 actual.Should().Contain("sub");
+var item = values.Should().ContainSingle().SingleItem;
 var match = values.Should().ContainSingle(value => value > 0).SingleItem;
 new Action(() => work()).Should().Throw<InvalidOperationException>();
 ```
@@ -137,7 +139,7 @@ They also intentionally skip shapes that are not obviously semantics-preserving 
 
 - overloads with custom comparers, precision, inspectors, or user messages
 - dictionary-key containment overloads
-- `Assert.Single(subject)` when the returned item is consumed
+- nongeneric `Assert.Single(subject)` calls when the returned item is used
 - `Assert.Throws<TException>(...)` when the returned exception is consumed
 
 For a broader mapping table and practical migration notes, see [Migrating to Axiom](migrating-to-axiom.md).
