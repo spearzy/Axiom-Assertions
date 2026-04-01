@@ -25,4 +25,6 @@ public static class AxiomAnalyzerIds
     public const string MigrateXunitAssertSingleWithPredicate = "AXM1019";
     public const string MigrateXunitAssertContainsKey = "AXM1020";
     public const string MigrateXunitAssertDoesNotContainKey = "AXM1021";
+    public const string MigrateXunitAssertStartsWith = "AXM1022";
+    public const string MigrateXunitAssertEndsWith = "AXM1023";
 }

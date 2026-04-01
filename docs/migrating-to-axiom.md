@@ -22,6 +22,8 @@ The current analyzer and code-fix wave focuses on high-confidence xUnit `Assert.
 | `Assert.DoesNotContain(item, collection)` | `collection.Should().NotContain(item)` |
 | `Assert.Contains(expectedSubstring, actualString)` | `actualString.Should().Contain(expectedSubstring)` |
 | `Assert.DoesNotContain(expectedSubstring, actualString)` | `actualString.Should().NotContain(expectedSubstring)` |
+| `Assert.StartsWith(expectedPrefix, actualString)` | `actualString.Should().StartWith(expectedPrefix)` |
+| `Assert.EndsWith(expectedSuffix, actualString)` | `actualString.Should().EndWith(expectedSuffix)` |
 | `Assert.Contains(key, dictionary)` | `dictionary.Should().ContainKey(key)` or `.WhoseValue` when you use the associated value |
 | `Assert.DoesNotContain(key, dictionary)` | `dictionary.Should().NotContainKey(key)` |
 | `Assert.Single(subject)` | `subject.Should().ContainSingle()` or `.SingleItem` when you use the item |
@@ -47,6 +49,8 @@ The migration tooling is conservative on purpose.
 It skips cases where the rewrite is not obviously semantics-preserving yet, including:
 
 - overloads with custom comparers, precision, inspectors, or messages
+- `Assert.StartsWith(...)` and `Assert.EndsWith(...)` overloads that use `StringComparison`, `Memory<char>`, or `Span<char>`
+- `Assert.StartsWith(...)` and `Assert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string
 - nongeneric `Assert.Single(subject)` when you use the returned value
 - `Assert.Throws<TException>(...)` when you use the returned exception outside the `string? paramName, Action testCode` overload
 - `Assert.Throws<TException>(paramName, ...)` when `paramName` is not an obvious non-null constant string

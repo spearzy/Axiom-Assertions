@@ -106,6 +106,8 @@ Rules:
 - `AXM1019` for `Assert.Single(collection, predicate)`, appending `.SingleItem` when the matched item is used
 - `AXM1020` for `Assert.Contains(key, dictionary)`, appending `.WhoseValue` when the associated value is used
 - `AXM1021` for `Assert.DoesNotContain(key, dictionary)`
+- `AXM1022` for `Assert.StartsWith(expectedPrefix, actualString)`
+- `AXM1023` for `Assert.EndsWith(expectedSuffix, actualString)`
 
 The migration support is intentionally narrow and high-confidence. It only offers diagnostics and code fixes for xUnit assertion shapes that map cleanly to Axiom's fluent API without changing value flow or subtle overload semantics.
 
@@ -117,6 +119,8 @@ Assert.True(condition);
 Assert.Empty(values);
 Assert.Contains(expected, values);
 Assert.Contains("sub", actual);
+Assert.StartsWith("pre", actual);
+Assert.EndsWith("suf", actual);
 Assert.Contains(key, lookup);
 var found = Assert.Contains(key, lookup);
 var item = Assert.Single(values);
@@ -133,6 +137,8 @@ condition.Should().BeTrue();
 values.Should().BeEmpty();
 values.Should().Contain(expected);
 actual.Should().Contain("sub");
+actual.Should().StartWith("pre");
+actual.Should().EndWith("suf");
 lookup.Should().ContainKey(key);
 var found = lookup.Should().ContainKey(key).WhoseValue;
 var item = values.Should().ContainSingle().SingleItem;
@@ -148,6 +154,8 @@ The dictionary-key rules follow Axiom's `ContainKey` and `NotContainKey` receive
 They also intentionally skip shapes that are not obviously semantics-preserving yet, including:
 
 - overloads with custom comparers, precision, inspectors, or user messages
+- `Assert.StartsWith(...)` and `Assert.EndsWith(...)` overloads that use `StringComparison`, `Memory<char>`, or `Span<char>`
+- `Assert.StartsWith(...)` and `Assert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string
 - nongeneric `Assert.Single(subject)` calls when the returned item is used
 - `Assert.Throws<TException>(...)` consumed-result shapes outside the `string? paramName, Action testCode` overload
 - `Assert.Throws<TException>(paramName, ...)` when `paramName` is not an obvious non-null constant string
