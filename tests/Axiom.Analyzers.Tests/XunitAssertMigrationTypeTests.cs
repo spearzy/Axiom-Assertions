@@ -5,11 +5,11 @@ namespace Axiom.Analyzers.Tests;
 
 public sealed class XunitAssertMigrationTypeTests
 {
-        [Fact]
-        public async Task AssertIsType_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertIsType_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using Xunit;
 
                 public sealed class Sample
@@ -21,8 +21,8 @@ public sealed class XunitAssertMigrationTypeTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using Xunit;
                 using Axiom.Assertions;
 
@@ -35,14 +35,14 @@ public sealed class XunitAssertMigrationTypeTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task AssertIsType_StringActual_IsNotFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertIsType_StringActual_IsNotFlagged()
+    {
+        const string source =
+            """
                 using Xunit;
 
                 public sealed class Sample
@@ -54,14 +54,14 @@ public sealed class XunitAssertMigrationTypeTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task AssertIsType_NonGenericOverload_IsNotFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertIsType_NonGenericOverload_IsNotFlagged()
+    {
+        const string source =
+            """
                 using System;
                 using Xunit;
 
@@ -74,14 +74,14 @@ public sealed class XunitAssertMigrationTypeTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task AssertIsType_ResultIsConsumed_IsNotFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertIsType_ResultIsConsumed_IsNotFlagged()
+    {
+        const string source =
+            """
                 using Xunit;
 
                 public sealed class Sample
@@ -94,14 +94,14 @@ public sealed class XunitAssertMigrationTypeTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task AssertIsAssignableFrom_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertIsAssignableFrom_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using Xunit;
 
                 public sealed class Sample
@@ -113,8 +113,8 @@ public sealed class XunitAssertMigrationTypeTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using Xunit;
                 using Axiom.Assertions;
 
@@ -127,14 +127,14 @@ public sealed class XunitAssertMigrationTypeTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task AssertIsAssignableFrom_StringActual_IsNotFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertIsAssignableFrom_StringActual_IsNotFlagged()
+    {
+        const string source =
+            """
                 using Xunit;
 
                 public sealed class Sample
@@ -146,14 +146,14 @@ public sealed class XunitAssertMigrationTypeTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task AssertIsAssignableFrom_NonGenericOverload_IsNotFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertIsAssignableFrom_NonGenericOverload_IsNotFlagged()
+    {
+        const string source =
+            """
                 using System;
                 using Xunit;
 
@@ -166,14 +166,14 @@ public sealed class XunitAssertMigrationTypeTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task AssertIsAssignableFrom_ResultIsConsumed_IsNotFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertIsAssignableFrom_ResultIsConsumed_IsNotFlagged()
+    {
+        const string source =
+            """
                 using System;
                 using Xunit;
 
@@ -187,14 +187,14 @@ public sealed class XunitAssertMigrationTypeTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task FullyQualifiedXunitAssertIsType_IsFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task FullyQualifiedXunitAssertIsType_IsFlagged()
+    {
+        const string source =
+            """
                 public sealed class Sample
                 {
                     public void Check(object actual)
@@ -204,14 +204,14 @@ public sealed class XunitAssertMigrationTypeTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task FullyQualifiedXunitAssertIsAssignableFrom_IsFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task FullyQualifiedXunitAssertIsAssignableFrom_IsFlagged()
+    {
+        const string source =
+            """
                 public sealed class Sample
                 {
                     public void Check(object actual)
@@ -221,7 +221,7 @@ public sealed class XunitAssertMigrationTypeTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
 }

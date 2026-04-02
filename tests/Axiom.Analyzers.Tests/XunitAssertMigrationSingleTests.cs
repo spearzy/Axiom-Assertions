@@ -5,11 +5,11 @@ namespace Axiom.Analyzers.Tests;
 
 public sealed class XunitAssertMigrationSingleTests
 {
-        [Fact]
-        public async Task AssertSingle_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using Xunit;
 
@@ -22,8 +22,8 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using System.Collections.Generic;
                 using Xunit;
                 using Axiom.Assertions;
@@ -38,14 +38,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task AssertSingle_NonGenericEnumerable_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_NonGenericEnumerable_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using System.Collections;
                 using Xunit;
 
@@ -58,8 +58,8 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using System.Collections;
                 using Xunit;
                 using Axiom.Assertions;
@@ -74,14 +74,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task AssertSingle_UsedResult_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_UsedResult_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using Xunit;
 
@@ -95,8 +95,8 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using System.Collections.Generic;
                 using Xunit;
                 using Axiom.Assertions;
@@ -112,14 +112,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task AssertSingle_UsedResult_ReadOnlyList_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_UsedResult_ReadOnlyList_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using Xunit;
 
@@ -132,8 +132,8 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using System.Collections.Generic;
                 using Xunit;
                 using Axiom.Assertions;
@@ -148,14 +148,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task AssertSingle_ReturnExpression_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_ReturnExpression_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using Xunit;
 
@@ -168,8 +168,8 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using System.Collections.Generic;
                 using Xunit;
                 using Axiom.Assertions;
@@ -184,14 +184,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task AssertSingle_ArgumentPosition_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_ArgumentPosition_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using Xunit;
 
@@ -206,8 +206,8 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using System.Collections.Generic;
                 using Xunit;
                 using Axiom.Assertions;
@@ -224,14 +224,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task AssertSingle_PredicateOverload_UnusedResult_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_PredicateOverload_UnusedResult_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using Xunit;
 
@@ -244,8 +244,8 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using System.Collections.Generic;
                 using Xunit;
                 using Axiom.Assertions;
@@ -260,14 +260,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task AssertSingle_PredicateOverload_UnusedResult_IsFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_PredicateOverload_UnusedResult_IsFlagged()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using Xunit;
 
@@ -280,14 +280,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task AssertSingle_PredicateOverload_UsedResult_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_PredicateOverload_UsedResult_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using Xunit;
 
@@ -301,8 +301,8 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using System.Collections.Generic;
                 using Xunit;
                 using Axiom.Assertions;
@@ -318,14 +318,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task AssertSingle_PredicateMethodGroup_UsedResult_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_PredicateMethodGroup_UsedResult_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using Xunit;
 
@@ -340,8 +340,8 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using System.Collections.Generic;
                 using Xunit;
                 using Axiom.Assertions;
@@ -358,14 +358,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task AssertSingle_PredicateVariable_IsNotFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_PredicateVariable_IsNotFlagged()
+    {
+        const string source =
+            """
                 using System;
                 using System.Collections.Generic;
                 using Xunit;
@@ -380,14 +380,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task AssertSingle_PredicateNullLiteral_IsNotFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_PredicateNullLiteral_IsNotFlagged()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using Xunit;
 
@@ -400,14 +400,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task AssertSingle_PredicateDefaultLiteral_IsNotFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_PredicateDefaultLiteral_IsNotFlagged()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using Xunit;
 
@@ -420,14 +420,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task AssertSingle_PredicateTypedDefault_IsNotFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_PredicateTypedDefault_IsNotFlagged()
+    {
+        const string source =
+            """
                 using System;
                 using System.Collections.Generic;
                 using Xunit;
@@ -441,14 +441,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task FullyQualifiedXunitAssertSingle_UsedResult_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task FullyQualifiedXunitAssertSingle_UsedResult_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
 
                 public sealed class Sample
@@ -460,8 +460,8 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using System.Collections.Generic;
                 using Axiom.Assertions;
                 using Axiom.Assertions.Extensions;
@@ -475,14 +475,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task StaticUsingSingle_UsedResult_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task StaticUsingSingle_UsedResult_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using static Xunit.Assert;
 
@@ -495,8 +495,8 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using System.Collections.Generic;
                 using static Xunit.Assert;
                 using Axiom.Assertions;
@@ -511,14 +511,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
-        [Fact]
-        public async Task AssertSingle_ReturnValueUsage_IsNotFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_ReturnValueUsage_IsNotFlagged()
+    {
+        const string source =
+            """
                 using System.Collections;
                 using Xunit;
 
@@ -532,14 +532,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task AlreadyMigratedContainSingleSingleItem_IsNotFlagged()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AlreadyMigratedContainSingleSingleItem_IsNotFlagged()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using Axiom.Assertions;
                 using Axiom.Assertions.Extensions;
@@ -553,14 +553,14 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
-        }
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
 
-        [Fact]
-        public async Task AssertSingle_PredicateOverload_WithStaticUsing_IsFlagged_AndFixed()
-        {
-            const string source =
-                """
+    [Fact]
+    public async Task AssertSingle_PredicateOverload_WithStaticUsing_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
                 using System.Collections.Generic;
                 using static Xunit.Assert;
 
@@ -573,8 +573,8 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            const string fixedSource =
-                """
+        const string fixedSource =
+            """
                 using System.Collections.Generic;
                 using static Xunit.Assert;
                 using Axiom.Assertions;
@@ -589,7 +589,7 @@ public sealed class XunitAssertMigrationSingleTests
                 }
                 """;
 
-            await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
-        }
+        await AnalyzerVerifier.VerifyAppliedCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
 
 }
