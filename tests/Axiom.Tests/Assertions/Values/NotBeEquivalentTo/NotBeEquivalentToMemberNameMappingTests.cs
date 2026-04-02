@@ -7,8 +7,8 @@ public sealed class NotBeEquivalentToMemberNameMappingTests
     [Fact]
     public void GivenMappedMemberNames_WhenMappedMembersMatch_ThenNotBeEquivalentToThrows()
     {
-        var actual = new ActualPerson { GivenName = "Ada", Age = 36 };
-        var expected = new ExpectedPerson { FirstName = "Ada", Age = 36 };
+        var actual = new ActualPerson { GivenName = "Bob", Age = 36 };
+        var expected = new ExpectedPerson { FirstName = "Bob", Age = 36 };
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
             actual.Should().NotBeEquivalentTo(
@@ -25,8 +25,8 @@ public sealed class NotBeEquivalentToMemberNameMappingTests
     [Fact]
     public void GivenMappedMemberNames_WhenMappedMembersDiffer_ThenNotBeEquivalentToDoesNotThrow()
     {
-        var actual = new ActualPerson { GivenName = "Ada", Age = 36 };
-        var expected = new ExpectedPerson { FirstName = "Grace", Age = 36 };
+        var actual = new ActualPerson { GivenName = "Bob", Age = 36 };
+        var expected = new ExpectedPerson { FirstName = "Alice", Age = 36 };
 
         var ex = Record.Exception(() =>
             actual.Should().NotBeEquivalentTo(

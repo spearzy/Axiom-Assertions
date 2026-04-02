@@ -5,8 +5,8 @@ public sealed class NotBeEquivalentToStructuralTypeComparisonTests
     [Fact]
     public void GivenUnrelatedTypesWithMatchingMemberNames_WhenStrictRuntimeTypesDisabled_ThenNotBeEquivalentToThrows()
     {
-        var actual = new ActualPerson { Name = "Ada", Age = 36 };
-        var expected = new ExpectedPerson { Name = "Ada", Age = 36 };
+        var actual = new ActualPerson { Name = "Bob", Age = 36 };
+        var expected = new ExpectedPerson { Name = "Bob", Age = 36 };
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
             actual.Should().NotBeEquivalentTo(
@@ -19,8 +19,8 @@ public sealed class NotBeEquivalentToStructuralTypeComparisonTests
     [Fact]
     public void GivenUnrelatedTypesWithMatchingMemberNames_WhenValuesDiffer_ThenNotBeEquivalentToDoesNotThrow()
     {
-        var actual = new ActualPerson { Name = "Ada", Age = 36 };
-        var expected = new ExpectedPerson { Name = "Grace", Age = 36 };
+        var actual = new ActualPerson { Name = "Bob", Age = 36 };
+        var expected = new ExpectedPerson { Name = "Alice", Age = 36 };
 
         var ex = Record.Exception(() =>
             actual.Should().NotBeEquivalentTo(

@@ -62,9 +62,9 @@ internal static class BenchmarkDataFactory
     public static BatchUserSnapshot CreateBatchUser()
     {
         return new BatchUserSnapshot(
-            Name: "Ada",
+            Name: "Bob",
             Age: 36,
-            Email: "ada@example.test",
+            Email: "bob@example.test",
             IsActive: true,
             CountryCode: "GB");
     }

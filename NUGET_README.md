@@ -139,7 +139,7 @@ Task<string> rollout = Task.FromResult("pricing-api");
 var continuation = await rollout.Should().SucceedWithin(TimeSpan.FromMilliseconds(50));
 continuation.WhoseResult.Should().Be("pricing-api");
 
-Func<Task<User>> loadUser = () => userClient.LoadAsync("ada");
+Func<Task<User>> loadUser = () => userClient.LoadAsync("bob");
 var loadedUser = await loadUser.Should().SucceedWithin(TimeSpan.FromMilliseconds(250));
 loadedUser.WhoseResult.Email.Should().Contain("@");
 

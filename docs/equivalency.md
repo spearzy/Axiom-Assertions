@@ -52,14 +52,14 @@ using Axiom.Assertions.Equivalency;
 
 var actual = new
 {
-    Name = "Ada",
+    Name = "Bob",
     Scores = new[] { 3, 1, 2 },
     UpdatedAt = new DateTime(2026, 3, 8, 12, 0, 0, DateTimeKind.Utc)
 };
 
 var expected = new
 {
-    Name = "Ada",
+    Name = "Bob",
     Scores = new[] { 1, 2, 3 },
     UpdatedAt = new DateTime(2026, 3, 8, 12, 0, 1, DateTimeKind.Utc)
 };

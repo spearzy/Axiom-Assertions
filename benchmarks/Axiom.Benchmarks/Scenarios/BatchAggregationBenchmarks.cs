@@ -23,7 +23,7 @@ public class BatchAggregationBenchmarks : AssertionBenchmarkBase
         AssertionFailureConsumer.ConsumeExpectedFailure(() =>
         {
             using var batch = Assert.Batch("profile");
-            _user.Name.Should().Be("Ada");
+            _user.Name.Should().Be("Bob");
             _user.Email.Should().Contain("@");
             _user.CountryCode.Should().Be("GB");
             _user.Age.Should().BeGreaterThan(40);
