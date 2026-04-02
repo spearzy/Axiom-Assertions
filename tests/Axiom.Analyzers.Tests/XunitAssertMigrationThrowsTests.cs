@@ -129,10 +129,10 @@ public sealed class XunitAssertMigrationThrowsTests
                 {
                     public void Check()
                     {
-                        {|AXM1014:Assert.Throws<global::System.InvalidOperationException>(ThrowNow)|};
+                        {|AXM1014:Assert.Throws<System.InvalidOperationException>(ThrowNow)|};
                     }
 
-                    private static void ThrowNow() => throw new global::System.InvalidOperationException();
+                    private static void ThrowNow() => throw new System.InvalidOperationException();
                 }
                 """;
 
@@ -146,10 +146,10 @@ public sealed class XunitAssertMigrationThrowsTests
                 {
                     public void Check()
                     {
-                        new Action(ThrowNow).Should().Throw<global::System.InvalidOperationException>();
+                        new Action(ThrowNow).Should().Throw<System.InvalidOperationException>();
                     }
 
-                    private static void ThrowNow() => throw new global::System.InvalidOperationException();
+                    private static void ThrowNow() => throw new System.InvalidOperationException();
                 }
                 """;
 

@@ -59,6 +59,41 @@ jobs:
           /p:ThresholdType=line
           /p:ThresholdStat=total
 
+  docs-validation:
+    name: Docs Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            10.0.x
+            9.0.x
+            8.0.x
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Restore
+        run: dotnet restore Axiom.sln
+
+      - name: Build
+        run: dotnet build Axiom.sln -c Release --no-restore
+
+      - name: Test docs snippets
+        run: dotnet test tests/Axiom.Docs.Snippets.Tests/Axiom.Docs.Snippets.Tests.csproj -c Release --no-build
+
+      - name: Install docs dependencies
+        run: pip install -r docs/requirements.txt
+
+      - name: Build docs site
+        run: mkdocs build --strict
+
   format:
     name: Format Check
     runs-on: ubuntu-latest

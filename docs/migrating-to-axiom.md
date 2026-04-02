@@ -76,7 +76,7 @@ A simple rule helps here.
 If the original test is checking one fact at a time, migrate it to scalar Axiom assertions.
 
 ```csharp
-actual.Name.Should().Be("Ada");
+actual.Name.Should().Be("Bob");
 actual.Email.Should().Contain("@");
 ```
 

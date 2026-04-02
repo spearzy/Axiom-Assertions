@@ -7,8 +7,8 @@ public sealed class BeEquivalentToMemberNameMappingTests
     [Fact]
     public void GivenMappedMemberNames_WhenMappedMembersMatch_ThenDoesNotThrow()
     {
-        var actual = new ActualPerson { GivenName = "Ada", Age = 36 };
-        var expected = new ExpectedPerson { FirstName = "Ada", Age = 36 };
+        var actual = new ActualPerson { GivenName = "Bob", Age = 36 };
+        var expected = new ExpectedPerson { FirstName = "Bob", Age = 36 };
 
         var ex = Record.Exception(() =>
             actual.Should().BeEquivalentTo(
@@ -25,8 +25,8 @@ public sealed class BeEquivalentToMemberNameMappingTests
     [Fact]
     public void GivenMappedMemberNames_WhenMappedMembersDiffer_ThenThrowsWithMappedActualPath()
     {
-        var actual = new ActualPerson { GivenName = "Ada", Age = 36 };
-        var expected = new ExpectedPerson { FirstName = "Grace", Age = 36 };
+        var actual = new ActualPerson { GivenName = "Bob", Age = 36 };
+        var expected = new ExpectedPerson { FirstName = "Alice", Age = 36 };
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
             actual.Should().BeEquivalentTo(
@@ -44,8 +44,8 @@ public sealed class BeEquivalentToMemberNameMappingTests
     [Fact]
     public void GivenNullActualMemberName_WhenMatchingMemberNames_ThenThrowsArgumentNullException()
     {
-        var actual = new ActualPerson { GivenName = "Ada", Age = 36 };
-        var expected = new ExpectedPerson { FirstName = "Ada", Age = 36 };
+        var actual = new ActualPerson { GivenName = "Bob", Age = 36 };
+        var expected = new ExpectedPerson { FirstName = "Bob", Age = 36 };
 
         var ex = Assert.Throws<ArgumentNullException>(() =>
             actual.Should().BeEquivalentTo(
@@ -62,8 +62,8 @@ public sealed class BeEquivalentToMemberNameMappingTests
     [Fact]
     public void GivenNullExpectedMemberName_WhenMatchingMemberNames_ThenThrowsArgumentNullException()
     {
-        var actual = new ActualPerson { GivenName = "Ada", Age = 36 };
-        var expected = new ExpectedPerson { FirstName = "Ada", Age = 36 };
+        var actual = new ActualPerson { GivenName = "Bob", Age = 36 };
+        var expected = new ExpectedPerson { FirstName = "Bob", Age = 36 };
 
         var ex = Assert.Throws<ArgumentNullException>(() =>
             actual.Should().BeEquivalentTo(
@@ -82,8 +82,8 @@ public sealed class BeEquivalentToMemberNameMappingTests
     [InlineData("   ")]
     public void GivenEmptyOrWhitespaceActualMemberName_WhenMatchingMemberNames_ThenThrowsArgumentException(string actualMember)
     {
-        var actual = new ActualPerson { GivenName = "Ada", Age = 36 };
-        var expected = new ExpectedPerson { FirstName = "Ada", Age = 36 };
+        var actual = new ActualPerson { GivenName = "Bob", Age = 36 };
+        var expected = new ExpectedPerson { FirstName = "Bob", Age = 36 };
 
         var ex = Assert.Throws<ArgumentException>(() =>
             actual.Should().BeEquivalentTo(
@@ -102,8 +102,8 @@ public sealed class BeEquivalentToMemberNameMappingTests
     [InlineData("   ")]
     public void GivenEmptyOrWhitespaceExpectedMemberName_WhenMatchingMemberNames_ThenThrowsArgumentException(string expectedMember)
     {
-        var actual = new ActualPerson { GivenName = "Ada", Age = 36 };
-        var expected = new ExpectedPerson { FirstName = "Ada", Age = 36 };
+        var actual = new ActualPerson { GivenName = "Bob", Age = 36 };
+        var expected = new ExpectedPerson { FirstName = "Bob", Age = 36 };
 
         var ex = Assert.Throws<ArgumentException>(() =>
             actual.Should().BeEquivalentTo(

@@ -132,7 +132,7 @@ The migration support is intentionally narrow and high-confidence. It only offer
 
 Before:
 
-```csharp
+```csharp axiom-context=migration-gallery
 Assert.Equal(expected, actual);
 Assert.True(condition);
 Assert.Empty(values);
@@ -150,7 +150,7 @@ var ex = Assert.Throws<ArgumentNullException>("name", () => work());
 
 After:
 
-```csharp
+```csharp axiom-context=migration-gallery
 actual.Should().Be(expected);
 condition.Should().BeTrue();
 values.Should().BeEmpty();
@@ -196,7 +196,7 @@ This first NUnit wave is intentionally small. It only covers simple `Assert.That
 
 Before:
 
-```csharp
+```csharp axiom-context=migration-gallery
 Assert.That(actual, Is.EqualTo(expected));
 Assert.That(value, Is.Not.Null);
 Assert.That(condition, Is.True);
@@ -205,7 +205,7 @@ Assert.That(values, Is.Empty);
 
 After:
 
-```csharp
+```csharp axiom-context=migration-gallery
 actual.Should().Be(expected);
 value.Should().NotBeNull();
 condition.Should().BeTrue();
