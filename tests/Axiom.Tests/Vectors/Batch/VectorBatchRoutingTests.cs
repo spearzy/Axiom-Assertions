@@ -92,10 +92,12 @@ public sealed class VectorBatchRoutingTests
         var disposeEx = Assert.Throws<InvalidOperationException>(() => batch.Dispose());
         var message = disposeEx.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
         Assert.Contains("Expected embedding to have dot product with expected equal to 1 within tolerance 0.001", message);
-        Assert.Contains("computed dot product 0", message);
+        Assert.Contains("dot product differed: expected 1, found 0, delta 1", message);
         Assert.Contains("Expected embedding to have Euclidean distance to expected equal to 1 within tolerance 0.001", message);
-        Assert.Contains("computed Euclidean distance 1.4142135", message);
+        Assert.Contains("Euclidean distance differed: expected 1, found 1.4142135", message);
         Assert.Contains("Expected embedding to be a zero vector", message);
+        Assert.Contains("index 0 differed: expected 0, found 1", message);
         Assert.Contains("Expected zero to not be a zero vector", message);
+        Assert.Contains("all 2 component(s) were zero", message);
     }
 }
