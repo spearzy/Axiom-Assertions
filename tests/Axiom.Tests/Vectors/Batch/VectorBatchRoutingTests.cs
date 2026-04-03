@@ -100,4 +100,38 @@ public sealed class VectorBatchRoutingTests
         Assert.Contains("Expected zero to not be a zero vector", message);
         Assert.Contains("all 2 component(s) were zero", message);
     }
+
+    [Fact]
+    public void VectorBatchFailures_Appear_InAssertionCallOrder()
+    {
+        float[] embedding = [1f, 0f];
+        float[] expected = [0f, 1f];
+        float[] zero = [0f, 0f];
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+        {
+            using var batch = new Axiom.Core.Batch("vectors");
+            embedding.Should().HaveDimension(3);
+            embedding.Should().HaveDotProductWith(expected, 1f, 0.001f);
+            embedding.Should().BeZeroVector();
+            zero.Should().NotBeZeroVector();
+        });
+
+        var message = ex.Message.Replace("\r\n", "\n", StringComparison.Ordinal);
+        var dimensionIndex = message.IndexOf("Expected embedding to have dimension 3", StringComparison.Ordinal);
+        var dotProductIndex = message.IndexOf(
+            "Expected embedding to have dot product with expected equal to 1 within tolerance 0.001",
+            StringComparison.Ordinal);
+        var zeroVectorIndex = message.IndexOf("Expected embedding to be a zero vector", StringComparison.Ordinal);
+        var notZeroVectorIndex = message.IndexOf("Expected zero to not be a zero vector", StringComparison.Ordinal);
+
+        Assert.True(dimensionIndex >= 0, message);
+        Assert.True(dotProductIndex >= 0, message);
+        Assert.True(zeroVectorIndex >= 0, message);
+        Assert.True(notZeroVectorIndex >= 0, message);
+
+        Assert.True(dimensionIndex < dotProductIndex, message);
+        Assert.True(dotProductIndex < zeroVectorIndex, message);
+        Assert.True(zeroVectorIndex < notZeroVectorIndex, message);
+    }
 }
