@@ -222,8 +222,13 @@ HaveCountAsync(expectedCount)
 ContainAsync(expected)
 ContainAsync(predicate)
 ContainExactlyAsync(expectedSequence)
+ContainExactlyInAnyOrderAsync(expectedSequence)
+ContainAllAsync(expectedItems)
 ContainAnyAsync(expectedItems)
+NotContainAsync(unexpected)
 NotContainAnyAsync(unexpectedItems)
+BeSubsetOfAsync(expectedSuperset)
+BeSupersetOfAsync(expectedSubset)
 OnlyContainAsync(predicate)
 ContainSingleAsync()
 ContainSingleAsync(predicate)
@@ -231,6 +236,8 @@ SatisfyRespectivelyAsync(assertionsForItems)
 HaveUniqueItemsAsync()
 HaveUniqueItemsByAsync(keySelector)
 HaveUniqueItemsByAsync(keySelector, comparer)
+BeInAscendingOrderAsync()
+BeInDescendingOrderAsync()
 ContainInOrderAsync(expectedSequence, allowGaps = true)
 ContainInOrderAsync(expectedSequence, keySelector, allowGaps = true)
 ```
@@ -246,12 +253,21 @@ Use them when you want to assert an async stream directly instead of materializi
 
 `ContainExactlyAsync(...)` is the exact ordered async-stream assertion. The stream must match the expected sequence item-for-item in the same order, with no missing items and no extras.
 
-`ContainAnyAsync(...)` passes when the async stream contains at least one of the expected items. `NotContainAnyAsync(...)` passes when the stream contains none of the unexpected items.
+`ContainExactlyInAnyOrderAsync(...)` is the exact unordered async-stream assertion. The stream must contain the same items with the same counts, but order does not matter.
+
+`ContainAllAsync(...)` checks that every expected item is present somewhere in the stream. `ContainAnyAsync(...)` passes when the async stream contains at least one of the expected items. `NotContainAsync(...)` passes when a specific item never appears. `NotContainAnyAsync(...)` passes when the stream contains none of the unexpected items.
+
+`BeSubsetOfAsync(...)` and `BeSupersetOfAsync(...)` mirror the synchronous collection subset/superset assertions for async streams.
 
 ```csharp
 await stepIds.Should().ContainExactlyAsync([1, 2, 3]);
+await stepIds.Should().ContainExactlyInAnyOrderAsync([3, 1, 2]);
+await stepIds.Should().ContainAllAsync([1, 3]);
 await stepIds.Should().ContainAnyAsync([2, 9]);
+await stepIds.Should().NotContainAsync(9);
 await stepIds.Should().NotContainAnyAsync([8, 9]);
+await stepIds.Should().BeSubsetOfAsync([1, 2, 3, 4]);
+await stepIds.Should().BeSupersetOfAsync([1, 3]);
 ```
 
 `SatisfyRespectivelyAsync(...)` is the ordered async-stream workflow assertion. It applies each assertion action to the corresponding item, fails when the stream is too short or too long, and reports the first failing item index when an item assertion fails.
@@ -272,7 +288,11 @@ await users.Should().HaveUniqueItemsByAsync(user => user.Email, StringComparer.O
 
 `ContainInOrderAsync(...)` mirrors the synchronous ordered-sequence assertions for async streams. With the default `allowGaps: true`, the expected sequence must appear in order as a subsequence. With `allowGaps: false`, the expected sequence must appear as an adjacent ordered run.
 
+`BeInAscendingOrderAsync(...)` and `BeInDescendingOrderAsync(...)` check the stream order directly and report the first out-of-order pair.
+
 ```csharp
+await stepIds.Should().BeInAscendingOrderAsync();
+await descendingStepIds.Should().BeInDescendingOrderAsync();
 await statuses.Should().ContainInOrderAsync([WorkflowStep.Started, WorkflowStep.Completed]);
 await events.Should().ContainInOrderAsync(
     [WorkflowStep.Started, WorkflowStep.Completed],

@@ -138,6 +138,18 @@ public sealed partial class AsyncEnumerableAssertions<T>
         return buffer.ToArray();
     }
 
+    private static async ValueTask<T[]> MaterialiseSubjectSequenceAsync(IAsyncEnumerable<T> subject)
+    {
+        var buffer = new List<T>();
+        await using var enumerator = subject.GetAsyncEnumerator();
+        while (await enumerator.MoveNextAsync().ConfigureAwait(false))
+        {
+            buffer.Add(enumerator.Current);
+        }
+
+        return [.. buffer];
+    }
+
     private static bool ContainsItem<TValue>(
         IReadOnlyList<TValue> values,
         TValue candidate,
@@ -152,6 +164,58 @@ public sealed partial class AsyncEnumerableAssertions<T>
         }
 
         return false;
+    }
+
+    private static int CountOccurrences<TValue>(
+        IReadOnlyList<TValue> values,
+        TValue candidate,
+        IEqualityComparer<TValue> comparer)
+    {
+        var count = 0;
+        for (var i = 0; i < values.Count; i++)
+        {
+            if (comparer.Equals(values[i], candidate))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private static int CompareObjectsForOrdering(object? previous, object? current)
+    {
+        if (ReferenceEquals(previous, current))
+        {
+            return 0;
+        }
+
+        if (previous is null)
+        {
+            return -1;
+        }
+
+        if (current is null)
+        {
+            return 1;
+        }
+
+        if (previous is IComparable comparable)
+        {
+            try
+            {
+                return comparable.CompareTo(current);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Values of runtime type '{previous.GetType().FullName}' do not define a compatible default ordering. Use a key-selector overload with an explicit comparer.",
+                    ex);
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Values of runtime type '{previous.GetType().FullName}' do not define a default ordering. Use a key-selector overload with an explicit comparer.");
     }
 
     private static int[] BuildFallbackTable<TValue>(IReadOnlyList<TValue> pattern, IEqualityComparer<TValue> comparer)

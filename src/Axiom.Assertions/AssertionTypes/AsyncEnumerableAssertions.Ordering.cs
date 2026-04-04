@@ -6,6 +6,38 @@ namespace Axiom.Assertions.AssertionTypes;
 
 public sealed partial class AsyncEnumerableAssertions<T>
 {
+    public async ValueTask<AndContinuation<AsyncEnumerableAssertions<T>>> BeInAscendingOrderAsync(
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        await AssertInOrderAsync(
+                because,
+                expectationText: "to be in ascending order",
+                inOrder: (previous, current) => CompareObjectsForOrdering(previous, current) <= 0,
+                callerFilePath,
+                callerLineNumber)
+            .ConfigureAwait(false);
+
+        return new AndContinuation<AsyncEnumerableAssertions<T>>(this);
+    }
+
+    public async ValueTask<AndContinuation<AsyncEnumerableAssertions<T>>> BeInDescendingOrderAsync(
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        await AssertInOrderAsync(
+                because,
+                expectationText: "to be in descending order",
+                inOrder: (previous, current) => CompareObjectsForOrdering(previous, current) >= 0,
+                callerFilePath,
+                callerLineNumber)
+            .ConfigureAwait(false);
+
+        return new AndContinuation<AsyncEnumerableAssertions<T>>(this);
+    }
+
     public async ValueTask<AndContinuation<AsyncEnumerableAssertions<T>>> ContainInOrderAsync(
         IEnumerable<T> expectedSequence,
         string? because = null,
@@ -138,5 +170,56 @@ public sealed partial class AsyncEnumerableAssertions<T>
             callerLineNumber);
 
         return new AndContinuation<AsyncEnumerableAssertions<T>>(this);
+    }
+
+    private async ValueTask AssertInOrderAsync(
+        string? because,
+        string expectationText,
+        Func<object?, object?, bool> inOrder,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var subject = Subject;
+        if (subject is null)
+        {
+            Fail(
+                new Failure(
+                    SubjectLabel(),
+                    new Expectation(expectationText, IncludeExpectedValue: false),
+                    subject,
+                    because),
+                callerFilePath,
+                callerLineNumber);
+            return;
+        }
+
+        await using var enumerator = subject.GetAsyncEnumerator();
+        if (!await enumerator.MoveNextAsync().ConfigureAwait(false))
+        {
+            return;
+        }
+
+        var previous = (object?)enumerator.Current;
+        var index = 1;
+        while (await enumerator.MoveNextAsync().ConfigureAwait(false))
+        {
+            var current = (object?)enumerator.Current;
+            if (inOrder(previous, current))
+            {
+                previous = current;
+                index++;
+                continue;
+            }
+
+            Fail(
+                new Failure(
+                    SubjectLabel(),
+                    new Expectation(expectationText, IncludeExpectedValue: false),
+                    new RenderedText($"first out-of-order pair at index {index}: previous {FormatValue(previous)} then current {FormatValue(current)}"),
+                    because),
+                callerFilePath,
+                callerLineNumber);
+            return;
+        }
     }
 }

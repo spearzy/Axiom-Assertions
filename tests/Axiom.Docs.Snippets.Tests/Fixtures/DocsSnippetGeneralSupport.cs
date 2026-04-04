@@ -96,6 +96,8 @@ public static class DocsSnippetFixtures
 
     public static IAsyncEnumerable<int> StepIds { get; } = GetStepIds();
 
+    public static IAsyncEnumerable<int> DescendingStepIds { get; } = GetDescendingStepIds();
+
     public static float[] Embedding { get; } = [1f, 0f, 0f];
 
     public static float[] ExpectedEmbedding { get; } = [1f, 0f, 0f];
@@ -146,6 +148,14 @@ public static class DocsSnippetFixtures
         await Task.Yield();
         yield return 2;
         yield return 3;
+    }
+
+    private static async IAsyncEnumerable<int> GetDescendingStepIds()
+    {
+        yield return 3;
+        await Task.Yield();
+        yield return 2;
+        yield return 1;
     }
 }
 

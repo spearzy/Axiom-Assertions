@@ -280,6 +280,58 @@ public sealed class AsyncEnumerableBatchRoutingTests
         Assert.Contains("missing expected selected value at sequence index 2: Running", disposeEx.Message);
     }
 
+    [Fact]
+    public async Task NewAsyncContainmentAssertions_InsideBatch_DoNotThrowAtAssertionCallSite()
+    {
+        var values = CreateAsyncSequence(1, 2, 2);
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = await Record.ExceptionAsync(async () =>
+        {
+            await values.Should().ContainExactlyInAnyOrderAsync([1, 2, 3]);
+            await values.Should().ContainAllAsync([1, 4]);
+            await values.Should().NotContainAsync(2);
+            await values.Should().BeSubsetOfAsync([1]);
+            await values.Should().BeSupersetOfAsync([1, 4]);
+        });
+
+        Assert.Null(callEx);
+
+        var disposeEx = Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+        Assert.Contains("Expected values to contain exactly in any order [1, 2, 3]", disposeEx.Message);
+        Assert.Contains("missing item 3: expected count 1 but found 0", disposeEx.Message);
+        Assert.Contains("Expected values to contain all [1, 4]", disposeEx.Message);
+        Assert.Contains("missing expected item at index 1: 4", disposeEx.Message);
+        Assert.Contains("Expected values to not contain 2", disposeEx.Message);
+        Assert.Contains("first matching item at subject index 1: 2", disposeEx.Message);
+        Assert.Contains("Expected values to be a subset of [1]", disposeEx.Message);
+        Assert.Contains("missing item at index 1: 2", disposeEx.Message);
+        Assert.Contains("Expected values to be a superset of [1, 4]", disposeEx.Message);
+        Assert.Contains("missing expected item at index 1: 4", disposeEx.Message);
+    }
+
+    [Fact]
+    public async Task AsyncEnumerableOrderingAssertions_InsideBatch_DoNotThrowAtAssertionCallSite()
+    {
+        var ascending = CreateAsyncSequence(1, 3, 2);
+        var descending = CreateAsyncSequence(3, 1, 2);
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = await Record.ExceptionAsync(async () =>
+        {
+            await ascending.Should().BeInAscendingOrderAsync();
+            await descending.Should().BeInDescendingOrderAsync();
+        });
+
+        Assert.Null(callEx);
+
+        var disposeEx = Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+        Assert.Contains("Expected ascending to be in ascending order", disposeEx.Message);
+        Assert.Contains("first out-of-order pair at index 2: previous 3 then current 2", disposeEx.Message);
+        Assert.Contains("Expected descending to be in descending order", disposeEx.Message);
+        Assert.Contains("first out-of-order pair at index 2: previous 1 then current 2", disposeEx.Message);
+    }
+
     private static async IAsyncEnumerable<T> CreateAsyncSequence<T>(params T[] items)
     {
         foreach (var item in items)
