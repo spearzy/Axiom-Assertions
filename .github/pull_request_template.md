@@ -42,6 +42,7 @@ If none:
 ## Examples
 
 Show the intended usage if this changes consumer-facing behavior.
+Skip this section if the API surface example already covers it.
 
 ```csharp
 // before / after or new usage
@@ -63,16 +64,12 @@ Does this affect pass-path cost, allocations, or hot-path behavior?
 - [ ] Yes, and I validated the impact
 - [ ] Yes, but only on failure / opt-in paths
 
-Notes:
-
 ## Diagnostics / Failure Output
 
 If failure messages changed, explain what changed and why.
 
 - [ ] No failure output changes
 - [ ] Failure output changed intentionally
-
-Notes:
 
 ## Tests
 
@@ -102,14 +99,6 @@ Docs updated?
 
 If yes, explain the break and migration path.
 
-## Release Notes
-
-If this lands in a release, what should the changelog/release notes say?
-
-- Added:
-- Changed:
-- Fixed:
-
 ## Checklist
 
 - [ ] The change is scoped and reviewable
@@ -118,4 +107,3 @@ If this lands in a release, what should the changelog/release notes say?
 - [ ] Pay-to-play / pass-path impact was considered
 - [ ] Tests cover the intended behavior
 - [ ] Docs were updated where needed
-- [ ] Changelog / release implications were considered
