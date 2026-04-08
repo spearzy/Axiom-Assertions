@@ -1,3 +1,4 @@
+using System.Globalization;
 using Axiom.Core.Failures;
 
 namespace Axiom.Assertions.AssertionTypes;
@@ -536,7 +537,17 @@ internal static class TemporalAssertionEngine
     {
         public override string ToString()
         {
-            return $"[{Minimum}, {Maximum}]";
+            return $"[{FormatComponent(Minimum)}, {FormatComponent(Maximum)}]";
+        }
+
+        private static string FormatComponent(T value)
+        {
+            return value switch
+            {
+                null => "<null>",
+                IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture) ?? value?.ToString() ?? "<null>",
+                _ => value?.ToString() ?? "<null>",
+            };
         }
     }
 }
