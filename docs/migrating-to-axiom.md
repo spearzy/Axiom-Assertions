@@ -70,6 +70,13 @@ The current analyzer and code-fix wave focuses on high-confidence xUnit `Assert.
 | `Assert.IsFalse(condition)` | `condition.Should().BeFalse()` |
 | `Assert.AreSame(expected, actual)` | `actual.Should().BeSameAs(expected)` |
 | `Assert.AreNotSame(expected, actual)` | `actual.Should().NotBeSameAs(expected)` |
+| `Assert.IsInstanceOfType(value, typeof(T))` | `value.Should().BeAssignableTo<T>()` |
+| `Assert.IsNotInstanceOfType(value, typeof(T))` | `value.Should().NotBeAssignableTo<T>()` |
+| `StringAssert.Contains(actual, expectedSubstring)` | `actual.Should().Contain(expectedSubstring)` |
+| `StringAssert.StartsWith(actual, expectedPrefix)` when `expectedPrefix` is an obvious non-null constant string | `actual.Should().StartWith(expectedPrefix)` |
+| `StringAssert.EndsWith(actual, expectedSuffix)` when `expectedSuffix` is an obvious non-null constant string | `actual.Should().EndWith(expectedSuffix)` |
+| `CollectionAssert.Contains(collection, expected)` | `collection.Should().Contain(expected)` |
+| `CollectionAssert.DoesNotContain(collection, unexpected)` | `collection.Should().NotContain(unexpected)` |
 
 For dictionary-key migration, the receiver has to fit Axiom's `ContainKey` / `NotContainKey` surface. The current support covers `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`, `Dictionary<TKey, TValue>`, `ReadOnlyDictionary<TKey, TValue>`, `ConcurrentDictionary<TKey, TValue>`, and `ImmutableDictionary<TKey, TValue>`.
 
@@ -95,7 +102,9 @@ It skips cases where the rewrite is not obviously semantics-preserving yet, incl
 - `Assert.Throws<TException>(...)` when you use the returned exception outside the `string? paramName, Action testCode` overload
 - `Assert.Throws<TException>(paramName, ...)` when `paramName` is not an obvious non-null constant string
 - richer NUnit constraint chains, comparer/tolerance variants, message-bearing `Assert.That(...)` overloads, `Has.*` chains beyond `Has.Count.EqualTo(int)`, and `Does.StartWith(...)` / `Does.EndWith(...)` when the expected prefix or suffix is not an obvious non-null constant string
-- MSTest message-bearing, comparer, precision, and other assertion-family overloads
+- MSTest message-bearing, comparer, precision, and other richer assertion-family overloads
+- `StringAssert.StartsWith(...)` and `StringAssert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string
+- `CollectionAssert.AreEqual(...)`, `CollectionAssert.AreEquivalent(...)`, and other structural-comparison collection shapes
 - most structural-comparison assertions
 
 If a code fix appears, it is meant to be a safe one. If it does not appear, treat the migration as a normal test rewrite rather than a missed trick.

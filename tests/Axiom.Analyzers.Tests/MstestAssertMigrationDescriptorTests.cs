@@ -75,6 +75,62 @@ public sealed class MstestAssertMigrationDescriptorTests
                 Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
                 Assert.Equal("Migrate MSTest Assert.AreNotSame to Axiom", rule.Title.ToString());
                 Assert.Equal("MSTest Assert.AreNotSame(expected, actual) can be migrated to 'actual.Should().NotBeSameAs(expected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1047", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.IsInstanceOfType to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.IsInstanceOfType(value, typeof(T)) can be migrated to 'value.Should().BeAssignableTo<T>()'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1048", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.IsNotInstanceOfType to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.IsNotInstanceOfType(value, typeof(T)) can be migrated to 'value.Should().NotBeAssignableTo<T>()'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1049", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest StringAssert.Contains to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest StringAssert.Contains(actual, expectedSubstring) can be migrated to 'actual.Should().Contain(expectedSubstring)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1050", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest StringAssert.StartsWith to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest StringAssert.StartsWith(actual, expectedPrefix) can be migrated to 'actual.Should().StartWith(expectedPrefix)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1051", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest StringAssert.EndsWith to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest StringAssert.EndsWith(actual, expectedSuffix) can be migrated to 'actual.Should().EndWith(expectedSuffix)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1052", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest CollectionAssert.Contains to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest CollectionAssert.Contains(collection, expected) can be migrated to 'collection.Should().Contain(expected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1053", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest CollectionAssert.DoesNotContain to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest CollectionAssert.DoesNotContain(collection, unexpected) can be migrated to 'collection.Should().NotContain(unexpected)'", rule.MessageFormat.ToString());
             });
     }
 }

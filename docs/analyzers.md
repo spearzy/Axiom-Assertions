@@ -252,16 +252,25 @@ Rules:
 - `AXM1037` for `Assert.IsFalse(condition)`
 - `AXM1038` for `Assert.AreSame(expected, actual)`
 - `AXM1039` for `Assert.AreNotSame(expected, actual)`
+- `AXM1047` for `Assert.IsInstanceOfType(value, typeof(T))`
+- `AXM1048` for `Assert.IsNotInstanceOfType(value, typeof(T))`
+- `AXM1049` for `StringAssert.Contains(actual, expectedSubstring)`
+- `AXM1050` for `StringAssert.StartsWith(actual, expectedPrefix)` when `expectedPrefix` is an obvious non-null constant string
+- `AXM1051` for `StringAssert.EndsWith(actual, expectedSuffix)` when `expectedSuffix` is an obvious non-null constant string
+- `AXM1052` for `CollectionAssert.Contains(collection, expected)`
+- `AXM1053` for `CollectionAssert.DoesNotContain(collection, unexpected)`
 
-This first MSTest wave is intentionally small. It only covers simple `Assert.*` calls that map directly to Axiom without carrying extra message, comparer, or precision semantics across.
+MSTest migrations only cover `Assert`, `StringAssert`, and `CollectionAssert` shapes that map directly to Axiom without carrying extra message, comparer, precision, or structural-comparison semantics across.
 
 Before:
 
 ```csharp axiom-context=migration-gallery
-Assert.AreEqual(expected, actual);
-Assert.IsNull(value);
-Assert.IsFalse(condition);
-Assert.AreNotEqual(expected, actual);
+Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected, actual);
+Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsNull(value);
+Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsFalse(condition);
+Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsInstanceOfType(value, typeof(IDisposable));
+StringAssert.Contains(actual, "archived");
+CollectionAssert.DoesNotContain(values, "blocked");
 ```
 
 After:
@@ -270,9 +279,11 @@ After:
 actual.Should().Be(expected);
 value.Should().BeNull();
 condition.Should().BeFalse();
-actual.Should().NotBe(expected);
+value.Should().BeAssignableTo<IDisposable>();
+actual.Should().Contain("archived");
+values.Should().NotContain("blocked");
 ```
 
-These suggestions use semantic matching against MSTest's real `Assert` API. They intentionally skip message-bearing, comparer, precision, and other MSTest assertion families in this first wave.
+These suggestions use semantic matching against MSTest's real `Assert`, `StringAssert`, and `CollectionAssert` APIs. They intentionally skip message-bearing, comparer, precision, structural-comparison, and other richer MSTest assertion families, plus `StringAssert.StartsWith(...)` and `StringAssert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string.
 
 For a broader mapping table and practical migration notes, see [Migrating to Axiom](migrating-to-axiom.md).

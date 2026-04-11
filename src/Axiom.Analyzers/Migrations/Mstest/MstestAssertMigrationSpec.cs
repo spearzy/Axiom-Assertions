@@ -13,12 +13,27 @@ internal enum MstestAssertMigrationKind
     BeFalse,
     BeSameAs,
     NotBeSameAs,
+    BeAssignableTo,
+    NotBeAssignableTo,
+    Contain,
+    NotContain,
+    ContainSubstring,
+    StartWith,
+    EndWith,
+}
+
+internal enum MstestAssertTarget
+{
+    Assert,
+    CollectionAssert,
+    StringAssert,
 }
 
 internal sealed class MstestAssertMigrationSpec
 {
     public MstestAssertMigrationSpec(
         string diagnosticId,
+        MstestAssertTarget target,
         string methodName,
         int requiredArgumentCount,
         MstestAssertMigrationKind kind,
@@ -27,6 +42,7 @@ internal sealed class MstestAssertMigrationSpec
         string codeFixTitle)
     {
         DiagnosticId = diagnosticId;
+        Target = target;
         MethodName = methodName;
         RequiredArgumentCount = requiredArgumentCount;
         Kind = kind;
@@ -44,6 +60,7 @@ internal sealed class MstestAssertMigrationSpec
     }
 
     public string DiagnosticId { get; }
+    public MstestAssertTarget Target { get; }
     public string MethodName { get; }
     public int RequiredArgumentCount { get; }
     public MstestAssertMigrationKind Kind { get; }
@@ -59,6 +76,7 @@ internal static class MstestAssertMigrationSpecs
     [
         new(
             AxiomAnalyzerIds.MigrateMstestAssertAreEqual,
+            MstestAssertTarget.Assert,
             "AreEqual",
             2,
             MstestAssertMigrationKind.Be,
@@ -67,6 +85,7 @@ internal static class MstestAssertMigrationSpecs
             "Convert to 'actual.Should().Be(expected)'"),
         new(
             AxiomAnalyzerIds.MigrateMstestAssertAreNotEqual,
+            MstestAssertTarget.Assert,
             "AreNotEqual",
             2,
             MstestAssertMigrationKind.NotBe,
@@ -75,6 +94,7 @@ internal static class MstestAssertMigrationSpecs
             "Convert to 'actual.Should().NotBe(expected)'"),
         new(
             AxiomAnalyzerIds.MigrateMstestAssertIsNull,
+            MstestAssertTarget.Assert,
             "IsNull",
             1,
             MstestAssertMigrationKind.BeNull,
@@ -83,6 +103,7 @@ internal static class MstestAssertMigrationSpecs
             "Convert to 'value.Should().BeNull()'"),
         new(
             AxiomAnalyzerIds.MigrateMstestAssertIsNotNull,
+            MstestAssertTarget.Assert,
             "IsNotNull",
             1,
             MstestAssertMigrationKind.NotBeNull,
@@ -91,6 +112,7 @@ internal static class MstestAssertMigrationSpecs
             "Convert to 'value.Should().NotBeNull()'"),
         new(
             AxiomAnalyzerIds.MigrateMstestAssertIsTrue,
+            MstestAssertTarget.Assert,
             "IsTrue",
             1,
             MstestAssertMigrationKind.BeTrue,
@@ -99,6 +121,7 @@ internal static class MstestAssertMigrationSpecs
             "Convert to 'condition.Should().BeTrue()'"),
         new(
             AxiomAnalyzerIds.MigrateMstestAssertIsFalse,
+            MstestAssertTarget.Assert,
             "IsFalse",
             1,
             MstestAssertMigrationKind.BeFalse,
@@ -107,6 +130,7 @@ internal static class MstestAssertMigrationSpecs
             "Convert to 'condition.Should().BeFalse()'"),
         new(
             AxiomAnalyzerIds.MigrateMstestAssertAreSame,
+            MstestAssertTarget.Assert,
             "AreSame",
             2,
             MstestAssertMigrationKind.BeSameAs,
@@ -115,12 +139,76 @@ internal static class MstestAssertMigrationSpecs
             "Convert to 'actual.Should().BeSameAs(expected)'"),
         new(
             AxiomAnalyzerIds.MigrateMstestAssertAreNotSame,
+            MstestAssertTarget.Assert,
             "AreNotSame",
             2,
             MstestAssertMigrationKind.NotBeSameAs,
             "Migrate MSTest Assert.AreNotSame to Axiom",
             "MSTest Assert.AreNotSame(expected, actual) can be migrated to 'actual.Should().NotBeSameAs(expected)'",
-            "Convert to 'actual.Should().NotBeSameAs(expected)'")
+            "Convert to 'actual.Should().NotBeSameAs(expected)'"),
+        new(
+            AxiomAnalyzerIds.MigrateMstestAssertIsInstanceOfType,
+            MstestAssertTarget.Assert,
+            "IsInstanceOfType",
+            2,
+            MstestAssertMigrationKind.BeAssignableTo,
+            "Migrate MSTest Assert.IsInstanceOfType to Axiom",
+            "MSTest Assert.IsInstanceOfType(value, typeof(T)) can be migrated to 'value.Should().BeAssignableTo<T>()'",
+            "Convert to 'value.Should().BeAssignableTo<T>()'"),
+        new(
+            AxiomAnalyzerIds.MigrateMstestAssertIsNotInstanceOfType,
+            MstestAssertTarget.Assert,
+            "IsNotInstanceOfType",
+            2,
+            MstestAssertMigrationKind.NotBeAssignableTo,
+            "Migrate MSTest Assert.IsNotInstanceOfType to Axiom",
+            "MSTest Assert.IsNotInstanceOfType(value, typeof(T)) can be migrated to 'value.Should().NotBeAssignableTo<T>()'",
+            "Convert to 'value.Should().NotBeAssignableTo<T>()'"),
+        new(
+            AxiomAnalyzerIds.MigrateMstestStringAssertContains,
+            MstestAssertTarget.StringAssert,
+            "Contains",
+            2,
+            MstestAssertMigrationKind.ContainSubstring,
+            "Migrate MSTest StringAssert.Contains to Axiom",
+            "MSTest StringAssert.Contains(actual, expectedSubstring) can be migrated to 'actual.Should().Contain(expectedSubstring)'",
+            "Convert to 'actual.Should().Contain(expectedSubstring)'"),
+        new(
+            AxiomAnalyzerIds.MigrateMstestStringAssertStartsWith,
+            MstestAssertTarget.StringAssert,
+            "StartsWith",
+            2,
+            MstestAssertMigrationKind.StartWith,
+            "Migrate MSTest StringAssert.StartsWith to Axiom",
+            "MSTest StringAssert.StartsWith(actual, expectedPrefix) can be migrated to 'actual.Should().StartWith(expectedPrefix)'",
+            "Convert to 'actual.Should().StartWith(expectedPrefix)'"),
+        new(
+            AxiomAnalyzerIds.MigrateMstestStringAssertEndsWith,
+            MstestAssertTarget.StringAssert,
+            "EndsWith",
+            2,
+            MstestAssertMigrationKind.EndWith,
+            "Migrate MSTest StringAssert.EndsWith to Axiom",
+            "MSTest StringAssert.EndsWith(actual, expectedSuffix) can be migrated to 'actual.Should().EndWith(expectedSuffix)'",
+            "Convert to 'actual.Should().EndWith(expectedSuffix)'"),
+        new(
+            AxiomAnalyzerIds.MigrateMstestCollectionAssertContains,
+            MstestAssertTarget.CollectionAssert,
+            "Contains",
+            2,
+            MstestAssertMigrationKind.Contain,
+            "Migrate MSTest CollectionAssert.Contains to Axiom",
+            "MSTest CollectionAssert.Contains(collection, expected) can be migrated to 'collection.Should().Contain(expected)'",
+            "Convert to 'collection.Should().Contain(expected)'"),
+        new(
+            AxiomAnalyzerIds.MigrateMstestCollectionAssertDoesNotContain,
+            MstestAssertTarget.CollectionAssert,
+            "DoesNotContain",
+            2,
+            MstestAssertMigrationKind.NotContain,
+            "Migrate MSTest CollectionAssert.DoesNotContain to Axiom",
+            "MSTest CollectionAssert.DoesNotContain(collection, unexpected) can be migrated to 'collection.Should().NotContain(unexpected)'",
+            "Convert to 'collection.Should().NotContain(unexpected)'")
     ];
 
     public static ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =

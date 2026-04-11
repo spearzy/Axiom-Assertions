@@ -4,6 +4,9 @@ internal static class MstestAssertStubs
 {
     public const string Source =
         """
+        using System;
+        using System.Collections;
+
         namespace Microsoft.VisualStudio.TestTools.UnitTesting
         {
             public static class Assert
@@ -28,6 +31,30 @@ internal static class MstestAssertStubs
                 public static void AreSame(object? expected, object? actual, string message) { }
                 public static void AreNotSame(object? expected, object? actual) { }
                 public static void AreNotSame(object? expected, object? actual, string message) { }
+                public static void IsInstanceOfType(object? value, Type expectedType) { }
+                public static void IsInstanceOfType(object? value, Type expectedType, string message) { }
+                public static void IsNotInstanceOfType(object? value, Type wrongType) { }
+                public static void IsNotInstanceOfType(object? value, Type wrongType, string message) { }
+            }
+
+            public static class StringAssert
+            {
+                public static void Contains(string value, string substring) { }
+                public static void Contains(string value, string substring, string message) { }
+                public static void StartsWith(string value, string prefix) { }
+                public static void StartsWith(string value, string prefix, string message) { }
+                public static void EndsWith(string value, string suffix) { }
+                public static void EndsWith(string value, string suffix, string message) { }
+            }
+
+            public static class CollectionAssert
+            {
+                public static void Contains(ICollection? collection, object? element) { }
+                public static void Contains(ICollection? collection, object? element, string message) { }
+                public static void DoesNotContain(ICollection? collection, object? element) { }
+                public static void DoesNotContain(ICollection? collection, object? element, string message) { }
+                public static void AreEqual(ICollection? expected, ICollection? actual) { }
+                public static void AreEquivalent(ICollection? expected, ICollection? actual) { }
             }
         }
         """;

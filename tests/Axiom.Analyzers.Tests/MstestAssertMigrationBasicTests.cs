@@ -530,6 +530,402 @@ public sealed class MstestAssertMigrationBasicTests
     }
 
     [Fact]
+    public async Task AssertIsInstanceOfType_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+                using System;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(object value)
+                    {
+                        {|AXM1047:Assert.IsInstanceOfType(value, typeof(IDisposable))|};
+                    }
+                }
+                """;
+
+        const string fixedSource =
+            """
+                using System;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using Axiom.Assertions;
+
+                public sealed class Sample
+                {
+                    public void Check(object value)
+                    {
+                        value.Should().BeAssignableTo<IDisposable>();
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<MstestAssertMigrationAnalyzer, MstestAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertIsNotInstanceOfType_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(object value)
+                    {
+                        {|AXM1048:Assert.IsNotInstanceOfType(value, typeof(string))|};
+                    }
+                }
+                """;
+
+        const string fixedSource =
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using Axiom.Assertions;
+
+                public sealed class Sample
+                {
+                    public void Check(object value)
+                    {
+                        value.Should().NotBeAssignableTo<string>();
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<MstestAssertMigrationAnalyzer, MstestAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task StringAssertContains_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(string actual)
+                    {
+                        {|AXM1049:StringAssert.Contains(actual, "archived")|};
+                    }
+                }
+                """;
+
+        const string fixedSource =
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using Axiom.Assertions;
+
+                public sealed class Sample
+                {
+                    public void Check(string actual)
+                    {
+                        actual.Should().Contain("archived");
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<MstestAssertMigrationAnalyzer, MstestAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task StringAssertStartsWith_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(string actual)
+                    {
+                        {|AXM1050:StringAssert.StartsWith(actual, "pre")|};
+                    }
+                }
+                """;
+
+        const string fixedSource =
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using Axiom.Assertions;
+
+                public sealed class Sample
+                {
+                    public void Check(string actual)
+                    {
+                        actual.Should().StartWith("pre");
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<MstestAssertMigrationAnalyzer, MstestAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task StringAssertEndsWith_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(string actual)
+                    {
+                        {|AXM1051:StringAssert.EndsWith(actual, "suf")|};
+                    }
+                }
+                """;
+
+        const string fixedSource =
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using Axiom.Assertions;
+
+                public sealed class Sample
+                {
+                    public void Check(string actual)
+                    {
+                        actual.Should().EndWith("suf");
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<MstestAssertMigrationAnalyzer, MstestAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task CollectionAssertContains_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+                using System.Collections.Generic;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(List<int> values, int expected)
+                    {
+                        {|AXM1052:CollectionAssert.Contains(values, expected)|};
+                    }
+                }
+                """;
+
+        const string fixedSource =
+            """
+                using System.Collections.Generic;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using Axiom.Assertions;
+                using Axiom.Assertions.Extensions;
+
+                public sealed class Sample
+                {
+                    public void Check(List<int> values, int expected)
+                    {
+                        values.Should().Contain(expected);
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<MstestAssertMigrationAnalyzer, MstestAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task CollectionAssertDoesNotContain_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+                using System.Collections.Generic;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(List<int> values, int unexpected)
+                    {
+                        {|AXM1053:CollectionAssert.DoesNotContain(values, unexpected)|};
+                    }
+                }
+                """;
+
+        const string fixedSource =
+            """
+                using System.Collections.Generic;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+                using Axiom.Assertions;
+                using Axiom.Assertions.Extensions;
+
+                public sealed class Sample
+                {
+                    public void Check(List<int> values, int unexpected)
+                    {
+                        values.Should().NotContain(unexpected);
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<MstestAssertMigrationAnalyzer, MstestAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertIsInstanceOfType_WithRuntimeTypeVariable_IsNotFlagged()
+    {
+        const string source =
+            """
+                using System;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(object value, Type expectedType)
+                    {
+                        Assert.IsInstanceOfType(value, expectedType);
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<MstestAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task StringAssertContains_MessageOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(string actual)
+                    {
+                        StringAssert.Contains(actual, "archived", "custom message");
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<MstestAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task StringAssertStartsWith_NonConstantPrefix_IsNotFlagged()
+    {
+        const string source =
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(string actual, string expectedPrefix)
+                    {
+                        StringAssert.StartsWith(actual, expectedPrefix);
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<MstestAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task StringAssertEndsWith_NonConstantSuffix_IsNotFlagged()
+    {
+        const string source =
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(string actual, string expectedSuffix)
+                    {
+                        StringAssert.EndsWith(actual, expectedSuffix);
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<MstestAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task CollectionAssertContains_MessageOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+                using System.Collections.Generic;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(List<int> values, int expected)
+                    {
+                        CollectionAssert.Contains(values, expected, "custom message");
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<MstestAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task CollectionAssertContains_DictionaryReceiver_IsNotFlagged()
+    {
+        const string source =
+            """
+                using System.Collections.Generic;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(Dictionary<string, int> valuesByKey)
+                    {
+                        CollectionAssert.Contains(valuesByKey, new KeyValuePair<string, int>("alpha", 1));
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<MstestAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task CollectionAssertAreEqual_IsNotFlagged()
+    {
+        const string source =
+            """
+                using System.Collections.Generic;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(List<int> expected, List<int> actual)
+                    {
+                        CollectionAssert.AreEqual(expected, actual);
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<MstestAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task CollectionAssertAreEquivalent_IsNotFlagged()
+    {
+        const string source =
+            """
+                using System.Collections.Generic;
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public sealed class Sample
+                {
+                    public void Check(List<int> expected, List<int> actual)
+                    {
+                        CollectionAssert.AreEquivalent(expected, actual);
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<MstestAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
     public async Task AlreadyMigratedAxiomCode_IsNotFlagged()
     {
         const string source =
@@ -547,8 +943,15 @@ public sealed class MstestAssertMigrationBasicTests
                         value.Should().NotBeNull();
                         condition.Should().BeTrue();
                         condition.Should().BeFalse();
+                        value.Should().BeAssignableTo<object>();
+                        value.Should().NotBeAssignableTo<string>();
+                        "actual".Should().Contain("act");
+                        "actual".Should().StartWith("act");
+                        "actual".Should().EndWith("ual");
                         actualReference.Should().BeSameAs(expectedReference);
                         actualReference.Should().NotBeSameAs(expectedReference);
+                        new[] { 1, 2, 3 }.Should().Contain(2);
+                        new[] { 1, 2, 3 }.Should().NotContain(4);
                     }
                 }
                 """;

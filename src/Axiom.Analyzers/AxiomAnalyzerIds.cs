@@ -50,4 +50,11 @@ public static class AxiomAnalyzerIds
     public const string MigrateNunitAssertThatHasCount = "AXM1044";
     public const string MigrateNunitAssertThatSameAs = "AXM1045";
     public const string MigrateNunitAssertThatNotSameAs = "AXM1046";
+    public const string MigrateMstestAssertIsInstanceOfType = "AXM1047";
+    public const string MigrateMstestAssertIsNotInstanceOfType = "AXM1048";
+    public const string MigrateMstestStringAssertContains = "AXM1049";
+    public const string MigrateMstestStringAssertStartsWith = "AXM1050";
+    public const string MigrateMstestStringAssertEndsWith = "AXM1051";
+    public const string MigrateMstestCollectionAssertContains = "AXM1052";
+    public const string MigrateMstestCollectionAssertDoesNotContain = "AXM1053";
 }
