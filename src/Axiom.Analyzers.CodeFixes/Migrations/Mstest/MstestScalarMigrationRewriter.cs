@@ -10,7 +10,8 @@ internal static class MstestScalarMigrationRewriter
         return MstestAssertMigrationCodeFixProvider.BuildShouldCall(
             match.SubjectExpression,
             GetMethodName(match.Spec.Kind),
-            match.ExpectedExpression);
+            match.ExpectedExpression,
+            match.TypeArgumentSyntax);
     }
 
     private static string GetMethodName(MstestAssertMigrationKind kind)
@@ -25,6 +26,13 @@ internal static class MstestScalarMigrationRewriter
             MstestAssertMigrationKind.BeFalse => "BeFalse",
             MstestAssertMigrationKind.BeSameAs => "BeSameAs",
             MstestAssertMigrationKind.NotBeSameAs => "NotBeSameAs",
+            MstestAssertMigrationKind.BeAssignableTo => "BeAssignableTo",
+            MstestAssertMigrationKind.NotBeAssignableTo => "NotBeAssignableTo",
+            MstestAssertMigrationKind.Contain => "Contain",
+            MstestAssertMigrationKind.NotContain => "NotContain",
+            MstestAssertMigrationKind.ContainSubstring => "Contain",
+            MstestAssertMigrationKind.StartWith => "StartWith",
+            MstestAssertMigrationKind.EndWith => "EndWith",
             _ => throw new ArgumentOutOfRangeException(nameof(kind)),
         };
     }

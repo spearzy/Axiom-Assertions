@@ -224,7 +224,14 @@ internal static class DocsSnippetExtractor
             || code.Contains("Assert.IsTrue(", StringComparison.Ordinal)
             || code.Contains("Assert.IsFalse(", StringComparison.Ordinal)
             || code.Contains("Assert.AreSame(", StringComparison.Ordinal)
-            || code.Contains("Assert.AreNotSame(", StringComparison.Ordinal);
+            || code.Contains("Assert.AreNotSame(", StringComparison.Ordinal)
+            || code.Contains("Assert.IsInstanceOfType(", StringComparison.Ordinal)
+            || code.Contains("Assert.IsNotInstanceOfType(", StringComparison.Ordinal)
+            || code.Contains("StringAssert.Contains(", StringComparison.Ordinal)
+            || code.Contains("StringAssert.StartsWith(", StringComparison.Ordinal)
+            || code.Contains("StringAssert.EndsWith(", StringComparison.Ordinal)
+            || code.Contains("CollectionAssert.Contains(", StringComparison.Ordinal)
+            || code.Contains("CollectionAssert.DoesNotContain(", StringComparison.Ordinal);
     }
 
     private static bool IsVectorSnippet(string code)

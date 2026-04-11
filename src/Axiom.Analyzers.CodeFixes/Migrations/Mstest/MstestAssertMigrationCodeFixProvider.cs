@@ -104,13 +104,14 @@ public sealed class MstestAssertMigrationCodeFixProvider : CodeFixProvider
     internal static ExpressionSyntax BuildShouldCall(
         ExpressionSyntax subjectExpression,
         string methodName,
-        ExpressionSyntax? argumentExpression = null)
+        ExpressionSyntax? argumentExpression = null,
+        TypeSyntax? typeArgumentSyntax = null)
     {
         var shouldInvocation = BuildShouldInvocation(subjectExpression);
         var assertionMethod = SyntaxFactory.MemberAccessExpression(
             SyntaxKind.SimpleMemberAccessExpression,
             shouldInvocation,
-            SyntaxFactory.IdentifierName(methodName));
+            BuildMethodName(methodName, typeArgumentSyntax));
 
         return BuildInvocation(assertionMethod, argumentExpression);
     }
@@ -123,6 +124,21 @@ public sealed class MstestAssertMigrationCodeFixProvider : CodeFixProvider
                 PrepareSubjectExpression(subjectExpression),
                 SyntaxFactory.IdentifierName("Should")),
             SyntaxFactory.ArgumentList());
+    }
+
+    private static SimpleNameSyntax BuildMethodName(
+        string methodName,
+        TypeSyntax? typeArgumentSyntax)
+    {
+        if (typeArgumentSyntax is null)
+        {
+            return SyntaxFactory.IdentifierName(methodName);
+        }
+
+        return SyntaxFactory.GenericName(
+            SyntaxFactory.Identifier(methodName),
+            SyntaxFactory.TypeArgumentList(
+                SyntaxFactory.SingletonSeparatedList(typeArgumentSyntax.WithoutTrivia())));
     }
 
     private static ExpressionSyntax BuildInvocation(

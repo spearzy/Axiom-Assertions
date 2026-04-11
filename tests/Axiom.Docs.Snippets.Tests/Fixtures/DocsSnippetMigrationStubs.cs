@@ -133,5 +133,20 @@ namespace Microsoft.VisualStudio.TestTools.UnitTesting
         public static void IsFalse(bool condition) { }
         public static void AreSame(object? expected, object? actual) { }
         public static void AreNotSame(object? expected, object? actual) { }
+        public static void IsInstanceOfType(object? value, Type expectedType) { }
+        public static void IsNotInstanceOfType(object? value, Type wrongType) { }
+    }
+
+    public static class StringAssert
+    {
+        public static void Contains(string value, string substring) { }
+        public static void StartsWith(string value, string prefix) { }
+        public static void EndsWith(string value, string suffix) { }
+    }
+
+    public static class CollectionAssert
+    {
+        public static void Contains(ICollection? collection, object? element) { }
+        public static void DoesNotContain(ICollection? collection, object? element) { }
     }
 }

@@ -438,6 +438,8 @@ internal sealed class DocsSnippetCompiler
         if (code.Contains("Assert.That(value", StringComparison.Ordinal) ||
             code.Contains("Assert.IsNull(value", StringComparison.Ordinal) ||
             code.Contains("Assert.IsNotNull(value", StringComparison.Ordinal) ||
+            code.Contains("Assert.IsInstanceOfType(value", StringComparison.Ordinal) ||
+            code.Contains("Assert.IsNotInstanceOfType(value", StringComparison.Ordinal) ||
             code.Contains("value.Should()", StringComparison.Ordinal))
         {
             lines.Add("var value = new object();");
