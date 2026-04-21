@@ -13,7 +13,7 @@ The built-in migration analyzers help with a growing set of safe, mechanical rew
 
 ## What Can Be Migrated Automatically Today
 
-The current analyzer and code-fix wave focuses on high-confidence xUnit `Assert.*` shapes plus conservative NUnit and MSTest migration waves.
+The current analyzer and code-fix support focuses on high-confidence xUnit `Assert.*` shapes plus conservative NUnit and MSTest migration suggestions.
 
 | Source style | Axiom style |
 | --- | --- |

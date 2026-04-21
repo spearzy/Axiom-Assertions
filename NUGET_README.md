@@ -180,7 +180,7 @@ public static class InvoiceAssertionExtensions
     {
         var context = AssertionContext.Create(assertions);
 
-        if (!string.Equals(context.Subject.Currency, expectedCurrency, StringComparison.Ordinal))
+        if (!context.GetEqualityComparer<string>().Equals(context.Subject.Currency, expectedCurrency))
         {
             context.Fail(
                 new Expectation("to have currency", expectedCurrency),
@@ -207,7 +207,7 @@ Axiom currently includes:
 - collections and dictionaries: containment, exact sequence, exact unordered sequence, count/empty checks, ordering, uniqueness, single-item extraction, key/value extraction, direct `IAsyncEnumerable<T>` assertions
 - temporal assertions: before/after, inclusive bounds, within-tolerance, inverse-tolerance, and range checks
 - vector assertions: dimension checks, NaN/infinity validation, approximate equality, dot product, Euclidean distance, cosine similarity thresholds, normalization, ranked retrieval evaluation
-- custom assertion authoring: `AssertionContext.Create(...)` for domain assertions on `ValueAssertions<T>`
+- custom assertion authoring: `AssertionContext.Create(...)` for domain assertions on `ValueAssertions<T>` and `StringAssertions`, with comparer-provider-aware equality through `context.GetEqualityComparer<T>()`
 
 ## Documentation
 

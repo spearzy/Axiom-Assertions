@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] - 2026-04-21
+
+### Added
+- Expanded migration analyzers and code fixes across xUnit, NUnit, and MSTest for more high-confidence assertion shapes.
+- Broadened `AssertionContext.Create(...)` so custom assertion authoring supports `StringAssertions` alongside the existing value-based path.
+
+### Changed
+- Hardened supported custom assertion authoring so `Batch`, failure rendering, subject labeling, configured failure strategy, and comparer-provider resolution behave like first-party assertions.
+- Updated authoring and migration docs to match the shipped `2.0.0` surface.
+
+### Fixed
+- Tightened regression coverage around migration safety and assertion authoring behavior so the shipped flows stay aligned with the current API surface.
+
 ## [1.9.0] - 2026-04-10
 
 ### Added
