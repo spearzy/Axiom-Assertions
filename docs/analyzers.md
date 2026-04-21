@@ -37,8 +37,8 @@ The current rules focus on a few high-value areas:
 - ignored async Axiom assertion results
 - `Batch` instances created without `using`
 - high-confidence xUnit `Assert.*` migration suggestions
-- a conservative NUnit `Assert.That(...)` migration wave
-- a conservative first MSTest `Assert.*` migration wave
+- conservative NUnit `Assert.That(...)` migration suggestions
+- conservative MSTest `Assert.*` migration suggestions
 
 ## Async Assertions Must Be Awaited
 
