@@ -1,6 +1,6 @@
 ---
 title: Getting Started with Axiom Assertions for .NET
-description: Install Axiom Assertions for .NET, write your first assertions, and find the right guides for migration, equivalency, analyzers, and vector testing.
+description: Install Axiom Assertions for .NET, write your first assertions, and find the right guides for migration, equivalency, JSON assertions, analyzers, and vector testing.
 ---
 
 # Getting Started
@@ -40,6 +40,12 @@ user.Roles.Should().Contain("admin");
 That default install path also bundles the Axiom analyzers/code fixes automatically, so common diagnostics light up without a second package.
 
 ## Optional Packages
+
+Install `Axiom.Json` when you want structural JSON equivalency and simple JSON path assertions:
+
+```bash
+dotnet add package Axiom.Json
+```
 
 Install `Axiom.Vectors` only when you want vector and embedding-focused assertions:
 
@@ -118,6 +124,19 @@ embedding.Should().HaveDimension(1536);
 embedding.Should().HaveCosineSimilarityWith(expected).AtLeast(0.995f);
 ```
 
+## JSON Example
+
+```csharp
+using Axiom.Json;
+
+var actualJson = """{ "id": 1, "name": "Ada", "roles": ["admin", "author"] }""";
+var expectedJson = """{ "roles": ["admin", "author"], "name": "Ada", "id": 1.0 }""";
+
+actualJson.Should().BeJsonEquivalentTo(expectedJson);
+actualJson.Should().HaveJsonStringAtPath("$.name", "Ada");
+actualJson.Should().HaveJsonPath("$.roles[1]");
+```
+
 ## Next Steps
 
 - Browse the full [Assertion Reference](assertion-reference.md)
@@ -127,5 +146,6 @@ embedding.Should().HaveCosineSimilarityWith(expected).AtLeast(0.995f);
 - Read [.NET assertion library](dotnet-assertion-library.md) for the broader category overview
 - Read the [Equivalency](equivalency.md) guide for object-graph configuration
 - Read [Custom Assertions](custom-assertions.md) when you want domain-specific extensions
+- Read [JSON](json.md) when you want JSON equivalency or path assertions
 - Read [Analyzers](analyzers.md) for the shipped diagnostics
 - Read [Vectors](vectors.md) or [Vector assertions for AI and retrieval tests in .NET](vector-assertions-for-ai-and-retrieval-tests-in-dotnet.md) for embedding and retrieval-style assertions

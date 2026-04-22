@@ -24,6 +24,8 @@ All fluent assertions either:
 | `Task<T>` | `subject.Should()` | `TaskAssertions<T>` |
 | `ValueTask` | `subject.Should()` | `TaskAssertions` |
 | `ValueTask<T>` | `subject.Should()` | `TaskAssertions<T>` |
+| `JsonDocument?` with `using Axiom.Json;` | `subject.Should()` | `JsonAssertions` |
+| `JsonElement` with `using Axiom.Json;` | `subject.Should()` | `JsonAssertions` |
 | `float[]?` with `using Axiom.Vectors;` | `subject.Should()` | `VectorAssertions<float>` |
 | `double[]?` with `using Axiom.Vectors;` | `subject.Should()` | `VectorAssertions<double>` |
 | `ReadOnlyMemory<float>` with `using Axiom.Vectors;` | `subject.Should()` | `VectorAssertions<float>` |
@@ -83,6 +85,54 @@ var namesContext = AssertionContext.Create(new[] { "alex", "bea" }.Should());
 ```
 
 The collection example is still value-based authoring on a collection subject. It is not a separate collection-specific authoring API.
+
+## JSON Assertions
+
+Available in `Axiom.Json`.
+
+Raw JSON strings keep the normal `StringAssertions` receiver from `subject.Should()` and gain JSON-specific extension methods.
+
+`JsonDocument` and `JsonElement` use `JsonAssertions` from `subject.Should()` when `using Axiom.Json;` is in scope.
+
+```csharp
+BeJsonEquivalentTo(string expectedJson)
+BeJsonEquivalentTo(JsonDocument expectedJson)
+BeJsonEquivalentTo(JsonElement expectedJson)
+NotBeJsonEquivalentTo(string unexpectedJson)
+NotBeJsonEquivalentTo(JsonDocument unexpectedJson)
+NotBeJsonEquivalentTo(JsonElement unexpectedJson)
+HaveJsonPath(path)
+NotHaveJsonPath(path)
+HaveJsonStringAtPath(path, expectedValue)
+HaveJsonNumberAtPath(path, decimal expectedValue)
+HaveJsonNumberAtPath(path, double expectedValue)
+HaveJsonBooleanAtPath(path, expectedValue)
+HaveJsonNullAtPath(path)
+```
+
+Current first wave JSON semantics:
+
+- object property order does not matter
+- array order does matter
+- numbers are compared by normalized JSON numeric value, so `1`, `1.0`, and `1e0` are equivalent
+- path traversal supports object members plus `[index]` array access only
+
+```csharp
+using System.Text.Json;
+using Axiom.Assertions;
+using Axiom.Json;
+
+var actualJson = """{ "id": 1, "name": "Bob", "roles": ["admin", "author"] }""";
+var expectedJson = """{ "roles": ["admin", "author"], "name": "Bob", "id": 1.0 }""";
+
+actualJson.Should().BeJsonEquivalentTo(expectedJson);
+actualJson.Should().HaveJsonStringAtPath("$.name", "Bob");
+actualJson.Should().HaveJsonPath("$.roles[1]");
+
+using var document = JsonDocument.Parse(actualJson);
+document.Should().HaveJsonNumberAtPath("$.id", 1m);
+document.RootElement.Should().NotHaveJsonPath("$.deletedAt");
+```
 
 ## Value Assertions
 

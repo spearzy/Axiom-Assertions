@@ -9,7 +9,7 @@
 [![Version](https://img.shields.io/nuget/v/Axiom.Assertions?label=version)](https://www.nuget.org/packages/Axiom.Assertions)
 [![Downloads](https://img.shields.io/nuget/dt/Axiom.Assertions?label=downloads)](https://www.nuget.org/packages/Axiom.Assertions)
 
-Axiom Assertions is a fluent assertion library for .NET tests. It focuses on deterministic failure output, explicit batch aggregation, configurable equivalency, analyzer-backed migration help, and optional vector and retrieval assertions.
+Axiom Assertions is a fluent assertion library for .NET tests. It focuses on deterministic failure output, explicit batch aggregation, configurable equivalency, analyzer-backed migration help, and optional JSON, vector, and retrieval assertions.
 
 Target frameworks: `net8.0`, `net9.0`, and `net10.0`.
 
@@ -30,6 +30,7 @@ Install the other packages when you need something more specific:
 ```bash
 dotnet add package Axiom.Core
 dotnet add package Axiom.Analyzers
+dotnet add package Axiom.Json
 dotnet add package Axiom.Vectors
 ```
 
@@ -72,6 +73,18 @@ results.Should().ContainInTopK("doc-7", 2);
 queries.Should().HaveMeanReciprocalRank(expectedMeanReciprocalRank: 0.75);
 ```
 
+JSON:
+
+```csharp
+using Axiom.Json;
+
+var actualJson = """{ "id": 1, "name": "Ada", "roles": ["admin", "author"] }""";
+var expectedJson = """{ "roles": ["admin", "author"], "name": "Ada", "id": 1.0 }""";
+
+actualJson.Should().BeJsonEquivalentTo(expectedJson);
+actualJson.Should().HaveJsonStringAtPath("$.name", "Ada");
+```
+
 ## Packages
 
 | Package | Use it when you want... |
@@ -79,6 +92,7 @@ queries.Should().HaveMeanReciprocalRank(expectedMeanReciprocalRank: 0.75);
 | [`Axiom.Assertions`](https://www.nuget.org/packages/Axiom.Assertions) | the main fluent assertion library for most test projects |
 | [`Axiom.Core`](https://www.nuget.org/packages/Axiom.Core) | low-level primitives such as `Batch`, formatting, and configuration without the full assertion surface |
 | [`Axiom.Analyzers`](https://www.nuget.org/packages/Axiom.Analyzers) | the analyzers and code fixes without the runtime assertion library |
+| [`Axiom.Json`](https://www.nuget.org/packages/Axiom.Json) | structural JSON equivalency and simple JSON path assertions on top of the main Axiom assertion library |
 | [`Axiom.Vectors`](https://www.nuget.org/packages/Axiom.Vectors) | vector, embedding, and ranked retrieval assertions on top of the main Axiom assertion library |
 
 ## Why Axiom
@@ -101,6 +115,7 @@ Use the docs site for the full guides and reference:
 - [Axiom vs Shouldly](https://spearzy.github.io/Axiom/axiom-vs-shouldly/)
 - [.NET assertion library](https://spearzy.github.io/Axiom/dotnet-assertion-library/)
 - [Equivalency Guide](https://spearzy.github.io/Axiom/equivalency/)
+- [JSON Guide](https://spearzy.github.io/Axiom/json/)
 - [Vectors Guide](https://spearzy.github.io/Axiom/vectors/)
 - [Vector assertions for AI and retrieval tests in .NET](https://spearzy.github.io/Axiom/vector-assertions-for-ai-and-retrieval-tests-in-dotnet/)
 - [Analyzers Guide](https://spearzy.github.io/Axiom/analyzers/)
