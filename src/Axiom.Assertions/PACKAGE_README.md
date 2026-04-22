@@ -22,6 +22,7 @@ dotnet add package Axiom.Assertions
 
 - you only want low-level primitives such as batching, formatting, or configuration: install `Axiom.Core`
 - you only want the diagnostics and code fixes without runtime assertions: install `Axiom.Analyzers`
+- you want structural JSON equivalency and simple JSON path assertions: install `Axiom.Json` on top of `Axiom.Assertions`
 - you want vector, embedding, or retrieval assertions on top of the main package: install `Axiom.Vectors`
 
 Documentation: [spearzy.github.io/Axiom](https://spearzy.github.io/Axiom/)

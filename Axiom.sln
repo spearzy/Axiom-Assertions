@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axiom.Benchmarks", "benchma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axiom.Docs.Snippets.Tests", "tests\Axiom.Docs.Snippets.Tests\Axiom.Docs.Snippets.Tests.csproj", "{EE502AA9-26D7-4A66-96E0-53EC00600BF3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axiom.Json", "src\Axiom.Json\Axiom.Json.csproj", "{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -145,6 +147,18 @@ Global
 		{EE502AA9-26D7-4A66-96E0-53EC00600BF3}.Release|x64.Build.0 = Release|Any CPU
 		{EE502AA9-26D7-4A66-96E0-53EC00600BF3}.Release|x86.ActiveCfg = Release|Any CPU
 		{EE502AA9-26D7-4A66-96E0-53EC00600BF3}.Release|x86.Build.0 = Release|Any CPU
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}.Debug|x64.Build.0 = Debug|Any CPU
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}.Debug|x86.Build.0 = Debug|Any CPU
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}.Release|x64.ActiveCfg = Release|Any CPU
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}.Release|x64.Build.0 = Release|Any CPU
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}.Release|x86.ActiveCfg = Release|Any CPU
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -159,5 +173,6 @@ Global
 		{3C4E87C0-B51A-4A08-8B06-BF1A15E1E3B2} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{0BEFAC39-5142-4435-B7DA-FAA31E17320E} = {66320409-64EC-F7C5-3DEF-65E7510DAAD1}
 		{EE502AA9-26D7-4A66-96E0-53EC00600BF3} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{E1012720-C7E6-4C7E-BF45-C71ACDCDDCEE} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal
