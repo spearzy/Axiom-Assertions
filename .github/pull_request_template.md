@@ -10,6 +10,7 @@ What does this add or improve for library users?
 - [ ] Better diagnostics / failure messages
 - [ ] Better developer ergonomics
 - [ ] Analyzer improvement
+- [ ] JSON assertions
 - [ ] Vector / embedding assertions
 - [ ] Docs / discoverability
 - [ ] Packaging / release alignment
@@ -24,6 +25,7 @@ Which packages are affected?
 - [ ] `Axiom.Assertions`
 - [ ] `Axiom.Core`
 - [ ] `Axiom.Analyzers`
+- [ ] `Axiom.Json`
 - [ ] `Axiom.Vectors`
 - [ ] Docs site
 - [ ] Release / CI only
