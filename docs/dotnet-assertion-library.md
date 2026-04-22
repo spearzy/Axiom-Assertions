@@ -7,7 +7,7 @@ description: Understand where Axiom Assertions fits as a .NET assertion library,
 
 If you are searching for a .NET assertion library, the real decision is usually about trade-offs rather than raw feature count.
 
-Axiom Assertions is a newer option in that category. It is aimed at teams that want deterministic messages, explicit batching, analyzers, equivalency support, and optional vector and retrieval testing support.
+Axiom Assertions is a newer option in that category. It is aimed at teams that want deterministic messages, explicit batching, analyzers, equivalency support, and optional JSON plus vector and retrieval testing support.
 
 ## What Category Axiom Fits
 
@@ -21,6 +21,7 @@ It is not trying to replace your test runner. It sits on top of xUnit, NUnit, or
 - explicit multi-assertion aggregation with `Batch`
 - configurable structural equivalency
 - analyzers and code fixes in the normal install path
+- optional JSON assertions for structural JSON equivalency and simple path checks
 - optional vector and retrieval assertions for AI-oriented tests
 
 ## When Axiom May Be Worth Evaluating
