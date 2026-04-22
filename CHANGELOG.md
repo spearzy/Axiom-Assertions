@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/).
 
+## [2.1.0] - 2026-04-22
+
+### Added
+- Added `Axiom.Json` as an optional package for deterministic JSON assertions over raw JSON `string`, `JsonDocument`, and `JsonElement`.
+- Added structural JSON equivalency, simple JSON path assertions, and scalar value-at-path assertions.
+
+### Changed
+- Added package docs, metadata, and CI/release smoke coverage for the new JSON assertion package.
+
+### Fixed
+- Tightened JSON-focused regression coverage so the shipped first-wave JSON surface stays stable.
+
 ## [2.0.0] - 2026-04-21
 
 ### Added
