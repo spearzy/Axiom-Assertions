@@ -56,8 +56,8 @@ internal static class XunitAsyncThrowsMigrationRewriter
                 : $"Convert to '(await ...Should().{methodName}<TException>()).Thrown'";
         }
 
-        return match.ExpectedExpression is not null 
-            ? $"Convert to '(await ...Should().{methodName}<TException>()).WithParamName(...)'" 
+        return match.ExpectedExpression is not null
+            ? $"Convert to '(await ...Should().{methodName}<TException>()).WithParamName(...)'"
             : match.Spec.CodeFixTitle;
     }
 
