@@ -25,6 +25,7 @@ theme:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Compatibility Matrix: compatibility-matrix.md
   - Assertion Reference: assertion-reference.md
   - Compare and Migrate:
       - Migrate from xUnit Assert to Axiom: migrate-from-xunit-assert.md

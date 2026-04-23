@@ -169,6 +169,7 @@ response.Should().HaveProblemDetailsTitle("Validation failed");
 
 ## Next Steps
 
+- Read the [Compatibility Matrix](compatibility-matrix.md) if you want the current package, target framework, and test framework support in one place
 - Browse the full [Assertion Reference](assertion-reference.md)
 - Read [Migrate from xUnit Assert to Axiom](migrate-from-xunit-assert.md) if you are coming from classic xUnit assertions
 - Read [Migrating to Axiom](migrating-to-axiom.md) for the broader migration guide
