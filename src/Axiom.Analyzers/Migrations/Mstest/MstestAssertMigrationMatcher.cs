@@ -10,25 +10,34 @@ internal sealed class MstestAssertMigrationMatch
     public MstestAssertMigrationMatch(
         MstestAssertMigrationSpec spec,
         InvocationExpressionSyntax invocationSyntax,
+        AwaitExpressionSyntax? awaitExpressionSyntax,
         ExpressionSyntax subjectExpression,
         ExpressionSyntax? expectedExpression,
+        ExpressionSyntax? additionalArgumentExpression,
         TypeSyntax? typeArgumentSyntax,
-        bool requiresAssertionsExtensionsNamespace)
+        bool requiresAssertionsExtensionsNamespace,
+        bool appendThrown)
     {
         Spec = spec;
         InvocationSyntax = invocationSyntax;
+        AwaitExpressionSyntax = awaitExpressionSyntax;
         SubjectExpression = subjectExpression;
         ExpectedExpression = expectedExpression;
+        AdditionalArgumentExpression = additionalArgumentExpression;
         TypeArgumentSyntax = typeArgumentSyntax;
         RequiresAssertionsExtensionsNamespace = requiresAssertionsExtensionsNamespace;
+        AppendThrown = appendThrown;
     }
 
     public MstestAssertMigrationSpec Spec { get; }
     public InvocationExpressionSyntax InvocationSyntax { get; }
+    public AwaitExpressionSyntax? AwaitExpressionSyntax { get; }
     public ExpressionSyntax SubjectExpression { get; }
     public ExpressionSyntax? ExpectedExpression { get; }
+    public ExpressionSyntax? AdditionalArgumentExpression { get; }
     public TypeSyntax? TypeArgumentSyntax { get; }
     public bool RequiresAssertionsExtensionsNamespace { get; }
+    public bool AppendThrown { get; }
 }
 
 internal static class MstestAssertMigrationMatcher
@@ -50,28 +59,37 @@ internal static class MstestAssertMigrationMatcher
         foreach (var spec in MstestAssertMigrationSpecs.GetByMethodName(invocation.TargetMethod.Name))
         {
             if (!symbols.IsSupportedAssertType(invocation.TargetMethod.ContainingType, spec.Target) ||
-                invocation.TargetMethod.Parameters.Length != spec.RequiredArgumentCount ||
-                invocation.Arguments.Length != spec.RequiredArgumentCount ||
-                invocationSyntax.ArgumentList.Arguments.Count != spec.RequiredArgumentCount ||
+                !HasSupportedArgumentCount(spec, invocation, invocationSyntax) ||
                 !IsSupportedOverload(invocation, spec.Kind, symbols))
             {
                 continue;
             }
 
-            var typeArgumentSyntax = GetTypeArgumentSyntax(spec.Kind, invocationSyntax.ArgumentList.Arguments);
+            var typeArgumentSyntax = GetTypeArgumentSyntax(spec.Kind, invocationSyntax);
             if (spec.Kind is MstestAssertMigrationKind.BeAssignableTo or MstestAssertMigrationKind.NotBeAssignableTo &&
                 typeArgumentSyntax is null)
             {
                 continue;
             }
 
+            if (IsAsyncThrowsKind(spec.Kind) && typeArgumentSyntax is null)
+            {
+                continue;
+            }
+
+            var awaitExpressionSyntax = GetAwaitExpressionSyntax(invocationSyntax);
             match = new MstestAssertMigrationMatch(
                 spec,
                 invocationSyntax,
+                awaitExpressionSyntax,
                 GetSubjectExpression(spec.Kind, invocationSyntax.ArgumentList.Arguments),
                 GetExpectedExpression(spec.Kind, invocationSyntax.ArgumentList.Arguments),
+                GetAdditionalArgumentExpression(spec.Kind, invocationSyntax.ArgumentList.Arguments),
                 typeArgumentSyntax,
-                RequiresAssertionsExtensionsNamespace(spec.Kind));
+                RequiresAssertionsExtensionsNamespace(spec.Kind),
+                appendThrown: IsAsyncThrowsKind(spec.Kind) &&
+                    awaitExpressionSyntax is not null &&
+                    IsAwaitedResultConsumed(awaitExpressionSyntax));
 
             return true;
         }
@@ -91,6 +109,23 @@ internal static class MstestAssertMigrationMatcher
         }
 
         return true;
+    }
+
+    private static bool HasSupportedArgumentCount(
+        MstestAssertMigrationSpec spec,
+        IInvocationOperation invocation,
+        InvocationExpressionSyntax invocationSyntax)
+    {
+        if (IsAsyncThrowsKind(spec.Kind) || IsOrderedValueKind(spec.Kind))
+        {
+            return invocation.TargetMethod.Parameters.Length >= spec.RequiredArgumentCount &&
+                   invocation.Arguments.Length >= spec.RequiredArgumentCount &&
+                   invocationSyntax.ArgumentList.Arguments.Count == spec.RequiredArgumentCount;
+        }
+
+        return invocation.TargetMethod.Parameters.Length == spec.RequiredArgumentCount &&
+               invocation.Arguments.Length == spec.RequiredArgumentCount &&
+               invocationSyntax.ArgumentList.Arguments.Count == spec.RequiredArgumentCount;
     }
 
     private static bool IsSupportedOverload(
@@ -116,8 +151,29 @@ internal static class MstestAssertMigrationMatcher
                 => IsSupportedStringContainmentOverload(invocation, symbols),
             MstestAssertMigrationKind.StartWith or MstestAssertMigrationKind.EndWith
                 => IsSupportedStringPrefixSuffixOverload(invocation, symbols),
+            MstestAssertMigrationKind.BeGreaterThan or
+            MstestAssertMigrationKind.BeGreaterThanOrEqualTo or
+            MstestAssertMigrationKind.BeLessThan or
+            MstestAssertMigrationKind.BeLessThanOrEqualTo
+                => IsSupportedOrderedComparisonOverload(invocation, symbols),
+            MstestAssertMigrationKind.BeInRange
+                => IsSupportedRangeOverload(invocation, symbols),
+            MstestAssertMigrationKind.ThrowExactlyAsync or MstestAssertMigrationKind.ThrowAsync
+                => IsSupportedAsyncThrowOverload(invocation, symbols),
             _ => false,
         };
+    }
+
+    private static bool IsSupportedAsyncThrowOverload(
+        IInvocationOperation invocation,
+        MstestAssertMigrationSymbols symbols)
+    {
+        var method = invocation.TargetMethod;
+        return GetAwaitExpressionSyntax(invocation.Syntax) is not null &&
+               method.IsGenericMethod &&
+               method.TypeArguments.Length == 1 &&
+               method.Parameters.Length >= 1 &&
+               symbols.IsFuncReturningTask(method.Parameters[0].Type);
     }
 
     private static bool IsSupportedEqualityOverload(
@@ -216,6 +272,27 @@ internal static class MstestAssertMigrationMatcher
                method.Parameters[1].Type.SpecialType == SpecialType.System_String;
     }
 
+    private static bool IsSupportedOrderedComparisonOverload(
+        IInvocationOperation invocation,
+        MstestAssertMigrationSymbols symbols)
+    {
+        var subjectType = GetReceiverType(invocation.Arguments[1]);
+        return subjectType is not null &&
+               IsSupportedReceiverExpression(invocation.Arguments[1], subjectType, symbols.SupportsOrderedValueMigrationReceiver) &&
+               IsSupportedOrderedExpectedExpression(invocation.Arguments[0], subjectType, symbols);
+    }
+
+    private static bool IsSupportedRangeOverload(
+        IInvocationOperation invocation,
+        MstestAssertMigrationSymbols symbols)
+    {
+        var subjectType = GetReceiverType(invocation.Arguments[2]);
+        return subjectType is not null &&
+               IsSupportedReceiverExpression(invocation.Arguments[2], subjectType, symbols.SupportsOrderedValueMigrationReceiver) &&
+               IsSupportedOrderedExpectedExpression(invocation.Arguments[0], subjectType, symbols) &&
+               IsSupportedOrderedExpectedExpression(invocation.Arguments[1], subjectType, symbols);
+    }
+
     private static bool IsSupportedCollectionExpectedExpression(
         IArgumentOperation expectedArgument,
         ITypeSymbol elementType,
@@ -259,6 +336,26 @@ internal static class MstestAssertMigrationMatcher
         }
 
         if (IsUnsupportedEqualityType(operation.Type, symbols))
+        {
+            return false;
+        }
+
+        var conversion = symbols.Compilation.ClassifyConversion(operation.Type, subjectType);
+        return conversion.Exists && conversion.IsImplicit;
+    }
+
+    private static bool IsSupportedOrderedExpectedExpression(
+        IArgumentOperation expectedArgument,
+        ITypeSymbol subjectType,
+        MstestAssertMigrationSymbols symbols)
+    {
+        var operation = UnwrapConversions(expectedArgument.Value);
+        if (operation.Type is null)
+        {
+            return false;
+        }
+
+        if (!symbols.SupportsOrderedValueMigrationReceiver(operation.Type))
         {
             return false;
         }
@@ -350,8 +447,14 @@ internal static class MstestAssertMigrationMatcher
         => kind is MstestAssertMigrationKind.Be or
                  MstestAssertMigrationKind.NotBe or
                  MstestAssertMigrationKind.BeSameAs or
-                 MstestAssertMigrationKind.NotBeSameAs
+                 MstestAssertMigrationKind.NotBeSameAs or
+                 MstestAssertMigrationKind.BeGreaterThan or
+                 MstestAssertMigrationKind.BeGreaterThanOrEqualTo or
+                 MstestAssertMigrationKind.BeLessThan or
+                 MstestAssertMigrationKind.BeLessThanOrEqualTo
             ? arguments[1].Expression
+            : kind is MstestAssertMigrationKind.BeInRange
+                ? arguments[2].Expression
             : arguments[0].Expression;
 
     private static ExpressionSyntax? GetExpectedExpression(
@@ -368,15 +471,49 @@ internal static class MstestAssertMigrationMatcher
             MstestAssertMigrationKind.ContainSubstring or
             MstestAssertMigrationKind.StartWith or
             MstestAssertMigrationKind.EndWith => arguments[1].Expression,
+            MstestAssertMigrationKind.BeGreaterThan or
+            MstestAssertMigrationKind.BeGreaterThanOrEqualTo or
+            MstestAssertMigrationKind.BeLessThan or
+            MstestAssertMigrationKind.BeLessThanOrEqualTo or
+            MstestAssertMigrationKind.BeInRange => arguments[0].Expression,
             _ => null,
         };
 
-    private static TypeSyntax? GetTypeArgumentSyntax(
+    private static ExpressionSyntax? GetAdditionalArgumentExpression(
         MstestAssertMigrationKind kind,
         SeparatedSyntaxList<ArgumentSyntax> arguments)
-        => kind is MstestAssertMigrationKind.BeAssignableTo or MstestAssertMigrationKind.NotBeAssignableTo
-            ? TryGetTypeArgumentSyntax(arguments[1], out var typeArgumentSyntax) ? typeArgumentSyntax : null
+        => kind is MstestAssertMigrationKind.BeInRange
+            ? arguments[1].Expression
             : null;
+
+    private static TypeSyntax? GetTypeArgumentSyntax(
+        MstestAssertMigrationKind kind,
+        InvocationExpressionSyntax invocationSyntax)
+    {
+        if (kind is MstestAssertMigrationKind.BeAssignableTo or MstestAssertMigrationKind.NotBeAssignableTo)
+        {
+            return TryGetTypeArgumentSyntax(invocationSyntax.ArgumentList.Arguments[1], out var typeArgumentSyntax)
+                ? typeArgumentSyntax
+                : null;
+        }
+
+        if (!IsAsyncThrowsKind(kind))
+        {
+            return null;
+        }
+
+        return invocationSyntax.Expression switch
+        {
+            GenericNameSyntax genericName when genericName.TypeArgumentList.Arguments.Count == 1
+                => genericName.TypeArgumentList.Arguments[0],
+            MemberAccessExpressionSyntax
+            {
+                Name: GenericNameSyntax genericName
+            } when genericName.TypeArgumentList.Arguments.Count == 1
+                => genericName.TypeArgumentList.Arguments[0],
+            _ => null,
+        };
+    }
 
     private static bool TryGetTypeArgumentSyntax(
         ArgumentSyntax argument,
@@ -410,4 +547,20 @@ internal static class MstestAssertMigrationMatcher
                  MstestAssertMigrationKind.BeFalse or
                  MstestAssertMigrationKind.Contain or
                  MstestAssertMigrationKind.NotContain;
+
+    private static bool IsAsyncThrowsKind(MstestAssertMigrationKind kind)
+        => kind is MstestAssertMigrationKind.ThrowExactlyAsync or MstestAssertMigrationKind.ThrowAsync;
+
+    private static bool IsOrderedValueKind(MstestAssertMigrationKind kind)
+        => kind is MstestAssertMigrationKind.BeGreaterThan or
+            MstestAssertMigrationKind.BeGreaterThanOrEqualTo or
+            MstestAssertMigrationKind.BeLessThan or
+            MstestAssertMigrationKind.BeLessThanOrEqualTo or
+            MstestAssertMigrationKind.BeInRange;
+
+    private static AwaitExpressionSyntax? GetAwaitExpressionSyntax(SyntaxNode syntax)
+        => syntax.Parent as AwaitExpressionSyntax;
+
+    private static bool IsAwaitedResultConsumed(AwaitExpressionSyntax awaitExpressionSyntax)
+        => awaitExpressionSyntax.Parent is not ExpressionStatementSyntax;
 }

@@ -452,6 +452,21 @@ internal sealed class DocsSnippetCompiler
             lines.Add("var condition = true;");
         }
 
+        if (code.Contains("minimum", StringComparison.Ordinal))
+        {
+            lines.Add("var minimum = 1;");
+        }
+
+        if (code.Contains("maximum", StringComparison.Ordinal))
+        {
+            lines.Add("var maximum = 10;");
+        }
+
+        if (code.Contains("count", StringComparison.Ordinal))
+        {
+            lines.Add("var count = 5;");
+        }
+
         if (code.Contains("values", StringComparison.Ordinal))
         {
             lines.Add(valuesLine);

@@ -16,3 +16,11 @@ AXM1064 | Migration | Info | Suggest migrating NUnit Assert.That(actual, Is.Not.
 AXM1065 | Migration | Info | Suggest migrating NUnit Assert.That(actual, Is.Not.AssignableTo<TExpected>()) to actual.Should().NotBeAssignableTo<TExpected>().
 AXM1066 | Migration | Info | Suggest migrating NUnit Assert.ThrowsAsync<TException>(...) to an Axiom awaitable .Should().ThrowExactlyAsync<TException>() assertion, appending .Thrown when the exception is used.
 AXM1067 | Migration | Info | Suggest migrating NUnit Assert.CatchAsync<TException>(...) to an Axiom awaitable .Should().ThrowAsync<TException>() assertion, appending .Thrown when the exception is used.
+AXM1068 | Migration | Info | Suggest migrating awaited MSTest Assert.ThrowsExceptionAsync<TException>(...) to an Axiom awaitable .Should().ThrowExactlyAsync<TException>() assertion, appending .Thrown when the exception is used.
+AXM1069 | Migration | Info | Suggest migrating awaited MSTest Assert.ThrowsExactlyAsync<TException>(...) to an Axiom awaitable .Should().ThrowExactlyAsync<TException>() assertion, appending .Thrown when the exception is used.
+AXM1070 | Migration | Info | Suggest migrating awaited MSTest Assert.ThrowsAsync<TException>(...) to an Axiom awaitable .Should().ThrowAsync<TException>() assertion, appending .Thrown when the exception is used.
+AXM1071 | Migration | Info | Suggest migrating MSTest Assert.IsGreaterThan(lowerBound, value) to value.Should().BeGreaterThan(lowerBound).
+AXM1072 | Migration | Info | Suggest migrating MSTest Assert.IsGreaterThanOrEqualTo(lowerBound, value) to value.Should().BeGreaterThanOrEqualTo(lowerBound).
+AXM1073 | Migration | Info | Suggest migrating MSTest Assert.IsLessThan(upperBound, value) to value.Should().BeLessThan(upperBound).
+AXM1074 | Migration | Info | Suggest migrating MSTest Assert.IsLessThanOrEqualTo(upperBound, value) to value.Should().BeLessThanOrEqualTo(upperBound).
+AXM1075 | Migration | Info | Suggest migrating MSTest Assert.IsInRange(minValue, maxValue, value) to value.Should().BeInRange(minValue, maxValue).

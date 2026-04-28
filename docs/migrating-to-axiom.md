@@ -87,6 +87,14 @@ The current analyzer and code-fix support focuses on high-confidence xUnit `Asse
 | `Assert.AreNotSame(expected, actual)` | `actual.Should().NotBeSameAs(expected)` |
 | `Assert.IsInstanceOfType(value, typeof(T))` | `value.Should().BeAssignableTo<T>()` |
 | `Assert.IsNotInstanceOfType(value, typeof(T))` | `value.Should().NotBeAssignableTo<T>()` |
+| `Assert.IsGreaterThan(lowerBound, value)` | `value.Should().BeGreaterThan(lowerBound)` |
+| `Assert.IsGreaterThanOrEqualTo(lowerBound, value)` | `value.Should().BeGreaterThanOrEqualTo(lowerBound)` |
+| `Assert.IsLessThan(upperBound, value)` | `value.Should().BeLessThan(upperBound)` |
+| `Assert.IsLessThanOrEqualTo(upperBound, value)` | `value.Should().BeLessThanOrEqualTo(upperBound)` |
+| `Assert.IsInRange(minValue, maxValue, value)` | `value.Should().BeInRange(minValue, maxValue)` |
+| `await Assert.ThrowsExceptionAsync<TException>(() => workAsync())` | `await new Func<Task>(() => workAsync()).Should().ThrowExactlyAsync<TException>()` or append `.Thrown` when you use the exception |
+| `await Assert.ThrowsExactlyAsync<TException>(() => workAsync())` | `await new Func<Task>(() => workAsync()).Should().ThrowExactlyAsync<TException>()` or append `.Thrown` when you use the exception |
+| `await Assert.ThrowsAsync<TException>(() => workAsync())` | `await new Func<Task>(() => workAsync()).Should().ThrowAsync<TException>()` or append `.Thrown` when you use the exception |
 | `StringAssert.Contains(actual, expectedSubstring)` | `actual.Should().Contain(expectedSubstring)` |
 | `StringAssert.StartsWith(actual, expectedPrefix)` when `expectedPrefix` is an obvious non-null constant string | `actual.Should().StartWith(expectedPrefix)` |
 | `StringAssert.EndsWith(actual, expectedSuffix)` when `expectedSuffix` is an obvious non-null constant string | `actual.Should().EndWith(expectedSuffix)` |
@@ -117,7 +125,7 @@ It skips cases where the rewrite is not obviously semantics-preserving yet, incl
 - `Assert.Throws<TException>(...)` when you use the returned exception outside the `string? paramName, Action testCode` overload
 - `Assert.Throws<TException>(paramName, ...)` when `paramName` is not an obvious non-null constant string
 - richer NUnit constraint chains, comparer/tolerance variants, message-bearing `Assert.That(...)` overloads, `Has.*` chains beyond `Has.Count.EqualTo(int)`, runtime `Type` constraints, `Is.Not.TypeOf<T>()`, NUnit async exception assertions outside an async context, `AsyncTestDelegate` variable rewrites, xUnit-style async `paramName` / `ThrowsAnyAsync` shapes that NUnit does not expose, and `Does.StartWith(...)` / `Does.EndWith(...)` when the expected prefix or suffix is not an obvious non-null constant string
-- MSTest message-bearing, comparer, precision, and other richer assertion-family overloads
+- MSTest async exception assertions that are not awaited, message-bearing async exception overloads, xUnit-style async `paramName` / `ThrowsAnyAsync` shapes that MSTest does not expose, message-bearing ordered-value overloads, non-comparable ordering, comparer, precision, and other richer assertion-family overloads
 - `StringAssert.StartsWith(...)` and `StringAssert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string
 - `CollectionAssert.AreEqual(...)`, `CollectionAssert.AreEquivalent(...)`, and other structural-comparison collection shapes
 - most structural-comparison assertions
