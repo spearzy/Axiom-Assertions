@@ -6,6 +6,7 @@ internal static class MstestAssertStubs
         """
         using System;
         using System.Collections;
+        using System.Threading.Tasks;
 
         namespace Microsoft.VisualStudio.TestTools.UnitTesting
         {
@@ -35,6 +36,17 @@ internal static class MstestAssertStubs
                 public static void IsInstanceOfType(object? value, Type expectedType, string message) { }
                 public static void IsNotInstanceOfType(object? value, Type wrongType) { }
                 public static void IsNotInstanceOfType(object? value, Type wrongType, string message) { }
+                public static Task<TException> ThrowsExceptionAsync<TException>(Func<Task> action) where TException : Exception => throw null!;
+                public static Task<TException> ThrowsExceptionAsync<TException>(Func<Task> action, string message) where TException : Exception => throw null!;
+                public static Task<TException> ThrowsExceptionAsync<TException>(Func<Task> action, string message, params object[] parameters) where TException : Exception => throw null!;
+                public static Task<TException> ThrowsExactlyAsync<TException>(Func<Task> action, string message = "", params object[] parameters) where TException : Exception => throw null!;
+                public static Task<TException> ThrowsAsync<TException>(Func<Task> action, string message = "", params object[] parameters) where TException : Exception => throw null!;
+                public static Task<TException> ThrowsAsync<TException>(Func<Task> action, Func<Exception?, string> messageBuilder) where TException : Exception => throw null!;
+                public static void IsGreaterThan<T>(T lowerBound, T value, string message = "") where T : IComparable<T> { }
+                public static void IsGreaterThanOrEqualTo<T>(T lowerBound, T value, string message = "") where T : IComparable<T> { }
+                public static void IsLessThan<T>(T upperBound, T value, string message = "") where T : IComparable<T> { }
+                public static void IsLessThanOrEqualTo<T>(T upperBound, T value, string message = "") where T : IComparable<T> { }
+                public static void IsInRange<T>(T minValue, T maxValue, T value, string message = "") where T : struct { }
             }
 
             public static class StringAssert

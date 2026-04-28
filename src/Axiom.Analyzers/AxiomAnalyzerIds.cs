@@ -71,4 +71,12 @@ public static class AxiomAnalyzerIds
     public const string MigrateNunitAssertThatNotAssignableTo = "AXM1065";
     public const string MigrateNunitAssertThrowsAsync = "AXM1066";
     public const string MigrateNunitAssertCatchAsync = "AXM1067";
+    public const string MigrateMstestAssertThrowsExceptionAsync = "AXM1068";
+    public const string MigrateMstestAssertThrowsExactlyAsync = "AXM1069";
+    public const string MigrateMstestAssertThrowsAsync = "AXM1070";
+    public const string MigrateMstestAssertIsGreaterThan = "AXM1071";
+    public const string MigrateMstestAssertIsGreaterThanOrEqualTo = "AXM1072";
+    public const string MigrateMstestAssertIsLessThan = "AXM1073";
+    public const string MigrateMstestAssertIsLessThanOrEqualTo = "AXM1074";
+    public const string MigrateMstestAssertIsInRange = "AXM1075";
 }

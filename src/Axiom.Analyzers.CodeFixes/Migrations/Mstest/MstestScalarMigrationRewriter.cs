@@ -11,6 +11,7 @@ internal static class MstestScalarMigrationRewriter
             match.SubjectExpression,
             GetMethodName(match.Spec.Kind),
             match.ExpectedExpression,
+            match.AdditionalArgumentExpression,
             match.TypeArgumentSyntax);
     }
 
@@ -33,6 +34,11 @@ internal static class MstestScalarMigrationRewriter
             MstestAssertMigrationKind.ContainSubstring => "Contain",
             MstestAssertMigrationKind.StartWith => "StartWith",
             MstestAssertMigrationKind.EndWith => "EndWith",
+            MstestAssertMigrationKind.BeGreaterThan => "BeGreaterThan",
+            MstestAssertMigrationKind.BeGreaterThanOrEqualTo => "BeGreaterThanOrEqualTo",
+            MstestAssertMigrationKind.BeLessThan => "BeLessThan",
+            MstestAssertMigrationKind.BeLessThanOrEqualTo => "BeLessThanOrEqualTo",
+            MstestAssertMigrationKind.BeInRange => "BeInRange",
             _ => throw new ArgumentOutOfRangeException(nameof(kind)),
         };
     }

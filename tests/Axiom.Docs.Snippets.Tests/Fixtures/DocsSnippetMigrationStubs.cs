@@ -156,6 +156,8 @@ namespace Microsoft.VisualStudio.TestTools.UnitTesting
         public static void AreNotSame(object? expected, object? actual) { }
         public static void IsInstanceOfType(object? value, Type expectedType) { }
         public static void IsNotInstanceOfType(object? value, Type wrongType) { }
+        public static void IsGreaterThan<T>(T lowerBound, T value) where T : IComparable<T> { }
+        public static void IsInRange<T>(T minValue, T maxValue, T value) where T : struct { }
     }
 
     public static class StringAssert

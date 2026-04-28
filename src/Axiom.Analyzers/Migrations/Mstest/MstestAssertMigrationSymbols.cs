@@ -15,6 +15,8 @@ internal sealed class MstestAssertMigrationSymbols
         INamedTypeSymbol? dictionaryType,
         INamedTypeSymbol? readOnlyDictionaryType,
         INamedTypeSymbol? nonGenericDictionaryType,
+        INamedTypeSymbol? comparableType,
+        INamedTypeSymbol? genericComparableType,
         INamedTypeSymbol? actionType,
         INamedTypeSymbol? funcType,
         INamedTypeSymbol? taskType,
@@ -36,6 +38,8 @@ internal sealed class MstestAssertMigrationSymbols
         DictionaryType = dictionaryType;
         ReadOnlyDictionaryType = readOnlyDictionaryType;
         NonGenericDictionaryType = nonGenericDictionaryType;
+        ComparableType = comparableType;
+        GenericComparableType = genericComparableType;
         ActionType = actionType;
         FuncType = funcType;
         TaskType = taskType;
@@ -58,6 +62,8 @@ internal sealed class MstestAssertMigrationSymbols
     private INamedTypeSymbol? DictionaryType { get; }
     private INamedTypeSymbol? ReadOnlyDictionaryType { get; }
     private INamedTypeSymbol? NonGenericDictionaryType { get; }
+    private INamedTypeSymbol? ComparableType { get; }
+    private INamedTypeSymbol? GenericComparableType { get; }
     private INamedTypeSymbol? ActionType { get; }
     private INamedTypeSymbol? FuncType { get; }
     private INamedTypeSymbol? TaskType { get; }
@@ -87,6 +93,8 @@ internal sealed class MstestAssertMigrationSymbols
             compilation.GetTypeByMetadataName("System.Collections.Generic.IDictionary`2"),
             compilation.GetTypeByMetadataName("System.Collections.Generic.IReadOnlyDictionary`2"),
             compilation.GetTypeByMetadataName("System.Collections.IDictionary"),
+            compilation.GetTypeByMetadataName("System.IComparable"),
+            compilation.GetTypeByMetadataName("System.IComparable`1"),
             compilation.GetTypeByMetadataName("System.Action"),
             compilation.GetTypeByMetadataName("System.Func`1"),
             compilation.GetTypeByMetadataName("System.Threading.Tasks.Task"),
@@ -220,6 +228,25 @@ internal sealed class MstestAssertMigrationSymbols
            !IsAsyncEnumerableLike(type) &&
            !IsDictionaryLike(type);
 
+    public bool SupportsOrderedValueMigrationReceiver(ITypeSymbol type)
+    {
+        return !UsesSpecializedShouldReceiver(type) && IsComparableLike(type);
+    }
+
+    public bool IsFuncReturningTask(ITypeSymbol type)
+    {
+        if (FuncType is null ||
+            TaskType is null ||
+            type is not INamedTypeSymbol namedType ||
+            !SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, FuncType) ||
+            namedType.TypeArguments.Length != 1)
+        {
+            return false;
+        }
+
+        return SymbolEqualityComparer.Default.Equals(namedType.TypeArguments[0], TaskType);
+    }
+
     public bool TryGetEnumerableElementType(ITypeSymbol type, out ITypeSymbol? elementType)
     {
         if (type is IArrayTypeSymbol arrayType)
@@ -308,6 +335,37 @@ internal sealed class MstestAssertMigrationSymbols
 
     private static bool IsStringType(ITypeSymbol type)
         => type.SpecialType == SpecialType.System_String;
+
+    private bool IsComparableLike(ITypeSymbol type)
+    {
+        if (type.SpecialType == SpecialType.System_String)
+        {
+            return false;
+        }
+
+        foreach (var candidate in type.AllInterfaces)
+        {
+            if (SymbolEqualityComparer.Default.Equals(candidate, ComparableType) ||
+                SymbolEqualityComparer.Default.Equals(candidate.OriginalDefinition, GenericComparableType))
+            {
+                return true;
+            }
+        }
+
+        return type.SpecialType is SpecialType.System_Byte or
+            SpecialType.System_SByte or
+            SpecialType.System_Int16 or
+            SpecialType.System_UInt16 or
+            SpecialType.System_Int32 or
+            SpecialType.System_UInt32 or
+            SpecialType.System_Int64 or
+            SpecialType.System_UInt64 or
+            SpecialType.System_Single or
+            SpecialType.System_Double or
+            SpecialType.System_Decimal or
+            SpecialType.System_Char or
+            SpecialType.System_DateTime;
+    }
 
     private bool IsTaskLike(ITypeSymbol type)
     {

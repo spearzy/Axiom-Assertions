@@ -291,6 +291,14 @@ Rules:
 - `AXM1051` for `StringAssert.EndsWith(actual, expectedSuffix)` when `expectedSuffix` is an obvious non-null constant string
 - `AXM1052` for `CollectionAssert.Contains(collection, expected)`
 - `AXM1053` for `CollectionAssert.DoesNotContain(collection, unexpected)`
+- `AXM1068` for awaited `Assert.ThrowsExceptionAsync<TException>(...)`, appending `.Thrown` when the returned exception is used
+- `AXM1069` for awaited `Assert.ThrowsExactlyAsync<TException>(...)`, appending `.Thrown` when the returned exception is used
+- `AXM1070` for awaited `Assert.ThrowsAsync<TException>(...)`, appending `.Thrown` when the returned exception is used
+- `AXM1071` for `Assert.IsGreaterThan(lowerBound, value)`
+- `AXM1072` for `Assert.IsGreaterThanOrEqualTo(lowerBound, value)`
+- `AXM1073` for `Assert.IsLessThan(upperBound, value)`
+- `AXM1074` for `Assert.IsLessThanOrEqualTo(upperBound, value)`
+- `AXM1075` for `Assert.IsInRange(minValue, maxValue, value)`
 
 MSTest migrations only cover `Assert`, `StringAssert`, and `CollectionAssert` shapes that map directly to Axiom without carrying extra message, comparer, precision, or structural-comparison semantics across.
 
@@ -302,6 +310,8 @@ Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected, actual);
 Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsNull(value);
 Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsFalse(condition);
 Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsInstanceOfType(value, typeof(IDisposable));
+Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsGreaterThan(minimum, count);
+Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsInRange(minimum, maximum, count);
 StringAssert.Contains(actual, "archived");
 CollectionAssert.DoesNotContain(values, "blocked");
 ```
@@ -314,10 +324,18 @@ actual.Should().Be(expected);
 value.Should().BeNull();
 condition.Should().BeFalse();
 value.Should().BeAssignableTo<IDisposable>();
+count.Should().BeGreaterThan(minimum);
+count.Should().BeInRange(minimum, maximum);
 actual.Should().Contain("archived");
 values.Should().NotContain("blocked");
 ```
 
-These suggestions use semantic matching against MSTest's real `Assert`, `StringAssert`, and `CollectionAssert` APIs. They intentionally skip message-bearing, comparer, precision, structural-comparison, and other richer MSTest assertion families, plus `StringAssert.StartsWith(...)` and `StringAssert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string.
+Async exception migrations intentionally require an awaited MSTest call. Exact-type MSTest shapes (`ThrowsExceptionAsync<TException>` and `ThrowsExactlyAsync<TException>`) map to `ThrowExactlyAsync<TException>()`; derived-type `ThrowsAsync<TException>` maps to `ThrowAsync<TException>()`.
+
+MSTest does not expose xUnit's `ThrowsAnyAsync<TException>` or async `paramName` assertion shapes. Message-bearing MSTest async exception overloads remain manual migrations.
+
+Ordered-value migrations preserve MSTest's bound-first argument order: `Assert.IsGreaterThan(lowerBound, value)` becomes `value.Should().BeGreaterThan(lowerBound)`.
+
+These suggestions use semantic matching against MSTest's real `Assert`, `StringAssert`, and `CollectionAssert` APIs. They intentionally skip message-bearing, comparer, precision, structural-comparison, non-comparable ordering, and other richer MSTest assertion families, plus `StringAssert.StartsWith(...)` and `StringAssert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string.
 
 For a broader mapping table and practical migration notes, see [Migrating to Axiom](migrating-to-axiom.md).

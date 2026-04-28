@@ -131,6 +131,70 @@ public sealed class MstestAssertMigrationDescriptorTests
                 Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
                 Assert.Equal("Migrate MSTest CollectionAssert.DoesNotContain to Axiom", rule.Title.ToString());
                 Assert.Equal("MSTest CollectionAssert.DoesNotContain(collection, unexpected) can be migrated to 'collection.Should().NotContain(unexpected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1068", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.ThrowsExceptionAsync to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.ThrowsExceptionAsync<TException>(...) can be migrated to 'await ...Should().ThrowExactlyAsync<TException>()', appending '.Thrown' when the exception is used", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1069", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.ThrowsExactlyAsync to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.ThrowsExactlyAsync<TException>(...) can be migrated to 'await ...Should().ThrowExactlyAsync<TException>()', appending '.Thrown' when the exception is used", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1070", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.ThrowsAsync to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.ThrowsAsync<TException>(...) can be migrated to 'await ...Should().ThrowAsync<TException>()', appending '.Thrown' when the exception is used", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1071", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.IsGreaterThan to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.IsGreaterThan(lowerBound, value) can be migrated to 'value.Should().BeGreaterThan(lowerBound)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1072", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.IsGreaterThanOrEqualTo to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.IsGreaterThanOrEqualTo(lowerBound, value) can be migrated to 'value.Should().BeGreaterThanOrEqualTo(lowerBound)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1073", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.IsLessThan to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.IsLessThan(upperBound, value) can be migrated to 'value.Should().BeLessThan(upperBound)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1074", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.IsLessThanOrEqualTo to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.IsLessThanOrEqualTo(upperBound, value) can be migrated to 'value.Should().BeLessThanOrEqualTo(upperBound)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1075", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.IsInRange to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.IsInRange(minValue, maxValue, value) can be migrated to 'value.Should().BeInRange(minValue, maxValue)'", rule.MessageFormat.ToString());
             });
     }
 }

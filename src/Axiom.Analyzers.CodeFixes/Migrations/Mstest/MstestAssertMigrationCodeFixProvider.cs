@@ -50,7 +50,7 @@ public sealed class MstestAssertMigrationCodeFixProvider : CodeFixProvider
 
         context.RegisterCodeFix(
             CodeAction.Create(
-                match.Spec.CodeFixTitle,
+                GetCodeFixTitle(match),
                 cancellationToken => ApplyFixAsync(context.Document, match, cancellationToken),
                 equivalenceKey: match.Spec.DiagnosticId),
             context.Diagnostics);
@@ -67,12 +67,25 @@ public sealed class MstestAssertMigrationCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        var replacementExpression = MstestScalarMigrationRewriter.BuildReplacementExpression(match)
-            .WithTriviaFrom(match.InvocationSyntax)
+        var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+        if (semanticModel is null)
+        {
+            return document;
+        }
+
+        var nodeToReplace = GetNodeToReplace(match);
+        var replacementExpression = BuildReplacementExpression(match, semanticModel)
+            .WithTriviaFrom(nodeToReplace)
             .WithAdditionalAnnotations(Formatter.Annotation);
 
-        var rewrittenRoot = compilationUnit.ReplaceNode(match.InvocationSyntax, replacementExpression);
+        var rewrittenRoot = compilationUnit.ReplaceNode(nodeToReplace, replacementExpression);
         rewrittenRoot = AddUsingIfMissing(rewrittenRoot, "Axiom.Assertions");
+
+        if (RequiresSystemAndTaskNamespaces(match, semanticModel))
+        {
+            rewrittenRoot = AddUsingIfMissing(rewrittenRoot, "System");
+            rewrittenRoot = AddUsingIfMissing(rewrittenRoot, "System.Threading.Tasks");
+        }
 
         if (match.RequiresAssertionsExtensionsNamespace)
         {
@@ -81,6 +94,35 @@ public sealed class MstestAssertMigrationCodeFixProvider : CodeFixProvider
 
         return document.WithSyntaxRoot(rewrittenRoot);
     }
+
+    private static ExpressionSyntax BuildReplacementExpression(
+        MstestAssertMigrationMatch match,
+        SemanticModel semanticModel)
+    {
+        return match.Spec.Kind is MstestAssertMigrationKind.ThrowExactlyAsync or MstestAssertMigrationKind.ThrowAsync
+            ? MstestAsyncThrowsMigrationRewriter.BuildReplacementExpression(match, semanticModel)
+            : MstestScalarMigrationRewriter.BuildReplacementExpression(match);
+    }
+
+    private static string GetCodeFixTitle(MstestAssertMigrationMatch match)
+    {
+        return match.Spec.Kind is MstestAssertMigrationKind.ThrowExactlyAsync or MstestAssertMigrationKind.ThrowAsync
+            ? MstestAsyncThrowsMigrationRewriter.GetCodeFixTitle(match)
+            : match.Spec.CodeFixTitle;
+    }
+
+    private static bool RequiresSystemAndTaskNamespaces(
+        MstestAssertMigrationMatch match,
+        SemanticModel semanticModel)
+    {
+        return match.Spec.Kind is MstestAssertMigrationKind.ThrowExactlyAsync or MstestAssertMigrationKind.ThrowAsync &&
+               MstestAsyncThrowsMigrationRewriter.RequiresSystemAndTaskNamespaces(match, semanticModel);
+    }
+
+    private static SyntaxNode GetNodeToReplace(MstestAssertMigrationMatch match)
+        => match.Spec.Kind is MstestAssertMigrationKind.ThrowExactlyAsync or MstestAssertMigrationKind.ThrowAsync
+            ? (SyntaxNode?)match.AwaitExpressionSyntax ?? match.InvocationSyntax
+            : match.InvocationSyntax;
 
     private static CompilationUnitSyntax AddUsingIfMissing(
         CompilationUnitSyntax compilationUnit,
@@ -107,13 +149,23 @@ public sealed class MstestAssertMigrationCodeFixProvider : CodeFixProvider
         ExpressionSyntax? argumentExpression = null,
         TypeSyntax? typeArgumentSyntax = null)
     {
+        return BuildShouldCall(subjectExpression, methodName, argumentExpression, additionalArgumentExpression: null, typeArgumentSyntax);
+    }
+
+    internal static ExpressionSyntax BuildShouldCall(
+        ExpressionSyntax subjectExpression,
+        string methodName,
+        ExpressionSyntax? argumentExpression,
+        ExpressionSyntax? additionalArgumentExpression,
+        TypeSyntax? typeArgumentSyntax)
+    {
         var shouldInvocation = BuildShouldInvocation(subjectExpression);
         var assertionMethod = SyntaxFactory.MemberAccessExpression(
             SyntaxKind.SimpleMemberAccessExpression,
             shouldInvocation,
             BuildMethodName(methodName, typeArgumentSyntax));
 
-        return BuildInvocation(assertionMethod, argumentExpression);
+        return BuildInvocation(assertionMethod, argumentExpression, additionalArgumentExpression);
     }
 
     private static ExpressionSyntax BuildShouldInvocation(ExpressionSyntax subjectExpression)
@@ -145,19 +197,47 @@ public sealed class MstestAssertMigrationCodeFixProvider : CodeFixProvider
         ExpressionSyntax targetExpression,
         ExpressionSyntax? argumentExpression = null)
     {
+        return BuildInvocation(targetExpression, argumentExpression, additionalArgumentExpression: null);
+    }
+
+    private static ExpressionSyntax BuildInvocation(
+        ExpressionSyntax targetExpression,
+        ExpressionSyntax? argumentExpression,
+        ExpressionSyntax? additionalArgumentExpression)
+    {
         if (argumentExpression is null)
         {
             return SyntaxFactory.InvocationExpression(targetExpression, SyntaxFactory.ArgumentList());
         }
 
+        if (additionalArgumentExpression is null)
+        {
+            return SyntaxFactory.InvocationExpression(
+                targetExpression,
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.Argument(argumentExpression.WithoutTrivia()))));
+        }
+
         return SyntaxFactory.InvocationExpression(
             targetExpression,
             SyntaxFactory.ArgumentList(
-                SyntaxFactory.SingletonSeparatedList(
-                    SyntaxFactory.Argument(argumentExpression.WithoutTrivia()))));
+                SyntaxFactory.SeparatedList(
+                [
+                    SyntaxFactory.Argument(argumentExpression.WithoutTrivia()),
+                    SyntaxFactory.Argument(additionalArgumentExpression.WithoutTrivia()),
+                ])));
     }
 
-    private static ExpressionSyntax PrepareSubjectExpression(ExpressionSyntax subjectExpression)
+    internal static ExpressionSyntax AppendMemberAccess(ExpressionSyntax expression, string memberName)
+    {
+        return SyntaxFactory.MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            expression,
+            SyntaxFactory.IdentifierName(memberName));
+    }
+
+    internal static ExpressionSyntax PrepareSubjectExpression(ExpressionSyntax subjectExpression)
     {
         var withoutTrivia = subjectExpression.WithoutTrivia();
         if (NeedsParentheses(withoutTrivia))
