@@ -40,6 +40,18 @@ The current rules focus on a few high-value areas:
 - conservative NUnit `Assert.That(...)` migration suggestions
 - conservative MSTest `Assert.*` migration suggestions
 
+## Migration Coverage At A Glance
+
+The migration analyzers are intentionally conservative. They only suggest rewrites when the target Axiom assertion preserves the old value flow and assertion semantics.
+
+| Framework | Current migration coverage |
+| --- | --- |
+| xUnit | scalar assertions, strings including safe `StringComparison` overloads, dictionary key lookup, `Single(...)`, synchronous exceptions, and awaited async exception assertions |
+| NUnit | common `Is.*`, `Does.*`, and `Has.Count.EqualTo(...)` constraints, plus ordered/range/type constraints and async exception assertions in async contexts |
+| MSTest | scalar assertions, reference/type checks, `StringAssert`, simple `CollectionAssert` containment, ordered/range checks, and awaited async exception assertions |
+
+For a shorter migration planning view, see [Migrating to Axiom](migrating-to-axiom.md).
+
 ## Async Assertions Must Be Awaited
 
 Rule: `AXM0001`

@@ -26,6 +26,28 @@ This page states the current shipped compatibility only.
 - `Axiom.Analyzers` is not a runtime assertion package. It provides Axiom diagnostics and current migration/code-fix coverage for xUnit, NUnit, and MSTest assertion shapes.
 - `Axiom.Assertions` is the default install path for most users. Install `Axiom.Json`, `Axiom.Http`, or `Axiom.Vectors` only when the test suite needs those assertion areas.
 
+## Starter Projects
+
+The repository includes minimal starter projects for the supported test frameworks:
+
+| Framework | Starter |
+| --- | --- |
+| xUnit | [Axiom.Assertions.Starter.Xunit](https://github.com/spearzy/Axiom/tree/main/starters/Axiom.Assertions.Starter.Xunit) |
+| NUnit | [Axiom.Assertions.Starter.NUnit](https://github.com/spearzy/Axiom/tree/main/starters/Axiom.Assertions.Starter.NUnit) |
+| MSTest | [Axiom.Assertions.Starter.MSTest](https://github.com/spearzy/Axiom/tree/main/starters/Axiom.Assertions.Starter.MSTest) |
+
+Each starter uses the normal `Axiom.Assertions` install path and keeps the example intentionally small.
+
+## Analyzer Migration Coverage
+
+The current migration analyzers cover high-confidence rewrites for all three supported frameworks:
+
+- xUnit: scalar, string, dictionary-key, single-item, synchronous exception, and awaited async exception shapes.
+- NUnit: common `Is.*`, `Does.*`, `Has.Count.EqualTo(...)`, ordered/range/type, and async exception shapes.
+- MSTest: scalar, reference/type, string, collection containment, ordered/range, and awaited async exception shapes.
+
+Unsupported or lossy framework-specific overloads remain manual migrations.
+
 ## Related Guides
 
 - [Getting Started](getting-started.md)

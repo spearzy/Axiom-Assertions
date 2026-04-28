@@ -31,7 +31,7 @@ That directness is the main reason teams can migrate in stages instead of pausin
 
 The Axiom analyzers cover a growing set of safe, mechanical xUnit rewrites. They are useful when you want to move a codebase gradually and reserve manual review time for the tests that really need judgment.
 
-That now includes awaited async exception assertions such as `Assert.ThrowsAsync<T>(...)`, `Assert.ThrowsAsync<T>(paramName, ...)`, and `Assert.ThrowsAnyAsync<T>(...)` when they map directly onto Axiom's async throw assertions without changing value flow.
+That now includes awaited async exception assertions such as `Assert.ThrowsAsync<T>(...)`, `Assert.ThrowsAsync<T>(paramName, ...)`, and `Assert.ThrowsAnyAsync<T>(...)` when they map directly onto Axiom's async throw assertions without changing value flow. If the old test used the returned exception, the code fix keeps that explicit by appending `.Thrown`.
 
 Install path:
 

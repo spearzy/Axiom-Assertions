@@ -13,95 +13,36 @@ The built-in migration analyzers help with a growing set of safe, mechanical rew
 
 ## What Can Be Migrated Automatically Today
 
-The current analyzer and code-fix support focuses on high-confidence xUnit `Assert.*` shapes plus conservative NUnit and MSTest migration suggestions.
+The current analyzer and code-fix support focuses on high-confidence xUnit `Assert.*` shapes plus conservative NUnit and MSTest migration suggestions. The detailed rule inventory lives in [Analyzers](analyzers.md); this page keeps the migration shape readable.
 
-| Source style | Axiom style |
+### xUnit
+
+| Area | Examples of supported rewrites |
 | --- | --- |
-| `Assert.Equal(expected, actual)` | `actual.Should().Be(expected)` |
-| `Assert.NotEqual(expected, actual)` | `actual.Should().NotBe(expected)` |
-| `Assert.Equal(expected, actual, comparer)` for non-string value assertions | `actual.Should().Be(expected, comparer)` |
-| `Assert.NotEqual(expected, actual, comparer)` for non-string value assertions | `actual.Should().NotBe(expected, comparer)` |
-| `Assert.Null(value)` | `value.Should().BeNull()` |
-| `Assert.NotNull(value)` | `value.Should().NotBeNull()` |
-| `Assert.True(condition)` | `condition.Should().BeTrue()` |
-| `Assert.False(condition)` | `condition.Should().BeFalse()` |
-| `Assert.Empty(subject)` | `subject.Should().BeEmpty()` |
-| `Assert.NotEmpty(subject)` | `subject.Should().NotBeEmpty()` |
-| `Assert.Contains(item, collection)` | `collection.Should().Contain(item)` |
-| `Assert.DoesNotContain(item, collection)` | `collection.Should().NotContain(item)` |
-| `Assert.Contains(expectedSubstring, actualString)` | `actualString.Should().Contain(expectedSubstring)` |
-| `Assert.DoesNotContain(expectedSubstring, actualString)` | `actualString.Should().NotContain(expectedSubstring)` |
-| `Assert.Contains(expectedSubstring, actualString, comparison)` | `actualString.Should().Contain(expectedSubstring, comparison)` |
-| `Assert.DoesNotContain(expectedSubstring, actualString, comparison)` | `actualString.Should().NotContain(expectedSubstring, comparison)` |
-| `Assert.StartsWith(expectedPrefix, actualString)` | `actualString.Should().StartWith(expectedPrefix)` |
-| `Assert.EndsWith(expectedSuffix, actualString)` | `actualString.Should().EndWith(expectedSuffix)` |
-| `Assert.StartsWith(expectedPrefix, actualString, comparison)` when `expectedPrefix` is an obvious non-null constant string | `actualString.Should().StartWith(expectedPrefix, comparison)` |
-| `Assert.EndsWith(expectedSuffix, actualString, comparison)` when `expectedSuffix` is an obvious non-null constant string | `actualString.Should().EndWith(expectedSuffix, comparison)` |
-| `Assert.Contains(key, dictionary)` | `dictionary.Should().ContainKey(key)` or `.WhoseValue` when you use the associated value |
-| `Assert.DoesNotContain(key, dictionary)` | `dictionary.Should().NotContainKey(key)` |
-| `Assert.Single(subject)` | `subject.Should().ContainSingle()` or `.SingleItem` when you use the item |
-| `Assert.Single(subject, predicate)` | `subject.Should().ContainSingle(predicate)` or `.SingleItem` when you use the matched item |
-| `Assert.Same(expected, actual)` | `actual.Should().BeSameAs(expected)` |
-| `Assert.NotSame(expected, actual)` | `actual.Should().NotBeSameAs(expected)` |
-| `Assert.IsType<T>(actual)` | `actual.Should().BeOfType<T>()` |
-| `Assert.IsAssignableFrom<T>(actual)` | `actual.Should().BeAssignableTo<T>()` |
-| `Assert.Throws<TException>(() => work())` | `new Action(() => work()).Should().Throw<TException>()` |
-| `Assert.Throws<TException>("name", () => work())` with a non-null constant param name | `new Action(() => work()).Should().Throw<TException>().WithParamName("name")` or append `.Thrown` when you use the exception |
-| `await Assert.ThrowsAsync<TException>(() => work())` | `await new Func<Task>(() => work()).Should().ThrowExactlyAsync<TException>()` or append `.Thrown` when you use the exception |
-| `await Assert.ThrowsAsync<TException>("name", () => work())` with a non-null constant param name | `(await new Func<Task>(() => work()).Should().ThrowExactlyAsync<TException>()).WithParamName("name")` or append `.Thrown` when you use the exception |
-| `await Assert.ThrowsAnyAsync<TException>(() => work())` | `await new Func<Task>(() => work()).Should().ThrowAsync<TException>()` or append `.Thrown` when you use the exception |
-| `Assert.That(actual, Is.EqualTo(expected))` | `actual.Should().Be(expected)` |
-| `Assert.That(actual, Is.Not.EqualTo(expected))` | `actual.Should().NotBe(expected)` |
-| `Assert.That(value, Is.Null)` | `value.Should().BeNull()` |
-| `Assert.That(value, Is.Not.Null)` | `value.Should().NotBeNull()` |
-| `Assert.That(condition, Is.True)` | `condition.Should().BeTrue()` |
-| `Assert.That(condition, Is.False)` | `condition.Should().BeFalse()` |
-| `Assert.That(collection, Is.Empty)` | `collection.Should().BeEmpty()` |
-| `Assert.That(collection, Is.Not.Empty)` | `collection.Should().NotBeEmpty()` |
-| `Assert.That(actual, Does.Contain(expectedSubstring))` on string subjects | `actual.Should().Contain(expectedSubstring)` |
-| `Assert.That(actual, Does.Not.Contain(expectedSubstring))` on string subjects | `actual.Should().NotContain(expectedSubstring)` |
-| `Assert.That(actual, Does.StartWith(expectedPrefix))` when `expectedPrefix` is an obvious non-null constant string | `actual.Should().StartWith(expectedPrefix)` |
-| `Assert.That(actual, Does.EndWith(expectedSuffix))` when `expectedSuffix` is an obvious non-null constant string | `actual.Should().EndWith(expectedSuffix)` |
-| `Assert.That(collection, Has.Count.EqualTo(expectedCount))` | `collection.Should().HaveCount(expectedCount)` |
-| `Assert.That(actual, Is.SameAs(expected))` | `actual.Should().BeSameAs(expected)` |
-| `Assert.That(actual, Is.Not.SameAs(expected))` | `actual.Should().NotBeSameAs(expected)` |
-| `Assert.That(actual, Is.GreaterThan(expected))` | `actual.Should().BeGreaterThan(expected)` |
-| `Assert.That(actual, Is.GreaterThanOrEqualTo(expected))` | `actual.Should().BeGreaterThanOrEqualTo(expected)` |
-| `Assert.That(actual, Is.LessThan(expected))` | `actual.Should().BeLessThan(expected)` |
-| `Assert.That(actual, Is.LessThanOrEqualTo(expected))` | `actual.Should().BeLessThanOrEqualTo(expected)` |
-| `Assert.That(actual, Is.InRange(minimum, maximum))` | `actual.Should().BeInRange(minimum, maximum)` |
-| `Assert.That(actual, Is.TypeOf<TExpected>())` | `actual.Should().BeOfType<TExpected>()` |
-| `Assert.That(actual, Is.InstanceOf<TExpected>())` | `actual.Should().BeAssignableTo<TExpected>()` |
-| `Assert.That(actual, Is.AssignableTo<TExpected>())` | `actual.Should().BeAssignableTo<TExpected>()` |
-| `Assert.That(actual, Is.Not.InstanceOf<TExpected>())` | `actual.Should().NotBeAssignableTo<TExpected>()` |
-| `Assert.That(actual, Is.Not.AssignableTo<TExpected>())` | `actual.Should().NotBeAssignableTo<TExpected>()` |
-| `Assert.ThrowsAsync<TException>(() => workAsync())` in async contexts | `await new Func<Task>(() => workAsync()).Should().ThrowExactlyAsync<TException>()` or append `.Thrown` when you use the exception |
-| `Assert.CatchAsync<TException>(() => workAsync())` in async contexts | `await new Func<Task>(() => workAsync()).Should().ThrowAsync<TException>()` or append `.Thrown` when you use the exception |
-| `Assert.AreEqual(expected, actual)` | `actual.Should().Be(expected)` |
-| `Assert.AreNotEqual(expected, actual)` | `actual.Should().NotBe(expected)` |
-| `Assert.IsNull(value)` | `value.Should().BeNull()` |
-| `Assert.IsNotNull(value)` | `value.Should().NotBeNull()` |
-| `Assert.IsTrue(condition)` | `condition.Should().BeTrue()` |
-| `Assert.IsFalse(condition)` | `condition.Should().BeFalse()` |
-| `Assert.AreSame(expected, actual)` | `actual.Should().BeSameAs(expected)` |
-| `Assert.AreNotSame(expected, actual)` | `actual.Should().NotBeSameAs(expected)` |
-| `Assert.IsInstanceOfType(value, typeof(T))` | `value.Should().BeAssignableTo<T>()` |
-| `Assert.IsNotInstanceOfType(value, typeof(T))` | `value.Should().NotBeAssignableTo<T>()` |
-| `Assert.IsGreaterThan(lowerBound, value)` | `value.Should().BeGreaterThan(lowerBound)` |
-| `Assert.IsGreaterThanOrEqualTo(lowerBound, value)` | `value.Should().BeGreaterThanOrEqualTo(lowerBound)` |
-| `Assert.IsLessThan(upperBound, value)` | `value.Should().BeLessThan(upperBound)` |
-| `Assert.IsLessThanOrEqualTo(upperBound, value)` | `value.Should().BeLessThanOrEqualTo(upperBound)` |
-| `Assert.IsInRange(minValue, maxValue, value)` | `value.Should().BeInRange(minValue, maxValue)` |
-| `await Assert.ThrowsExceptionAsync<TException>(() => workAsync())` | `await new Func<Task>(() => workAsync()).Should().ThrowExactlyAsync<TException>()` or append `.Thrown` when you use the exception |
-| `await Assert.ThrowsExactlyAsync<TException>(() => workAsync())` | `await new Func<Task>(() => workAsync()).Should().ThrowExactlyAsync<TException>()` or append `.Thrown` when you use the exception |
-| `await Assert.ThrowsAsync<TException>(() => workAsync())` | `await new Func<Task>(() => workAsync()).Should().ThrowAsync<TException>()` or append `.Thrown` when you use the exception |
-| `StringAssert.Contains(actual, expectedSubstring)` | `actual.Should().Contain(expectedSubstring)` |
-| `StringAssert.StartsWith(actual, expectedPrefix)` when `expectedPrefix` is an obvious non-null constant string | `actual.Should().StartWith(expectedPrefix)` |
-| `StringAssert.EndsWith(actual, expectedSuffix)` when `expectedSuffix` is an obvious non-null constant string | `actual.Should().EndWith(expectedSuffix)` |
-| `CollectionAssert.Contains(collection, expected)` | `collection.Should().Contain(expected)` |
-| `CollectionAssert.DoesNotContain(collection, unexpected)` | `collection.Should().NotContain(unexpected)` |
+| Scalar assertions | equality and inequality, null checks, booleans, emptiness, collection containment, reference identity, type checks |
+| String assertions | substring, prefix, and suffix checks, including safe `StringComparison` overloads |
+| Returned values | dictionary key lookup and `Single(...)` rewrites append `.WhoseValue` or `.SingleItem` when the old xUnit result was consumed |
+| Exceptions | synchronous `Throws<TException>(...)`, awaited `ThrowsAsync<TException>(...)`, awaited `ThrowsAsync<TException>(paramName, ...)` with a non-null constant name, and awaited `ThrowsAnyAsync<TException>(...)` |
 
-For dictionary-key migration, the receiver has to fit Axiom's `ContainKey` / `NotContainKey` surface. The current support covers `IDictionary<TKey, TValue>`, `IReadOnlyDictionary<TKey, TValue>`, `Dictionary<TKey, TValue>`, `ReadOnlyDictionary<TKey, TValue>`, `ConcurrentDictionary<TKey, TValue>`, and `ImmutableDictionary<TKey, TValue>`.
+### NUnit
+
+| Area | Examples of supported rewrites |
+| --- | --- |
+| `Is.*` constraints | equality, inequality, null checks, booleans, emptiness, reference identity, ordered comparisons, ranges, and generic type constraints |
+| `Does.*` constraints | direct string contains, not-contains, starts-with, and ends-with checks when the expected value is clear |
+| `Has.*` constraints | `Has.Count.EqualTo(...)` |
+| Async exceptions | `Assert.ThrowsAsync<TException>(...)` and `Assert.CatchAsync<TException>(...)` in async contexts |
+
+### MSTest
+
+| Area | Examples of supported rewrites |
+| --- | --- |
+| `Assert.*` | equality, inequality, null checks, booleans, reference identity, type checks, ordered comparisons, and ranges |
+| `StringAssert.*` | contains, starts-with, and ends-with checks when the expected value is clear |
+| `CollectionAssert.*` | contains and does-not-contain checks |
+| Async exceptions | awaited `ThrowsExceptionAsync<TException>(...)`, `ThrowsExactlyAsync<TException>(...)`, and `ThrowsAsync<TException>(...)` |
+
+For dictionary-key migration, the receiver has to fit Axiom's `ContainKey` / `NotContainKey` surface. The current support covers the common mutable, read-only, concurrent, and immutable dictionary shapes.
 
 These suggestions ship in:
 
@@ -114,21 +55,38 @@ The NUnit and MSTest support is intentionally narrower than the xUnit support to
 
 The migration tooling is conservative on purpose.
 
-It skips cases where the rewrite is not obviously semantics-preserving yet, including:
+It skips cases where the rewrite is not obviously semantics-preserving yet.
+
+For xUnit, keep these manual:
 
 - precision, inspectors, and message-bearing overloads
 - string-equality overloads such as `Assert.Equal(..., ignoreCase: ...)`
-- comparer-bearing equality overloads that would land on Axiom's specialized string assertion surface rather than a direct local-comparer value assertion
-- `Assert.StartsWith(...)` and `Assert.EndsWith(...)` overloads that use `Memory<char>` or `Span<char>`
-- `Assert.StartsWith(...)` and `Assert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string
-- nongeneric `Assert.Single(subject)` when you use the returned value
-- `Assert.Throws<TException>(...)` when you use the returned exception outside the `string? paramName, Action testCode` overload
-- `Assert.Throws<TException>(paramName, ...)` when `paramName` is not an obvious non-null constant string
-- richer NUnit constraint chains, comparer/tolerance variants, message-bearing `Assert.That(...)` overloads, `Has.*` chains beyond `Has.Count.EqualTo(int)`, runtime `Type` constraints, `Is.Not.TypeOf<T>()`, NUnit async exception assertions outside an async context, `AsyncTestDelegate` variable rewrites, xUnit-style async `paramName` / `ThrowsAnyAsync` shapes that NUnit does not expose, and `Does.StartWith(...)` / `Does.EndWith(...)` when the expected prefix or suffix is not an obvious non-null constant string
-- MSTest async exception assertions that are not awaited, message-bearing async exception overloads, xUnit-style async `paramName` / `ThrowsAnyAsync` shapes that MSTest does not expose, message-bearing ordered-value overloads, non-comparable ordering, comparer, precision, and other richer assertion-family overloads
-- `StringAssert.StartsWith(...)` and `StringAssert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string
-- `CollectionAssert.AreEqual(...)`, `CollectionAssert.AreEquivalent(...)`, and other structural-comparison collection shapes
-- most structural-comparison assertions
+- comparer-bearing equality overloads that would need a specialized string assertion rewrite
+- `Memory<char>` / `Span<char>` prefix and suffix overloads
+- prefix and suffix checks where the expected value is not an obvious non-null constant string
+- nongeneric `Assert.Single(subject)` when the returned value is consumed
+- exception assertions where the returned exception is used outside the safe supported shapes
+
+For NUnit, keep these manual:
+
+- richer constraint chains and comparer or tolerance variants
+- message-bearing `Assert.That(...)` overloads
+- `Has.*` chains beyond `Has.Count.EqualTo(int)`
+- runtime `Type` constraints and `Is.Not.TypeOf<T>()`
+- async exception assertions outside an async context
+- `AsyncTestDelegate` variable rewrites
+- xUnit-style async `paramName` / `ThrowsAnyAsync` shapes, which NUnit does not expose
+
+For MSTest, keep these manual:
+
+- async exception assertions that are not awaited
+- message-bearing async exception overloads
+- xUnit-style async `paramName` / `ThrowsAnyAsync` shapes, which MSTest does not expose
+- message-bearing ordered-value overloads
+- non-comparable ordering, comparer, precision, and richer assertion-family overloads
+- `CollectionAssert.AreEqual(...)`, `CollectionAssert.AreEquivalent(...)`, and other structural collection comparisons
+
+Most structural-comparison assertions still need a deliberate manual migration.
 
 If a code fix appears, it is meant to be a safe one. If it does not appear, treat the migration as a normal test rewrite rather than a missed trick.
 
