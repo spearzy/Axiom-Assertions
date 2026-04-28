@@ -50,7 +50,7 @@ public sealed class NunitAssertMigrationCodeFixProvider : CodeFixProvider
 
         context.RegisterCodeFix(
             CodeAction.Create(
-                match.Spec.CodeFixTitle,
+                GetCodeFixTitle(match),
                 cancellationToken => ApplyFixAsync(context.Document, match, cancellationToken),
                 equivalenceKey: match.Spec.DiagnosticId),
             context.Diagnostics);
@@ -67,12 +67,18 @@ public sealed class NunitAssertMigrationCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        var replacementExpression = NunitScalarMigrationRewriter.BuildReplacementExpression(match)
+        var replacementExpression = BuildReplacementExpression(match)
             .WithTriviaFrom(match.InvocationSyntax)
             .WithAdditionalAnnotations(Formatter.Annotation);
 
         var rewrittenRoot = compilationUnit.ReplaceNode(match.InvocationSyntax, replacementExpression);
         rewrittenRoot = AddUsingIfMissing(rewrittenRoot, "Axiom.Assertions");
+
+        if (match.Spec.Kind is NunitAssertMigrationKind.ThrowExactlyAsync or NunitAssertMigrationKind.ThrowAsync)
+        {
+            rewrittenRoot = AddUsingIfMissing(rewrittenRoot, "System");
+            rewrittenRoot = AddUsingIfMissing(rewrittenRoot, "System.Threading.Tasks");
+        }
 
         if (match.RequiresAssertionsExtensionsNamespace)
         {
@@ -80,6 +86,20 @@ public sealed class NunitAssertMigrationCodeFixProvider : CodeFixProvider
         }
 
         return document.WithSyntaxRoot(rewrittenRoot);
+    }
+
+    private static ExpressionSyntax BuildReplacementExpression(NunitAssertMigrationMatch match)
+    {
+        return match.Spec.Kind is NunitAssertMigrationKind.ThrowExactlyAsync or NunitAssertMigrationKind.ThrowAsync
+            ? NunitAsyncThrowsMigrationRewriter.BuildReplacementExpression(match)
+            : NunitScalarMigrationRewriter.BuildReplacementExpression(match);
+    }
+
+    private static string GetCodeFixTitle(NunitAssertMigrationMatch match)
+    {
+        return match.Spec.Kind is NunitAssertMigrationKind.ThrowExactlyAsync or NunitAssertMigrationKind.ThrowAsync
+            ? NunitAsyncThrowsMigrationRewriter.GetCodeFixTitle(match)
+            : match.Spec.CodeFixTitle;
     }
 
     private static CompilationUnitSyntax AddUsingIfMissing(
@@ -104,15 +124,24 @@ public sealed class NunitAssertMigrationCodeFixProvider : CodeFixProvider
     internal static ExpressionSyntax BuildShouldCall(
         ExpressionSyntax subjectExpression,
         string methodName,
-        ExpressionSyntax? argumentExpression = null)
+        ExpressionSyntax? argumentExpression = null,
+        ExpressionSyntax? additionalArgumentExpression = null,
+        TypeSyntax? typeArgumentSyntax = null)
     {
         var shouldInvocation = BuildShouldInvocation(subjectExpression);
+        SimpleNameSyntax methodNameSyntax = typeArgumentSyntax is null
+            ? SyntaxFactory.IdentifierName(methodName)
+            : SyntaxFactory.GenericName(
+                SyntaxFactory.Identifier(methodName),
+                SyntaxFactory.TypeArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(typeArgumentSyntax.WithoutTrivia())));
+
         var assertionMethod = SyntaxFactory.MemberAccessExpression(
             SyntaxKind.SimpleMemberAccessExpression,
             shouldInvocation,
-            SyntaxFactory.IdentifierName(methodName));
+            methodNameSyntax);
 
-        return BuildInvocation(assertionMethod, argumentExpression);
+        return BuildInvocation(assertionMethod, argumentExpression, additionalArgumentExpression);
     }
 
     private static ExpressionSyntax BuildShouldInvocation(ExpressionSyntax subjectExpression)
@@ -127,18 +156,33 @@ public sealed class NunitAssertMigrationCodeFixProvider : CodeFixProvider
 
     private static ExpressionSyntax BuildInvocation(
         ExpressionSyntax targetExpression,
-        ExpressionSyntax? argumentExpression = null)
+        ExpressionSyntax? argumentExpression = null,
+        ExpressionSyntax? additionalArgumentExpression = null)
     {
         if (argumentExpression is null)
         {
             return SyntaxFactory.InvocationExpression(targetExpression, SyntaxFactory.ArgumentList());
         }
 
-        return SyntaxFactory.InvocationExpression(
-            targetExpression,
-            SyntaxFactory.ArgumentList(
-                SyntaxFactory.SingletonSeparatedList(
-                    SyntaxFactory.Argument(argumentExpression.WithoutTrivia()))));
+        var arguments = new List<ArgumentSyntax>
+        {
+            SyntaxFactory.Argument(argumentExpression.WithoutTrivia()),
+        };
+
+        if (additionalArgumentExpression is not null)
+        {
+            arguments.Add(SyntaxFactory.Argument(additionalArgumentExpression.WithoutTrivia()));
+        }
+
+        return SyntaxFactory.InvocationExpression(targetExpression, SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(arguments)));
+    }
+
+    internal static ExpressionSyntax AppendMemberAccess(ExpressionSyntax expression, string memberName)
+    {
+        return SyntaxFactory.MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            expression,
+            SyntaxFactory.IdentifierName(memberName));
     }
 
     private static ExpressionSyntax PrepareSubjectExpression(ExpressionSyntax subjectExpression)

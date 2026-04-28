@@ -12,6 +12,7 @@ internal sealed class NunitAssertMigrationSymbols
         INamedTypeSymbol? nunitHasType,
         INamedTypeSymbol? constraintExpressionType,
         INamedTypeSymbol? countConstraintExpressionType,
+        INamedTypeSymbol? asyncTestDelegateType,
         INamedTypeSymbol? resolveConstraintType,
         INamedTypeSymbol? enumerableType,
         INamedTypeSymbol? genericEnumerableType,
@@ -34,6 +35,7 @@ internal sealed class NunitAssertMigrationSymbols
         NunitHasType = nunitHasType;
         ConstraintExpressionType = constraintExpressionType;
         CountConstraintExpressionType = countConstraintExpressionType;
+        AsyncTestDelegateType = asyncTestDelegateType;
         ResolveConstraintType = resolveConstraintType;
         EnumerableType = enumerableType;
         GenericEnumerableType = genericEnumerableType;
@@ -57,6 +59,7 @@ internal sealed class NunitAssertMigrationSymbols
     private INamedTypeSymbol? NunitHasType { get; }
     private INamedTypeSymbol? ConstraintExpressionType { get; }
     private INamedTypeSymbol? CountConstraintExpressionType { get; }
+    private INamedTypeSymbol? AsyncTestDelegateType { get; }
     private INamedTypeSymbol? ResolveConstraintType { get; }
     private INamedTypeSymbol? EnumerableType { get; }
     private INamedTypeSymbol? GenericEnumerableType { get; }
@@ -91,6 +94,7 @@ internal sealed class NunitAssertMigrationSymbols
             compilation.GetTypeByMetadataName("NUnit.Framework.Has"),
             compilation.GetTypeByMetadataName("NUnit.Framework.Constraints.ConstraintExpression"),
             compilation.GetTypeByMetadataName("NUnit.Framework.Constraints.CountConstraintExpression"),
+            compilation.GetTypeByMetadataName("NUnit.Framework.AsyncTestDelegate"),
             compilation.GetTypeByMetadataName("NUnit.Framework.Constraints.IResolveConstraint"),
             compilation.GetTypeByMetadataName("System.Collections.IEnumerable"),
             compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1"),
@@ -140,6 +144,10 @@ internal sealed class NunitAssertMigrationSymbols
         => CountConstraintExpressionType is not null &&
            type is not null &&
            SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, CountConstraintExpressionType);
+
+    public bool IsAsyncTestDelegate(ITypeSymbol type)
+        => AsyncTestDelegateType is not null &&
+           SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, AsyncTestDelegateType);
 
     public bool IsEnumerableLike(ITypeSymbol type)
     {
@@ -213,6 +221,15 @@ internal sealed class NunitAssertMigrationSymbols
 
     public bool SupportsCountMigrationReceiver(ITypeSymbol type)
         => IsEnumerableLike(type) && !IsAsyncEnumerableLike(type) && !IsStringType(type);
+
+    public bool SupportsOrderedComparisonMigrationReceiver(ITypeSymbol type)
+        => type.SpecialType != SpecialType.System_Object &&
+           !IsEnumerableLike(type) &&
+           !IsSpanOrMemoryLike(type) &&
+           !UsesSpecializedShouldReceiver(type);
+
+    public bool SupportsTypeAssertionMigrationReceiver(ITypeSymbol type)
+        => !UsesSpecializedShouldReceiver(type);
 
     public static bool IsNullableOrReferenceType(ITypeSymbol type)
     {

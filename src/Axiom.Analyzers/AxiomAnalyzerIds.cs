@@ -59,4 +59,16 @@ public static class AxiomAnalyzerIds
     public const string MigrateMstestCollectionAssertDoesNotContain = "AXM1053";
     public const string MigrateXunitAssertThrowsAsync = "AXM1054";
     public const string MigrateXunitAssertThrowsAnyAsync = "AXM1055";
+    public const string MigrateNunitAssertThatGreaterThan = "AXM1056";
+    public const string MigrateNunitAssertThatGreaterThanOrEqualTo = "AXM1057";
+    public const string MigrateNunitAssertThatLessThan = "AXM1058";
+    public const string MigrateNunitAssertThatLessThanOrEqualTo = "AXM1059";
+    public const string MigrateNunitAssertThatInRange = "AXM1060";
+    public const string MigrateNunitAssertThatTypeOf = "AXM1061";
+    public const string MigrateNunitAssertThatInstanceOf = "AXM1062";
+    public const string MigrateNunitAssertThatAssignableTo = "AXM1063";
+    public const string MigrateNunitAssertThatNotInstanceOf = "AXM1064";
+    public const string MigrateNunitAssertThatNotAssignableTo = "AXM1065";
+    public const string MigrateNunitAssertThrowsAsync = "AXM1066";
+    public const string MigrateNunitAssertCatchAsync = "AXM1067";
 }

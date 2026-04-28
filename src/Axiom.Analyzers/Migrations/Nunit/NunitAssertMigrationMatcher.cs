@@ -12,20 +12,29 @@ internal sealed class NunitAssertMigrationMatch
         InvocationExpressionSyntax invocationSyntax,
         ExpressionSyntax subjectExpression,
         ExpressionSyntax? expectedExpression,
-        bool requiresAssertionsExtensionsNamespace)
+        ExpressionSyntax? additionalExpectedExpression,
+        TypeSyntax? typeArgumentSyntax,
+        bool requiresAssertionsExtensionsNamespace,
+        bool appendThrown)
     {
         Spec = spec;
         InvocationSyntax = invocationSyntax;
         SubjectExpression = subjectExpression;
         ExpectedExpression = expectedExpression;
+        AdditionalExpectedExpression = additionalExpectedExpression;
+        TypeArgumentSyntax = typeArgumentSyntax;
         RequiresAssertionsExtensionsNamespace = requiresAssertionsExtensionsNamespace;
+        AppendThrown = appendThrown;
     }
 
     public NunitAssertMigrationSpec Spec { get; }
     public InvocationExpressionSyntax InvocationSyntax { get; }
     public ExpressionSyntax SubjectExpression { get; }
     public ExpressionSyntax? ExpectedExpression { get; }
+    public ExpressionSyntax? AdditionalExpectedExpression { get; }
+    public TypeSyntax? TypeArgumentSyntax { get; }
     public bool RequiresAssertionsExtensionsNamespace { get; }
+    public bool AppendThrown { get; }
 }
 
 internal static class NunitAssertMigrationMatcher
@@ -39,12 +48,28 @@ internal static class NunitAssertMigrationMatcher
 
         if (!symbols.IsEnabled ||
             invocation.Syntax is not InvocationExpressionSyntax invocationSyntax ||
-            invocation.TargetMethod.Name != "That" ||
             !symbols.IsNunitAssert(invocation.TargetMethod.ContainingType) ||
-            invocation.Arguments.Length != 2 ||
-            invocation.TargetMethod.Parameters.Length < 2 ||
-            !symbols.IsResolveConstraint(invocation.TargetMethod.Parameters[1].Type) ||
             !HasOnlyPositionalArguments(invocationSyntax))
+        {
+            return false;
+        }
+
+        return invocation.TargetMethod.Name == "That"
+            ? TryMatchAssertThat(invocation, invocationSyntax, symbols, out match)
+            : TryMatchAsyncThrows(invocation, invocationSyntax, symbols, out match);
+    }
+
+    private static bool TryMatchAssertThat(
+        IInvocationOperation invocation,
+        InvocationExpressionSyntax invocationSyntax,
+        NunitAssertMigrationSymbols symbols,
+        out NunitAssertMigrationMatch match)
+    {
+        match = null!;
+
+        if (invocation.Arguments.Length != 2 ||
+            invocation.TargetMethod.Parameters.Length < 2 ||
+            !symbols.IsResolveConstraint(invocation.TargetMethod.Parameters[1].Type))
         {
             return false;
         }
@@ -52,14 +77,28 @@ internal static class NunitAssertMigrationMatcher
         var constraintOperation = UnwrapConversions(invocation.Arguments[1].Value);
         foreach (var spec in NunitAssertMigrationSpecs.All)
         {
-            if (!TryMatchConstraint(constraintOperation, spec.Kind, symbols, out var expectedExpression, out var expectedArgument))
+            if (!TryMatchConstraint(
+                    constraintOperation,
+                    spec.Kind,
+                    symbols,
+                    out var expectedExpression,
+                    out var expectedArgument,
+                    out var additionalExpectedExpression,
+                    out var additionalExpectedArgument,
+                    out var typeArgumentSyntax))
             {
                 continue;
             }
 
             var subjectType = GetReceiverType(invocation.Arguments[0]);
             if (subjectType is null ||
-                !IsSupportedSubject(invocation.Arguments[0], subjectType, expectedArgument, spec.Kind, symbols))
+                !IsSupportedSubject(
+                    invocation.Arguments[0],
+                    subjectType,
+                    expectedArgument,
+                    additionalExpectedArgument,
+                    spec.Kind,
+                    symbols))
             {
                 continue;
             }
@@ -69,7 +108,52 @@ internal static class NunitAssertMigrationMatcher
                 invocationSyntax,
                 invocationSyntax.ArgumentList.Arguments[0].Expression,
                 expectedExpression,
-                RequiresAssertionsExtensionsNamespace(spec.Kind));
+                additionalExpectedExpression,
+                typeArgumentSyntax,
+                RequiresAssertionsExtensionsNamespace(spec.Kind),
+                appendThrown: false);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryMatchAsyncThrows(
+        IInvocationOperation invocation,
+        InvocationExpressionSyntax invocationSyntax,
+        NunitAssertMigrationSymbols symbols,
+        out NunitAssertMigrationMatch match)
+    {
+        match = null!;
+
+        if (!IsInAsyncContext(invocationSyntax))
+        {
+            return false;
+        }
+
+        foreach (var spec in NunitAssertMigrationSpecs.All)
+        {
+            if (!TryMatchAsyncThrowsInvocation(
+                    invocation,
+                    invocationSyntax,
+                    spec.Kind,
+                    symbols,
+                    out var subjectExpression,
+                    out var typeArgumentSyntax))
+            {
+                continue;
+            }
+
+            match = new NunitAssertMigrationMatch(
+                spec,
+                invocationSyntax,
+                subjectExpression,
+                expectedExpression: null,
+                additionalExpectedExpression: null,
+                typeArgumentSyntax,
+                requiresAssertionsExtensionsNamespace: false,
+                appendThrown: IsResultConsumed(invocation));
 
             return true;
         }
@@ -96,10 +180,16 @@ internal static class NunitAssertMigrationMatcher
         NunitAssertMigrationKind kind,
         NunitAssertMigrationSymbols symbols,
         out ExpressionSyntax? expectedExpression,
-        out IArgumentOperation? expectedArgument)
+        out IArgumentOperation? expectedArgument,
+        out ExpressionSyntax? additionalExpectedExpression,
+        out IArgumentOperation? additionalExpectedArgument,
+        out TypeSyntax? typeArgumentSyntax)
     {
         expectedExpression = null;
         expectedArgument = null;
+        additionalExpectedExpression = null;
+        additionalExpectedArgument = null;
+        typeArgumentSyntax = null;
 
         return kind switch
         {
@@ -118,8 +208,63 @@ internal static class NunitAssertMigrationMatcher
             NunitAssertMigrationKind.HaveCount => TryMatchCountEqualTo(constraintOperation, symbols, out expectedExpression, out expectedArgument),
             NunitAssertMigrationKind.BeSameAs => TryMatchSameAs(constraintOperation, symbols, negated: false, out expectedExpression, out expectedArgument),
             NunitAssertMigrationKind.NotBeSameAs => TryMatchSameAs(constraintOperation, symbols, negated: true, out expectedExpression, out expectedArgument),
+            NunitAssertMigrationKind.BeGreaterThan => TryMatchIsSingleArgumentMethod(constraintOperation, symbols, "GreaterThan", out expectedExpression, out expectedArgument),
+            NunitAssertMigrationKind.BeGreaterThanOrEqualTo => TryMatchIsSingleArgumentMethod(constraintOperation, symbols, "GreaterThanOrEqualTo", out expectedExpression, out expectedArgument),
+            NunitAssertMigrationKind.BeLessThan => TryMatchIsSingleArgumentMethod(constraintOperation, symbols, "LessThan", out expectedExpression, out expectedArgument),
+            NunitAssertMigrationKind.BeLessThanOrEqualTo => TryMatchIsSingleArgumentMethod(constraintOperation, symbols, "LessThanOrEqualTo", out expectedExpression, out expectedArgument),
+            NunitAssertMigrationKind.BeInRange => TryMatchInRange(constraintOperation, symbols, out expectedExpression, out expectedArgument, out additionalExpectedExpression, out additionalExpectedArgument),
+            NunitAssertMigrationKind.BeOfType => TryMatchIsGenericTypeMethod(constraintOperation, symbols, "TypeOf", negated: false, out typeArgumentSyntax),
+            NunitAssertMigrationKind.BeInstanceOf => TryMatchIsGenericTypeMethod(constraintOperation, symbols, "InstanceOf", negated: false, out typeArgumentSyntax),
+            NunitAssertMigrationKind.BeAssignableTo => TryMatchIsGenericTypeMethod(constraintOperation, symbols, "AssignableTo", negated: false, out typeArgumentSyntax),
+            NunitAssertMigrationKind.NotBeInstanceOf => TryMatchIsGenericTypeMethod(constraintOperation, symbols, "InstanceOf", negated: true, out typeArgumentSyntax),
+            NunitAssertMigrationKind.NotBeAssignableTo => TryMatchIsGenericTypeMethod(constraintOperation, symbols, "AssignableTo", negated: true, out typeArgumentSyntax),
             _ => false,
         };
+    }
+
+    private static bool TryMatchAsyncThrowsInvocation(
+        IInvocationOperation invocation,
+        InvocationExpressionSyntax invocationSyntax,
+        NunitAssertMigrationKind kind,
+        NunitAssertMigrationSymbols symbols,
+        out ExpressionSyntax subjectExpression,
+        out TypeSyntax? typeArgumentSyntax)
+    {
+        subjectExpression = null!;
+        typeArgumentSyntax = null;
+
+        var expectedMethodName = kind switch
+        {
+            NunitAssertMigrationKind.ThrowExactlyAsync => "ThrowsAsync",
+            NunitAssertMigrationKind.ThrowAsync => "CatchAsync",
+            _ => null,
+        };
+
+        if (expectedMethodName is null ||
+            invocation.TargetMethod.Name != expectedMethodName ||
+            !invocation.TargetMethod.IsGenericMethod ||
+            invocation.TargetMethod.TypeArguments.Length != 1 ||
+            invocation.TargetMethod.Parameters.Length != 1 ||
+            invocation.Arguments.Length != 1 ||
+            !symbols.IsAsyncTestDelegate(invocation.TargetMethod.Parameters[0].Type) ||
+            !TryGetSingleGenericTypeArgument(invocationSyntax, out typeArgumentSyntax) ||
+            !IsSupportedAsyncTestDelegateArgument(invocation.Arguments[0]))
+        {
+            return false;
+        }
+
+        subjectExpression = invocationSyntax.ArgumentList.Arguments[0].Expression;
+        return true;
+    }
+
+    private static bool IsSupportedAsyncTestDelegateArgument(IArgumentOperation argument)
+    {
+        var operation = UnwrapConversions(argument.Value);
+        return operation is IAnonymousFunctionOperation or IMethodReferenceOperation ||
+               operation is IDelegateCreationOperation
+               {
+                   Target: IAnonymousFunctionOperation or IMethodReferenceOperation,
+               };
     }
 
     private static bool TryMatchEqualTo(
@@ -289,6 +434,121 @@ internal static class NunitAssertMigrationMatcher
         return true;
     }
 
+    private static bool TryMatchIsSingleArgumentMethod(
+        IOperation constraintOperation,
+        NunitAssertMigrationSymbols symbols,
+        string methodName,
+        out ExpressionSyntax? expectedExpression,
+        out IArgumentOperation? expectedArgument)
+    {
+        expectedExpression = null;
+        expectedArgument = null;
+
+        if (constraintOperation is not IInvocationOperation invocation ||
+            invocation.Syntax is not InvocationExpressionSyntax invocationSyntax ||
+            invocation.TargetMethod.Name != methodName ||
+            invocation.Arguments.Length != 1 ||
+            invocation.Instance is not null ||
+            !symbols.IsIsType(invocation.TargetMethod.ContainingType))
+        {
+            return false;
+        }
+
+        expectedExpression = invocationSyntax.ArgumentList.Arguments[0].Expression;
+        expectedArgument = invocation.Arguments[0];
+        return true;
+    }
+
+    private static bool TryMatchInRange(
+        IOperation constraintOperation,
+        NunitAssertMigrationSymbols symbols,
+        out ExpressionSyntax? minimumExpression,
+        out IArgumentOperation? minimumArgument,
+        out ExpressionSyntax? maximumExpression,
+        out IArgumentOperation? maximumArgument)
+    {
+        minimumExpression = null;
+        minimumArgument = null;
+        maximumExpression = null;
+        maximumArgument = null;
+
+        if (constraintOperation is not IInvocationOperation invocation ||
+            invocation.Syntax is not InvocationExpressionSyntax invocationSyntax ||
+            invocation.TargetMethod.Name != "InRange" ||
+            invocation.Arguments.Length != 2 ||
+            invocation.Instance is not null ||
+            !symbols.IsIsType(invocation.TargetMethod.ContainingType))
+        {
+            return false;
+        }
+
+        minimumExpression = invocationSyntax.ArgumentList.Arguments[0].Expression;
+        minimumArgument = invocation.Arguments[0];
+        maximumExpression = invocationSyntax.ArgumentList.Arguments[1].Expression;
+        maximumArgument = invocation.Arguments[1];
+        return true;
+    }
+
+    private static bool TryMatchIsGenericTypeMethod(
+        IOperation constraintOperation,
+        NunitAssertMigrationSymbols symbols,
+        string methodName,
+        bool negated,
+        out TypeSyntax? typeArgumentSyntax)
+    {
+        typeArgumentSyntax = null;
+
+        if (constraintOperation is not IInvocationOperation invocation ||
+            invocation.Syntax is not InvocationExpressionSyntax invocationSyntax ||
+            invocation.TargetMethod.Name != methodName ||
+            invocation.TargetMethod.TypeArguments.Length != 1 ||
+            invocation.Arguments.Length != 0)
+        {
+            return false;
+        }
+
+        if (negated)
+        {
+            if (!symbols.IsConstraintExpressionType(invocation.TargetMethod.ContainingType) ||
+                !IsDirectNotExpression(invocation.Instance, symbols))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (invocation.Instance is not null ||
+                !symbols.IsIsType(invocation.TargetMethod.ContainingType))
+            {
+                return false;
+            }
+        }
+
+        return TryGetSingleGenericTypeArgument(invocationSyntax, out typeArgumentSyntax);
+    }
+
+    private static bool TryGetSingleGenericTypeArgument(
+        InvocationExpressionSyntax invocationSyntax,
+        out TypeSyntax? typeArgumentSyntax)
+    {
+        typeArgumentSyntax = null;
+
+        var nameSyntax = invocationSyntax.Expression switch
+        {
+            MemberAccessExpressionSyntax { Name: GenericNameSyntax genericName } => genericName,
+            GenericNameSyntax genericName => genericName,
+            _ => null,
+        };
+
+        if (nameSyntax?.TypeArgumentList.Arguments.Count != 1)
+        {
+            return false;
+        }
+
+        typeArgumentSyntax = nameSyntax.TypeArgumentList.Arguments[0];
+        return true;
+    }
+
     private static bool IsDirectNotExpression(IOperation? operation, NunitAssertMigrationSymbols symbols)
     {
         var unwrapped = operation is null ? null : UnwrapConversions(operation);
@@ -323,6 +583,7 @@ internal static class NunitAssertMigrationMatcher
         IArgumentOperation subjectArgument,
         ITypeSymbol subjectType,
         IArgumentOperation? expectedArgument,
+        IArgumentOperation? additionalExpectedArgument,
         NunitAssertMigrationKind kind,
         NunitAssertMigrationSymbols symbols)
     {
@@ -344,6 +605,21 @@ internal static class NunitAssertMigrationMatcher
                 => IsSupportedCountSubject(subjectArgument, subjectType, expectedArgument, symbols),
             NunitAssertMigrationKind.BeSameAs or NunitAssertMigrationKind.NotBeSameAs
                 => IsSupportedReferenceEqualitySubject(subjectArgument, subjectType, expectedArgument, symbols),
+            NunitAssertMigrationKind.BeGreaterThan or
+            NunitAssertMigrationKind.BeGreaterThanOrEqualTo or
+            NunitAssertMigrationKind.BeLessThan or
+            NunitAssertMigrationKind.BeLessThanOrEqualTo
+                => IsSupportedOrderedComparisonSubject(subjectArgument, subjectType, expectedArgument, symbols),
+            NunitAssertMigrationKind.BeInRange
+                => IsSupportedOrderedComparisonSubject(subjectArgument, subjectType, expectedArgument, symbols) &&
+                   additionalExpectedArgument is not null &&
+                   IsSupportedOrderedExpectedExpression(additionalExpectedArgument, subjectType, symbols),
+            NunitAssertMigrationKind.BeOfType or
+            NunitAssertMigrationKind.BeInstanceOf or
+            NunitAssertMigrationKind.BeAssignableTo or
+            NunitAssertMigrationKind.NotBeInstanceOf or
+            NunitAssertMigrationKind.NotBeAssignableTo
+                => IsSupportedReceiverExpression(subjectArgument, subjectType, symbols.SupportsTypeAssertionMigrationReceiver),
             _ => false,
         };
     }
@@ -463,6 +739,41 @@ internal static class NunitAssertMigrationMatcher
         return conversion.Exists && conversion.IsImplicit;
     }
 
+    private static bool IsSupportedOrderedComparisonSubject(
+        IArgumentOperation subjectArgument,
+        ITypeSymbol subjectType,
+        IArgumentOperation? expectedArgument,
+        NunitAssertMigrationSymbols symbols)
+    {
+        return expectedArgument is not null &&
+               IsSupportedReceiverExpression(subjectArgument, subjectType, symbols.SupportsOrderedComparisonMigrationReceiver) &&
+               IsSupportedOrderedExpectedExpression(expectedArgument, subjectType, symbols);
+    }
+
+    private static bool IsSupportedOrderedExpectedExpression(
+        IArgumentOperation expectedArgument,
+        ITypeSymbol subjectType,
+        NunitAssertMigrationSymbols symbols)
+    {
+        var expectedType = UnwrapConversions(expectedArgument.Value).Type;
+        if (expectedType is null ||
+            IsUnsupportedOrderedComparisonType(expectedType, symbols))
+        {
+            return false;
+        }
+
+        var conversion = symbols.Compilation.ClassifyConversion(expectedType, subjectType);
+        return conversion.Exists && conversion.IsImplicit;
+    }
+
+    private static bool IsUnsupportedOrderedComparisonType(ITypeSymbol type, NunitAssertMigrationSymbols symbols)
+    {
+        return type.SpecialType == SpecialType.System_String ||
+               symbols.IsEnumerableLike(type) ||
+               symbols.IsAsyncEnumerableLike(type) ||
+               symbols.IsSpanOrMemoryLike(type);
+    }
+
     private static bool IsSupportedReceiverExpression(
         IArgumentOperation argument,
         ITypeSymbol subjectType,
@@ -501,6 +812,35 @@ internal static class NunitAssertMigrationMatcher
         }
 
         return operation;
+    }
+
+    private static bool IsInAsyncContext(SyntaxNode syntax)
+    {
+        foreach (var ancestor in syntax.Ancestors())
+        {
+            switch (ancestor)
+            {
+                case AnonymousFunctionExpressionSyntax anonymousFunction:
+                    return anonymousFunction.AsyncKeyword.IsKind(SyntaxKind.AsyncKeyword);
+                case LocalFunctionStatementSyntax localFunction:
+                    return localFunction.Modifiers.Any(SyntaxKind.AsyncKeyword);
+                case BaseMethodDeclarationSyntax methodDeclaration:
+                    return methodDeclaration.Modifiers.Any(SyntaxKind.AsyncKeyword);
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsResultConsumed(IInvocationOperation invocation)
+    {
+        IOperation current = invocation;
+        while (current.Parent is IConversionOperation conversion)
+        {
+            current = conversion;
+        }
+
+        return current.Parent is not IExpressionStatementOperation;
     }
 
     private static bool RequiresAssertionsExtensionsNamespace(NunitAssertMigrationKind kind)

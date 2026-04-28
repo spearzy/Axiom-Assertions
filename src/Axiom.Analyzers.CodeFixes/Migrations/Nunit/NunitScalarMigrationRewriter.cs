@@ -10,7 +10,9 @@ internal static class NunitScalarMigrationRewriter
         return NunitAssertMigrationCodeFixProvider.BuildShouldCall(
             match.SubjectExpression,
             GetMethodName(match.Spec.Kind),
-            match.ExpectedExpression);
+            match.ExpectedExpression,
+            match.AdditionalExpectedExpression,
+            match.TypeArgumentSyntax);
     }
 
     private static string GetMethodName(NunitAssertMigrationKind kind)
@@ -32,6 +34,16 @@ internal static class NunitScalarMigrationRewriter
             NunitAssertMigrationKind.HaveCount => "HaveCount",
             NunitAssertMigrationKind.BeSameAs => "BeSameAs",
             NunitAssertMigrationKind.NotBeSameAs => "NotBeSameAs",
+            NunitAssertMigrationKind.BeGreaterThan => "BeGreaterThan",
+            NunitAssertMigrationKind.BeGreaterThanOrEqualTo => "BeGreaterThanOrEqualTo",
+            NunitAssertMigrationKind.BeLessThan => "BeLessThan",
+            NunitAssertMigrationKind.BeLessThanOrEqualTo => "BeLessThanOrEqualTo",
+            NunitAssertMigrationKind.BeInRange => "BeInRange",
+            NunitAssertMigrationKind.BeOfType => "BeOfType",
+            NunitAssertMigrationKind.BeInstanceOf => "BeAssignableTo",
+            NunitAssertMigrationKind.BeAssignableTo => "BeAssignableTo",
+            NunitAssertMigrationKind.NotBeInstanceOf => "NotBeAssignableTo",
+            NunitAssertMigrationKind.NotBeAssignableTo => "NotBeAssignableTo",
             _ => throw new ArgumentOutOfRangeException(nameof(kind)),
         };
     }

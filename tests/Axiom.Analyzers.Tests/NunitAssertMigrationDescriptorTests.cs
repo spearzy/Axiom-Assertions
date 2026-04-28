@@ -131,6 +131,102 @@ public sealed class NunitAssertMigrationDescriptorTests
                 Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
                 Assert.Equal("Migrate NUnit Assert.That Is.Not.SameAs constraint to Axiom", rule.Title.ToString());
                 Assert.Equal("NUnit Assert.That(actual, Is.Not.SameAs(expected)) can be migrated to 'actual.Should().NotBeSameAs(expected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1056", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Is.GreaterThan constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(actual, Is.GreaterThan(expected)) can be migrated to 'actual.Should().BeGreaterThan(expected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1057", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Is.GreaterThanOrEqualTo constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(actual, Is.GreaterThanOrEqualTo(expected)) can be migrated to 'actual.Should().BeGreaterThanOrEqualTo(expected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1058", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Is.LessThan constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(actual, Is.LessThan(expected)) can be migrated to 'actual.Should().BeLessThan(expected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1059", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Is.LessThanOrEqualTo constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(actual, Is.LessThanOrEqualTo(expected)) can be migrated to 'actual.Should().BeLessThanOrEqualTo(expected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1060", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Is.InRange constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(actual, Is.InRange(minimum, maximum)) can be migrated to 'actual.Should().BeInRange(minimum, maximum)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1061", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Is.TypeOf constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(actual, Is.TypeOf<TExpected>()) can be migrated to 'actual.Should().BeOfType<TExpected>()'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1062", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Is.InstanceOf constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(actual, Is.InstanceOf<TExpected>()) can be migrated to 'actual.Should().BeAssignableTo<TExpected>()'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1063", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Is.AssignableTo constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(actual, Is.AssignableTo<TExpected>()) can be migrated to 'actual.Should().BeAssignableTo<TExpected>()'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1064", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Is.Not.InstanceOf constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(actual, Is.Not.InstanceOf<TExpected>()) can be migrated to 'actual.Should().NotBeAssignableTo<TExpected>()'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1065", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Is.Not.AssignableTo constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(actual, Is.Not.AssignableTo<TExpected>()) can be migrated to 'actual.Should().NotBeAssignableTo<TExpected>()'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1066", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.ThrowsAsync to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.ThrowsAsync<TException>(...) can be migrated to 'await ...Should().ThrowExactlyAsync<TException>()', appending '.Thrown' when the exception is used", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1067", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.CatchAsync to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.CatchAsync<TException>(...) can be migrated to 'await ...Should().ThrowAsync<TException>()', appending '.Thrown' when the exception is used", rule.MessageFormat.ToString());
             });
     }
 }

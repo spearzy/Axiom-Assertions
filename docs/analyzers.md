@@ -192,7 +192,7 @@ They also intentionally skip shapes that are not obviously semantics-preserving 
 - non-awaited `Assert.ThrowsAsync<TException>(...)` and `Assert.ThrowsAnyAsync<TException>(...)` shapes
 - `Assert.ThrowsAsync<TException>(paramName, ...)` when `paramName` is not an obvious non-null constant string
 
-## NUnit Assert.That Migration Suggestions
+## NUnit Assert Migration Suggestions
 
 Rules:
 
@@ -211,8 +211,20 @@ Rules:
 - `AXM1044` for `Assert.That(collection, Has.Count.EqualTo(expectedCount))`
 - `AXM1045` for `Assert.That(actual, Is.SameAs(expected))`
 - `AXM1046` for `Assert.That(actual, Is.Not.SameAs(expected))`
+- `AXM1056` for `Assert.That(actual, Is.GreaterThan(expected))`
+- `AXM1057` for `Assert.That(actual, Is.GreaterThanOrEqualTo(expected))`
+- `AXM1058` for `Assert.That(actual, Is.LessThan(expected))`
+- `AXM1059` for `Assert.That(actual, Is.LessThanOrEqualTo(expected))`
+- `AXM1060` for `Assert.That(actual, Is.InRange(minimum, maximum))`
+- `AXM1061` for `Assert.That(actual, Is.TypeOf<TExpected>())`
+- `AXM1062` for `Assert.That(actual, Is.InstanceOf<TExpected>())`
+- `AXM1063` for `Assert.That(actual, Is.AssignableTo<TExpected>())`
+- `AXM1064` for `Assert.That(actual, Is.Not.InstanceOf<TExpected>())`
+- `AXM1065` for `Assert.That(actual, Is.Not.AssignableTo<TExpected>())`
+- `AXM1066` for `Assert.ThrowsAsync<TException>(...)` in async contexts, appending `.Thrown` when the returned exception is used
+- `AXM1067` for `Assert.CatchAsync<TException>(...)` in async contexts, appending `.Thrown` when the returned exception is used
 
-The NUnit migration support is still intentionally narrow. It now covers a small set of `Does.*`, `Has.Count.EqualTo(...)`, and `Is.SameAs(...)` shapes that map directly onto the current Axiom surface without guessing through richer constraint chains.
+The NUnit migration support is still intentionally narrow. It covers `Does.*`, `Has.Count.EqualTo(...)`, ordered value, range, reference identity, generic type constraints, and async exception assertions that map directly onto the current Axiom surface without guessing through richer constraint chains.
 
 Before:
 
@@ -228,6 +240,11 @@ Assert.That(actual, Does.StartWith("pre"));
 Assert.That(actual, Does.EndWith("suf"));
 Assert.That(values, Has.Count.EqualTo(2));
 Assert.That(value, Is.SameAs(value));
+Assert.That(2, Is.GreaterThan(1));
+Assert.That(2, Is.InRange(1, 3));
+Assert.That(value, Is.TypeOf<object>());
+Assert.That(value, Is.InstanceOf<object>());
+Assert.That(value, Is.Not.AssignableTo<string>());
 ```
 
 After:
@@ -244,9 +261,16 @@ actual.Should().StartWith("pre");
 actual.Should().EndWith("suf");
 values.Should().HaveCount(2);
 value.Should().BeSameAs(value);
+2.Should().BeGreaterThan(1);
+2.Should().BeInRange(1, 3);
+value.Should().BeOfType<object>();
+value.Should().BeAssignableTo<object>();
+value.Should().NotBeAssignableTo<string>();
 ```
 
-These suggestions use semantic matching against NUnit's real `Assert.That(...)` API. They intentionally skip tolerance/comparer variations, message-bearing overloads, richer `Does.*` chains, `Has.*` chains beyond `Has.Count.EqualTo(int)`, and prefix/suffix constraints where the expected value is not an obvious non-null constant string.
+These suggestions use semantic matching against NUnit's real APIs. They intentionally skip tolerance/comparer variations, message-bearing overloads, richer `Does.*` chains, `Has.*` chains beyond `Has.Count.EqualTo(int)`, runtime `Type` constraints, `Is.Not.TypeOf<T>()`, async exception assertions outside an async context, `AsyncTestDelegate` variable rewrites, and prefix/suffix constraints where the expected value is not an obvious non-null constant string.
+
+NUnit does not expose xUnit's `Assert.ThrowsAnyAsync<TException>(...)` or `Assert.ThrowsAsync<TException>(paramName, ...)` shapes. The NUnit derived-exception async assertion shape is `Assert.CatchAsync<TException>(...)`, which maps to Axiom's `ThrowAsync<TException>()`.
 
 ## MSTest Assert Migration Suggestions
 
