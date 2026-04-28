@@ -65,6 +65,18 @@ The current analyzer and code-fix support focuses on high-confidence xUnit `Asse
 | `Assert.That(collection, Has.Count.EqualTo(expectedCount))` | `collection.Should().HaveCount(expectedCount)` |
 | `Assert.That(actual, Is.SameAs(expected))` | `actual.Should().BeSameAs(expected)` |
 | `Assert.That(actual, Is.Not.SameAs(expected))` | `actual.Should().NotBeSameAs(expected)` |
+| `Assert.That(actual, Is.GreaterThan(expected))` | `actual.Should().BeGreaterThan(expected)` |
+| `Assert.That(actual, Is.GreaterThanOrEqualTo(expected))` | `actual.Should().BeGreaterThanOrEqualTo(expected)` |
+| `Assert.That(actual, Is.LessThan(expected))` | `actual.Should().BeLessThan(expected)` |
+| `Assert.That(actual, Is.LessThanOrEqualTo(expected))` | `actual.Should().BeLessThanOrEqualTo(expected)` |
+| `Assert.That(actual, Is.InRange(minimum, maximum))` | `actual.Should().BeInRange(minimum, maximum)` |
+| `Assert.That(actual, Is.TypeOf<TExpected>())` | `actual.Should().BeOfType<TExpected>()` |
+| `Assert.That(actual, Is.InstanceOf<TExpected>())` | `actual.Should().BeAssignableTo<TExpected>()` |
+| `Assert.That(actual, Is.AssignableTo<TExpected>())` | `actual.Should().BeAssignableTo<TExpected>()` |
+| `Assert.That(actual, Is.Not.InstanceOf<TExpected>())` | `actual.Should().NotBeAssignableTo<TExpected>()` |
+| `Assert.That(actual, Is.Not.AssignableTo<TExpected>())` | `actual.Should().NotBeAssignableTo<TExpected>()` |
+| `Assert.ThrowsAsync<TException>(() => workAsync())` in async contexts | `await new Func<Task>(() => workAsync()).Should().ThrowExactlyAsync<TException>()` or append `.Thrown` when you use the exception |
+| `Assert.CatchAsync<TException>(() => workAsync())` in async contexts | `await new Func<Task>(() => workAsync()).Should().ThrowAsync<TException>()` or append `.Thrown` when you use the exception |
 | `Assert.AreEqual(expected, actual)` | `actual.Should().Be(expected)` |
 | `Assert.AreNotEqual(expected, actual)` | `actual.Should().NotBe(expected)` |
 | `Assert.IsNull(value)` | `value.Should().BeNull()` |
@@ -104,7 +116,7 @@ It skips cases where the rewrite is not obviously semantics-preserving yet, incl
 - nongeneric `Assert.Single(subject)` when you use the returned value
 - `Assert.Throws<TException>(...)` when you use the returned exception outside the `string? paramName, Action testCode` overload
 - `Assert.Throws<TException>(paramName, ...)` when `paramName` is not an obvious non-null constant string
-- richer NUnit constraint chains, comparer/tolerance variants, message-bearing `Assert.That(...)` overloads, `Has.*` chains beyond `Has.Count.EqualTo(int)`, and `Does.StartWith(...)` / `Does.EndWith(...)` when the expected prefix or suffix is not an obvious non-null constant string
+- richer NUnit constraint chains, comparer/tolerance variants, message-bearing `Assert.That(...)` overloads, `Has.*` chains beyond `Has.Count.EqualTo(int)`, runtime `Type` constraints, `Is.Not.TypeOf<T>()`, NUnit async exception assertions outside an async context, `AsyncTestDelegate` variable rewrites, xUnit-style async `paramName` / `ThrowsAnyAsync` shapes that NUnit does not expose, and `Does.StartWith(...)` / `Does.EndWith(...)` when the expected prefix or suffix is not an obvious non-null constant string
 - MSTest message-bearing, comparer, precision, and other richer assertion-family overloads
 - `StringAssert.StartsWith(...)` and `StringAssert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string
 - `CollectionAssert.AreEqual(...)`, `CollectionAssert.AreEquivalent(...)`, and other structural-comparison collection shapes

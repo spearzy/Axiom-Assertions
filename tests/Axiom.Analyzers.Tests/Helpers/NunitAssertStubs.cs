@@ -6,15 +6,26 @@ internal static class NunitAssertStubs
         """
         using System;
         using System.Collections.Generic;
+        using System.Threading.Tasks;
 
         namespace NUnit.Framework
         {
             using Constraints;
 
+            public delegate Task AsyncTestDelegate();
+
             public static class Assert
             {
                 public static void That<TActual>(TActual actual, IResolveConstraint expression) { }
                 public static void That<TActual>(TActual actual, IResolveConstraint expression, string message) { }
+                public static TActual ThrowsAsync<TActual>(AsyncTestDelegate code) where TActual : Exception => default!;
+                public static TActual ThrowsAsync<TActual>(AsyncTestDelegate code, string message, params object[] args) where TActual : Exception => default!;
+                public static Exception ThrowsAsync(Type expectedExceptionType, AsyncTestDelegate code) => default!;
+                public static Exception ThrowsAsync(Type expectedExceptionType, AsyncTestDelegate code, string message, params object[] args) => default!;
+                public static TActual CatchAsync<TActual>(AsyncTestDelegate code) where TActual : Exception => default!;
+                public static TActual CatchAsync<TActual>(AsyncTestDelegate code, string message, params object[] args) where TActual : Exception => default!;
+                public static Exception CatchAsync(Type expectedExceptionType, AsyncTestDelegate code) => default!;
+                public static Exception CatchAsync(Type expectedExceptionType, AsyncTestDelegate code, string message, params object[] args) => default!;
             }
 
             public static class Is
@@ -28,6 +39,17 @@ internal static class NunitAssertStubs
                 public static EqualConstraint EqualTo(string expected) => default!;
                 public static EqualConstraint EqualTo<T>(IEnumerable<T> expected) => default!;
                 public static SameAsConstraint SameAs(object? expected) => default!;
+                public static ComparableConstraint GreaterThan(object? expected) => default!;
+                public static ComparableConstraint GreaterThanOrEqualTo(object? expected) => default!;
+                public static ComparableConstraint LessThan(object? expected) => default!;
+                public static ComparableConstraint LessThanOrEqualTo(object? expected) => default!;
+                public static RangeConstraint InRange(object? minimum, object? maximum) => default!;
+                public static TypeOfConstraint TypeOf<TExpected>() => default!;
+                public static TypeOfConstraint TypeOf(Type expectedType) => default!;
+                public static InstanceOfConstraint InstanceOf<TExpected>() => default!;
+                public static InstanceOfConstraint InstanceOf(Type expectedType) => default!;
+                public static AssignableToConstraint AssignableTo<TExpected>() => default!;
+                public static AssignableToConstraint AssignableTo(Type expectedType) => default!;
             }
 
             public static class Does
@@ -58,6 +80,17 @@ internal static class NunitAssertStubs
                 public EqualConstraint EqualTo(object? expected) => default!;
                 public EqualConstraint EqualTo(string expected) => default!;
                 public SameAsConstraint SameAs(object? expected) => default!;
+                public ComparableConstraint GreaterThan(object? expected) => default!;
+                public ComparableConstraint GreaterThanOrEqualTo(object? expected) => default!;
+                public ComparableConstraint LessThan(object? expected) => default!;
+                public ComparableConstraint LessThanOrEqualTo(object? expected) => default!;
+                public RangeConstraint InRange(object? minimum, object? maximum) => default!;
+                public TypeOfConstraint TypeOf<TExpected>() => default!;
+                public TypeOfConstraint TypeOf(Type expectedType) => default!;
+                public InstanceOfConstraint InstanceOf<TExpected>() => default!;
+                public InstanceOfConstraint InstanceOf(Type expectedType) => default!;
+                public AssignableToConstraint AssignableTo<TExpected>() => default!;
+                public AssignableToConstraint AssignableTo(Type expectedType) => default!;
                 public ContainsConstraint Contain(string expected) => default!;
                 public StartsWithConstraint StartWith(string expected) => default!;
                 public EndsWithConstraint EndWith(string expected) => default!;
@@ -74,6 +107,18 @@ internal static class NunitAssertStubs
             public sealed class FalseConstraint : ConstraintExpression { }
             public sealed class EmptyConstraint : ConstraintExpression { }
             public sealed class SameAsConstraint : ConstraintExpression { }
+            public sealed class ComparableConstraint : ConstraintExpression
+            {
+                public ComparableConstraint Using(object comparer) => this;
+                public ComparableConstraint Within(double tolerance) => this;
+            }
+            public sealed class RangeConstraint : ConstraintExpression
+            {
+                public RangeConstraint Using(object comparer) => this;
+            }
+            public sealed class TypeOfConstraint : ConstraintExpression { }
+            public sealed class InstanceOfConstraint : ConstraintExpression { }
+            public sealed class AssignableToConstraint : ConstraintExpression { }
             public sealed class ContainsConstraint : ConstraintExpression
             {
                 public ContainsConstraint IgnoreCase => this;

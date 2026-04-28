@@ -72,6 +72,14 @@ namespace NUnit.Framework
         public static EmptyConstraint Empty => default!;
         public static EqualConstraint EqualTo(object? expected) => default!;
         public static SameAsConstraint SameAs(object? expected) => default!;
+        public static ComparableConstraint GreaterThan(object? expected) => default!;
+        public static ComparableConstraint GreaterThanOrEqualTo(object? expected) => default!;
+        public static ComparableConstraint LessThan(object? expected) => default!;
+        public static ComparableConstraint LessThanOrEqualTo(object? expected) => default!;
+        public static RangeConstraint InRange(object? minimum, object? maximum) => default!;
+        public static TypeOfConstraint TypeOf<TExpected>() => default!;
+        public static InstanceOfConstraint InstanceOf<TExpected>() => default!;
+        public static AssignableToConstraint AssignableTo<TExpected>() => default!;
     }
 
     public static class Does
@@ -101,6 +109,14 @@ namespace NUnit.Framework.Constraints
         public EmptyConstraint Empty => default!;
         public EqualConstraint EqualTo(object? expected) => default!;
         public SameAsConstraint SameAs(object? expected) => default!;
+        public ComparableConstraint GreaterThan(object? expected) => default!;
+        public ComparableConstraint GreaterThanOrEqualTo(object? expected) => default!;
+        public ComparableConstraint LessThan(object? expected) => default!;
+        public ComparableConstraint LessThanOrEqualTo(object? expected) => default!;
+        public RangeConstraint InRange(object? minimum, object? maximum) => default!;
+        public TypeOfConstraint TypeOf<TExpected>() => default!;
+        public InstanceOfConstraint InstanceOf<TExpected>() => default!;
+        public AssignableToConstraint AssignableTo<TExpected>() => default!;
         public ContainsConstraint Contain(string expected) => default!;
         public StartsWithConstraint StartWith(string expected) => default!;
         public EndsWithConstraint EndWith(string expected) => default!;
@@ -112,6 +128,11 @@ namespace NUnit.Framework.Constraints
     public sealed class FalseConstraint : ConstraintExpression { }
     public sealed class EmptyConstraint : ConstraintExpression { }
     public sealed class SameAsConstraint : ConstraintExpression { }
+    public sealed class ComparableConstraint : ConstraintExpression { }
+    public sealed class RangeConstraint : ConstraintExpression { }
+    public sealed class TypeOfConstraint : ConstraintExpression { }
+    public sealed class InstanceOfConstraint : ConstraintExpression { }
+    public sealed class AssignableToConstraint : ConstraintExpression { }
     public sealed class ContainsConstraint : ConstraintExpression { }
     public sealed class StartsWithConstraint : ConstraintExpression { }
     public sealed class EndsWithConstraint : ConstraintExpression { }

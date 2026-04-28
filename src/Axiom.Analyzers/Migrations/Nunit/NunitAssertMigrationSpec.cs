@@ -20,6 +20,18 @@ internal enum NunitAssertMigrationKind
     HaveCount,
     BeSameAs,
     NotBeSameAs,
+    BeGreaterThan,
+    BeGreaterThanOrEqualTo,
+    BeLessThan,
+    BeLessThanOrEqualTo,
+    BeInRange,
+    BeOfType,
+    BeInstanceOf,
+    BeAssignableTo,
+    NotBeInstanceOf,
+    NotBeAssignableTo,
+    ThrowExactlyAsync,
+    ThrowAsync,
 }
 
 internal sealed class NunitAssertMigrationSpec
@@ -147,7 +159,79 @@ internal static class NunitAssertMigrationSpecs
             NunitAssertMigrationKind.NotBeSameAs,
             "Migrate NUnit Assert.That Is.Not.SameAs constraint to Axiom",
             "NUnit Assert.That(actual, Is.Not.SameAs(expected)) can be migrated to 'actual.Should().NotBeSameAs(expected)'",
-            "Convert to 'actual.Should().NotBeSameAs(expected)'")
+            "Convert to 'actual.Should().NotBeSameAs(expected)'"),
+        new(
+            AxiomAnalyzerIds.MigrateNunitAssertThatGreaterThan,
+            NunitAssertMigrationKind.BeGreaterThan,
+            "Migrate NUnit Assert.That Is.GreaterThan constraint to Axiom",
+            "NUnit Assert.That(actual, Is.GreaterThan(expected)) can be migrated to 'actual.Should().BeGreaterThan(expected)'",
+            "Convert to 'actual.Should().BeGreaterThan(expected)'"),
+        new(
+            AxiomAnalyzerIds.MigrateNunitAssertThatGreaterThanOrEqualTo,
+            NunitAssertMigrationKind.BeGreaterThanOrEqualTo,
+            "Migrate NUnit Assert.That Is.GreaterThanOrEqualTo constraint to Axiom",
+            "NUnit Assert.That(actual, Is.GreaterThanOrEqualTo(expected)) can be migrated to 'actual.Should().BeGreaterThanOrEqualTo(expected)'",
+            "Convert to 'actual.Should().BeGreaterThanOrEqualTo(expected)'"),
+        new(
+            AxiomAnalyzerIds.MigrateNunitAssertThatLessThan,
+            NunitAssertMigrationKind.BeLessThan,
+            "Migrate NUnit Assert.That Is.LessThan constraint to Axiom",
+            "NUnit Assert.That(actual, Is.LessThan(expected)) can be migrated to 'actual.Should().BeLessThan(expected)'",
+            "Convert to 'actual.Should().BeLessThan(expected)'"),
+        new(
+            AxiomAnalyzerIds.MigrateNunitAssertThatLessThanOrEqualTo,
+            NunitAssertMigrationKind.BeLessThanOrEqualTo,
+            "Migrate NUnit Assert.That Is.LessThanOrEqualTo constraint to Axiom",
+            "NUnit Assert.That(actual, Is.LessThanOrEqualTo(expected)) can be migrated to 'actual.Should().BeLessThanOrEqualTo(expected)'",
+            "Convert to 'actual.Should().BeLessThanOrEqualTo(expected)'"),
+        new(
+            AxiomAnalyzerIds.MigrateNunitAssertThatInRange,
+            NunitAssertMigrationKind.BeInRange,
+            "Migrate NUnit Assert.That Is.InRange constraint to Axiom",
+            "NUnit Assert.That(actual, Is.InRange(minimum, maximum)) can be migrated to 'actual.Should().BeInRange(minimum, maximum)'",
+            "Convert to 'actual.Should().BeInRange(minimum, maximum)'"),
+        new(
+            AxiomAnalyzerIds.MigrateNunitAssertThatTypeOf,
+            NunitAssertMigrationKind.BeOfType,
+            "Migrate NUnit Assert.That Is.TypeOf constraint to Axiom",
+            "NUnit Assert.That(actual, Is.TypeOf<TExpected>()) can be migrated to 'actual.Should().BeOfType<TExpected>()'",
+            "Convert to 'actual.Should().BeOfType<TExpected>()'"),
+        new(
+            AxiomAnalyzerIds.MigrateNunitAssertThatInstanceOf,
+            NunitAssertMigrationKind.BeInstanceOf,
+            "Migrate NUnit Assert.That Is.InstanceOf constraint to Axiom",
+            "NUnit Assert.That(actual, Is.InstanceOf<TExpected>()) can be migrated to 'actual.Should().BeAssignableTo<TExpected>()'",
+            "Convert to 'actual.Should().BeAssignableTo<TExpected>()'"),
+        new(
+            AxiomAnalyzerIds.MigrateNunitAssertThatAssignableTo,
+            NunitAssertMigrationKind.BeAssignableTo,
+            "Migrate NUnit Assert.That Is.AssignableTo constraint to Axiom",
+            "NUnit Assert.That(actual, Is.AssignableTo<TExpected>()) can be migrated to 'actual.Should().BeAssignableTo<TExpected>()'",
+            "Convert to 'actual.Should().BeAssignableTo<TExpected>()'"),
+        new(
+            AxiomAnalyzerIds.MigrateNunitAssertThatNotInstanceOf,
+            NunitAssertMigrationKind.NotBeInstanceOf,
+            "Migrate NUnit Assert.That Is.Not.InstanceOf constraint to Axiom",
+            "NUnit Assert.That(actual, Is.Not.InstanceOf<TExpected>()) can be migrated to 'actual.Should().NotBeAssignableTo<TExpected>()'",
+            "Convert to 'actual.Should().NotBeAssignableTo<TExpected>()'"),
+        new(
+            AxiomAnalyzerIds.MigrateNunitAssertThatNotAssignableTo,
+            NunitAssertMigrationKind.NotBeAssignableTo,
+            "Migrate NUnit Assert.That Is.Not.AssignableTo constraint to Axiom",
+            "NUnit Assert.That(actual, Is.Not.AssignableTo<TExpected>()) can be migrated to 'actual.Should().NotBeAssignableTo<TExpected>()'",
+            "Convert to 'actual.Should().NotBeAssignableTo<TExpected>()'"),
+        new(
+            AxiomAnalyzerIds.MigrateNunitAssertThrowsAsync,
+            NunitAssertMigrationKind.ThrowExactlyAsync,
+            "Migrate NUnit Assert.ThrowsAsync to Axiom",
+            "NUnit Assert.ThrowsAsync<TException>(...) can be migrated to 'await ...Should().ThrowExactlyAsync<TException>()', appending '.Thrown' when the exception is used",
+            "Convert to 'await ...Should().ThrowExactlyAsync<TException>()'"),
+        new(
+            AxiomAnalyzerIds.MigrateNunitAssertCatchAsync,
+            NunitAssertMigrationKind.ThrowAsync,
+            "Migrate NUnit Assert.CatchAsync to Axiom",
+            "NUnit Assert.CatchAsync<TException>(...) can be migrated to 'await ...Should().ThrowAsync<TException>()', appending '.Thrown' when the exception is used",
+            "Convert to 'await ...Should().ThrowAsync<TException>()'")
     ];
 
     public static ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
