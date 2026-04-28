@@ -47,33 +47,25 @@ Starter consumer projects are available in the repository if you want a minimal 
 
 ## Optional Packages
 
-These are add-ons on top of `Axiom.Assertions`.
+Use these when a project needs more than the default `Axiom.Assertions` package.
 
-Install `Axiom.Json` when you want structural JSON equivalency and simple JSON path assertions:
+| Install | Use it when |
+| --- | --- |
+| `Axiom.Json` | You want structural JSON equivalency and simple JSON path assertions. |
+| `Axiom.Http` | You want deterministic `HttpResponseMessage` assertions for exact status codes, headers, content types, JSON bodies, and ProblemDetails-style API responses. |
+| `Axiom.Vectors` | You want vector, embedding, and retrieval-focused assertions. |
+| `Axiom.Analyzers` | You only want diagnostics/code fixes without the runtime assertion library. |
+| `Axiom.Core` | You want low-level batching, formatting, or configuration primitives without the full fluent assertion surface. |
+
+Install optional runtime add-ons only in projects that need that surface:
 
 ```bash
 dotnet add package Axiom.Json
-```
-
-Install `Axiom.Http` when you want deterministic `HttpResponseMessage` assertions for exact status codes, headers, content types, JSON bodies, and ProblemDetails-style API responses:
-
-```bash
 dotnet add package Axiom.Http
-```
-
-Install `Axiom.Vectors` only when you want vector and embedding-focused assertions:
-
-```bash
 dotnet add package Axiom.Vectors
 ```
 
-Install `Axiom.Analyzers` separately only if you want the diagnostics without the runtime assertion library:
-
-```bash
-dotnet add package Axiom.Analyzers
-```
-
-Install `Axiom.Core` directly only when you want low-level primitives such as `Batch`, formatting, or configuration without the full fluent assertion surface.
+`Axiom.Analyzers` and `Axiom.Core` are advanced or special-case installs. Most test projects do not need to reference them directly.
 
 ## Optional Configuration
 

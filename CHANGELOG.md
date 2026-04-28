@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/).
 
+## [2.3.0] - 2026-04-28
+
+### Added
+- Added package/install guidance, a compatibility matrix, and starter consumer projects for xUnit, NUnit, and MSTest.
+- Expanded migration analyzer coverage for xUnit, NUnit, and MSTest with additional high-confidence async exception, ordered comparison, type, and range assertion shapes.
+
+### Changed
+- Updated analyzer and migration docs so package choices, framework compatibility, starter projects, and the expanded migration surface are easier to find.
+
+### Fixed
+- Tightened analyzer and docs snippet coverage around the new migration paths and starter project workflows.
+
 ## [2.2.0] - 2026-04-22
 
 ### Added
