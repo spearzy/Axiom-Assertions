@@ -4,10 +4,7 @@
 
 This project is maintained on a best-effort basis.
 
-For security fixes, priority is given to:
-
-- the latest release on `main`,
-- the latest preview package line (`0.x`).
+For security fixes, priority is given to the current stable release line on main.
 
 Older releases may not receive security updates.
 
@@ -17,7 +14,7 @@ Please report suspected vulnerabilities privately first.
 
 Use GitHub private vulnerability reporting for this repository:
 
-- [Report a vulnerability](https://github.com/spearzy/Axiom/security/advisories/new)
+Report a vulnerability: https://github.com/spearzy/Axiom/security/advisories/new
 
 Please include:
 

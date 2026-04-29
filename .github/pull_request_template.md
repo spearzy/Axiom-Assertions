@@ -2,6 +2,13 @@
 
 Describe the change in 2-5 sentences.
 
+## Responsibility
+
+- [ ] I understand this change and take responsibility for it.
+- [ ] If AI tools were used, I reviewed the result for correctness, maintainability, licensing, and tests.
+
+AI assistance notes, if applicable:
+
 ## Consumer Value
 
 What does this add or improve for library users?
@@ -103,6 +110,8 @@ If yes, explain the break and migration path.
 
 ## Checklist
 
+- [ ] I take responsibility for the final change
+- [ ] Any AI-assisted content was reviewed for correctness, maintainability, licensing, and tests
 - [ ] The change is scoped and reviewable
 - [ ] Public API shape is intentional
 - [ ] Failure messages are deterministic
