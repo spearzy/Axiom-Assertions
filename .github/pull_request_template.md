@@ -7,7 +7,7 @@ Describe the change in 2-5 sentences.
 - [ ] I understand this change and take responsibility for it.
 - [ ] If AI tools were used, I reviewed the result for correctness, maintainability, licensing, and tests.
 
-If AI tools materially helped with the change, note that briefly here, for example: docs drafting, test drafting, refactoring, or implementation scaffolding.
+AI assistance notes, if applicable:
 
 ## Consumer Value
 
