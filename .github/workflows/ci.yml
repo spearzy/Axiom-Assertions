@@ -122,6 +122,36 @@ jobs:
       - name: Verify formatting
         run: dotnet format Axiom.sln --verify-no-changes --no-restore
 
+  package-consumption-smoke:
+    name: Package Consumption Smoke
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            10.0.x
+            9.0.x
+            8.0.x
+
+      - name: Run package consumption smoke action
+        uses: spearzy/dotnet-package-smoke@v1.0.0
+        with:
+          package-projects: |
+            src/Axiom.Assertions/Axiom.Assertions.csproj
+            src/Axiom.Core/Axiom.Core.csproj
+            src/Axiom.Json/Axiom.Json.csproj
+            src/Axiom.Http/Axiom.Http.csproj
+            src/Axiom.Vectors/Axiom.Vectors.csproj
+          consumer-target-frameworks: |
+            net8.0
+            net9.0
+            net10.0
+          configuration: Release
+
   pack:
     name: Pack (no publish)
     runs-on: ubuntu-latest
