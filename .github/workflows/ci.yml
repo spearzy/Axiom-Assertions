@@ -137,6 +137,12 @@ jobs:
             9.0.x
             8.0.x
 
+      - name: Restore
+        run: dotnet restore Axiom.sln
+
+      - name: Build
+        run: dotnet build Axiom.sln -c Release --no-restore
+
       - name: Run package consumption smoke action
         uses: spearzy/dotnet-package-smoke@v1.0.0
         with:
@@ -151,6 +157,11 @@ jobs:
             net9.0
             net10.0
           configuration: Release
+          restore-before-pack: false
+          build-before-pack: false
+          pack-arguments: >-
+            --no-build
+            --no-restore
 
   pack:
     name: Pack (no publish)
