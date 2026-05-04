@@ -26,5 +26,5 @@ This package is designed to be used with `Axiom.Assertions`.
 - you want JSON assertions: install `Axiom.Json` on top of `Axiom.Assertions`
 - you want `HttpResponseMessage` assertions: install `Axiom.Http` on top of `Axiom.Assertions`
 
-Documentation: [spearzy.github.io/Axiom](https://spearzy.github.io/Axiom/)
-Getting started: [Getting Started](https://spearzy.github.io/Axiom/getting-started/)
+Documentation: [spearzy.github.io/Axiom](https://spearzy.github.io/Axiom-Assertions/)
+Getting started: [Getting Started](https://spearzy.github.io/Axiom-Assertions/getting-started/)
