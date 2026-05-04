@@ -1,67 +1,110 @@
 ---
 title: Axiom vs FluentAssertions
-description: Compare Axiom Assertions and FluentAssertions for .NET tests, with practical guidance on determinism, API shape, migration, and trade-offs.
+description: Compare Axiom Assertions and FluentAssertions side by side for .NET teams evaluating assertion style, determinism, batching, equivalency, migration cost, and package scope.
 ---
 
 # Axiom vs FluentAssertions
 
-Both libraries aim to make .NET tests more expressive than raw framework assertions. The more useful question is which trade-offs fit the suite you are maintaining.
+This page is for teams deciding whether Axiom is worth evaluating next to an existing or planned FluentAssertions setup.
 
-Axiom is the newer and narrower library here. FluentAssertions is older, broader, and much more established. This page is meant to make the trade-offs explicit rather than pretend those two positions are interchangeable.
+It is not a claim that every FluentAssertions suite should move. FluentAssertions is older, broader, more established, and has a much larger ecosystem. Axiom is newer and narrower. The useful decision is whether Axiom's trade-offs solve a real problem in your test suite.
 
-## What Axiom Currently Emphasizes
+## Who This Comparison Is For
 
-Axiom is worth evaluating when you care most about:
+Use this page if you are:
 
-- deterministic failure output that stays stable across environments
-- explicit grouped failures with `Batch`
-- a package layout that keeps core assertions, analyzers, JSON support, HTTP support, and vector support clearly separated
-- a narrower and more explicit surface than older assertion libraries
-- built-in optional JSON and HTTP assertions without pushing those APIs into every test project
-- built-in retrieval and ranking assertions for AI and search-related test suites
+- choosing a fluent assertion library for a new .NET test suite
+- maintaining a large test suite where failure output stability matters
+- considering whether explicit batching, analyzers, or optional JSON, HTTP, and vector packages are useful enough to justify migration
+- checking whether Axiom is mature enough for the specific assertion areas you rely on
 
-```csharp
-using Axiom.Assertions;
-using Axiom.Core;
+If your team is already productive with FluentAssertions and the current output, idioms, and package model are working well, staying put is a reasonable engineering decision.
 
-using var batch = Assert.Batch("profile");
-user.Name.Should().NotBeNull();
-user.Email.Should().Contain("@");
-user.Roles.Should().Contain("admin");
-```
+## What Each Library Optimizes For
 
-## What FluentAssertions Still Offers Today
+| Area | Axiom | FluentAssertions |
+| --- | --- | --- |
+| Library maturity | Newer and narrower | Older, broader, and more established |
+| API style | Explicit method-driven fluent assertions | Broad fluent assertion surface with many idioms and chains |
+| Failure output | Deterministic, structured output is a core design goal | Mature and expressive output across a wide surface |
+| Multiple failures | Explicit `Batch` aggregation | Uses FluentAssertions' assertion-scope model |
+| Migration help | Analyzer-backed migration from supported xUnit, NUnit, and MSTest shapes | Strong ecosystem familiarity; migration depends on where you are starting |
+| Package shape | Main package plus opt-in JSON, HTTP, and vector/retrieval packages | Broad general-purpose assertion package |
 
-FluentAssertions remains the safer choice when you want:
+If licensing or procurement policy matters for your team, evaluate the current package terms directly. This guide focuses on technical fit and migration cost.
 
-- a very broad and mature assertion surface with years of ecosystem usage
-- a team that already knows the FluentAssertions idioms well
-- less appetite for changing assertion style in an existing FluentAssertions-heavy codebase
-- the broadest community footprint for third-party examples and prior art
+## Same-Intent Examples
 
-If your suite is already deeply invested in FluentAssertions and is working well, there may be no technical reason to move.
+These examples are intentionally small. They show style and shape, not every supported assertion category.
 
-## Migration And API Shape
+| Intent | Axiom | FluentAssertions |
+| --- | --- | --- |
+| Scalar equality | `actual.Should().Be(expected);` | `actual.Should().Be(expected);` |
+| String containment | `name.Should().Contain("Ada");` | `name.Should().Contain("Ada");` |
+| Collection membership | `roles.Should().Contain("admin");` | `roles.Should().Contain("admin");` |
+| Exact unordered collection | `ids.Should().ContainExactlyInAnyOrder(expectedIds);` | `ids.Should().BeEquivalentTo(expectedIds);` with ordering rules chosen for that assertion |
+| Group related failures | `using var batch = Assert.Batch("profile");` then normal assertions | use an assertion scope around related assertions |
+| Structural comparison | `actual.Should().BeEquivalentTo(expected, options => options.IgnorePath("actual.UpdatedAt"));` | `actual.Should().BeEquivalentTo(expected, options => ...);` |
+| Exception assertion | `new Action(() => work()).Should().Throw<InvalidOperationException>();` | `action.Should().Throw<InvalidOperationException>();` |
 
-Axiom intentionally stays close to straightforward `actual.Should().Something(...)` shapes. That keeps it easy to read, but it also means it does not try to mirror every FluentAssertions idiom or helper chain.
+The overlap is real for common scalar, string, collection, exception, and equivalency checks. The difference is less about one-line syntax and more about the surrounding design: failure-output stability, batching model, analyzer migration support, and optional packages.
 
-If your current FluentAssertions suite is healthy, a migration should have a concrete reason behind it. Moving for novelty alone is unlikely to pay for itself.
+## Where Axiom Is A Strong Fit
 
-If you are assessing migration cost, read:
+Axiom is worth evaluating when:
 
-- [Migrating to Axiom](migrating-to-axiom.md)
-- [Migrate from xUnit Assert to Axiom](migrate-from-xunit-assert.md)
-- [Migrate from NUnit Assert to Axiom](migrate-from-nunit-assert.md)
-- [Migrate from MSTest Assert to Axiom](migrate-from-mstest-assert.md)
+- deterministic failure output matters in CI, snapshots, or code review
+- you want explicit `Batch` usage rather than ambient grouping hidden in helper code
+- you want analyzer-backed migration from supported xUnit, NUnit, or MSTest assertion shapes
+- your tests include JSON, `HttpResponseMessage`, vector, embedding, or retrieval-ranking checks and you want those APIs as opt-in packages
+- you prefer a smaller assertion surface that is easier to audit and reason about
+- your team is willing to trade ecosystem breadth for a more explicit and focused library
 
-## Equivalency And Comparison Rules
+The strongest adoption path is usually one project or one folder first, not a whole-suite rewrite.
 
-Both libraries support structural comparison. Axiom keeps the equivalency configuration explicit and deterministic, with typed member mapping and per-call comparison rules.
+## Where FluentAssertions Is Still The Safer Choice
 
-If structural comparison is the main thing you care about, read [Equivalency](equivalency.md) before choosing.
+FluentAssertions is likely the safer or easier choice when:
 
-## A Practical Rule Of Thumb
+- the suite already uses FluentAssertions heavily and the team is happy with it
+- you rely on assertion categories or helper chains Axiom does not currently cover
+- broad community examples, long production history, and ecosystem familiarity matter more than Axiom's narrower design goals
+- migration would turn into a large mechanical rewrite without a clear testing problem to solve
+- you want the broadest general-purpose fluent assertion surface today
 
-Evaluate Axiom when deterministic messages, explicit batching, analyzer-backed migration support, optional JSON or HTTP assertions, or vector and retrieval assertions solve a real problem in your test suite.
+Axiom does not try to be a drop-in FluentAssertions clone. Unsupported FluentAssertions idioms should be treated as manual migration decisions, not gaps to paper over mechanically.
 
-Stay with FluentAssertions when you want the broader and more established general-purpose fluent assertion ecosystem, or when your current FluentAssertions suite is already serving the team well.
+## Migration Cost And Friction
+
+Migration cost usually depends on what your suite uses today:
+
+| Current usage | Typical friction |
+| --- | --- |
+| Simple scalar, string, collection, and exception checks | Low to moderate, especially when the target Axiom shape is direct |
+| Heavy structural equivalency | Needs deliberate review of equivalency options and comparison rules |
+| Deep FluentAssertions-specific chains | Higher; these should usually stay manual |
+| Custom assertion helpers | Depends on how much helper code assumes FluentAssertions types and scopes |
+| Large established suite with little assertion pain | Often not worth moving yet |
+
+Axiom's migration analyzers currently focus on framework assertions, not automated FluentAssertions-to-Axiom rewrites. If you are moving from FluentAssertions, plan it as an intentional codebase migration rather than a broad one-click conversion.
+
+## When Not To Switch
+
+Do not switch just because Axiom exists.
+
+Stay with FluentAssertions when:
+
+- your current tests are clear, stable, and trusted
+- the suite uses FluentAssertions features Axiom does not cover
+- the team values ecosystem maturity more than deterministic output or explicit package boundaries
+- the migration would consume time without improving maintainability
+- you need a broader assertion library today than Axiom currently aims to be
+
+A good evaluation should be allowed to end with "we should not migrate right now."
+
+## Where To Go Next
+
+- Use [Migrating to Axiom](migrating-to-axiom.md) for staged migration planning.
+- Use the [Equivalency guide](equivalency.md) before moving object-graph comparisons.
+- Use the [Assertion Reference](assertion-reference.md) to check whether a required assertion exists today.
+- Use [Getting Started](getting-started.md) if optional JSON, HTTP, or vector package setup is part of the evaluation.

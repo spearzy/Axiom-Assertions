@@ -43,7 +43,7 @@ Another assertion library may still be the safer choice when you want:
 
 If your current assertion approach is already clear, stable, and well understood by the team, there may be no reason to switch.
 
-Those trade-offs are easiest to see in the comparison pages:
+Those trade-offs are easiest to see in the side-by-side comparison pages:
 
 - [Axiom vs FluentAssertions](axiom-vs-fluentassertions.md)
 - [Axiom vs Shouldly](axiom-vs-shouldly.md)
