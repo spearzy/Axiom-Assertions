@@ -52,6 +52,7 @@ Those trade-offs are easiest to see in the comparison pages:
 
 - Start with [Getting Started](getting-started.md)
 - Browse the [Assertion Reference](assertion-reference.md)
-- Read [Migrate from xUnit Assert to Axiom](migrate-from-xunit-assert.md) if you are moving an existing suite
+- Read [Migrating to Axiom](migrating-to-axiom.md) if you are moving an existing suite
+- Use the [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), or [MSTest](migrate-from-mstest-assert.md) walkthrough for framework-specific migration steps
 - Read [HTTP and API assertions](http.md) if you need practical `HttpResponseMessage` checks
 - Read [Vector assertions for AI and retrieval tests in .NET](vector-assertions-for-ai-and-retrieval-tests-in-dotnet.md) if you need embedding or ranking assertions
