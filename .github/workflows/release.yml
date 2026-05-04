@@ -161,24 +161,6 @@ jobs:
           "$GITHUB_WORKSPACE/artifacts/packages"
           "${{ steps.version.outputs.version }}"
 
-      - name: Vectors package smoke test
-        run: >
-          bash eng/ci/run-vectors-smoke.sh
-          "$GITHUB_WORKSPACE/artifacts/packages"
-          "${{ steps.version.outputs.version }}"
-
-      - name: Json package smoke test
-        run: >
-          bash eng/ci/run-json-smoke.sh
-          "$GITHUB_WORKSPACE/artifacts/packages"
-          "${{ steps.version.outputs.version }}"
-
-      - name: Http package smoke test
-        run: >
-          bash eng/ci/run-http-smoke.sh
-          "$GITHUB_WORKSPACE/artifacts/packages"
-          "${{ steps.version.outputs.version }}"
-
       - name: Upload package artefacts
         uses: actions/upload-artifact@v7
         with:

@@ -6,6 +6,7 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <AxiomRepositoryPackageVersion>2.3.0</AxiomRepositoryPackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MSBuildProjectName)' != 'Axiom.Tests'">
@@ -23,7 +24,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <VersionPrefix>2.3.0</VersionPrefix>
+    <VersionPrefix>$(AxiomRepositoryPackageVersion)</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(MSBuildProjectName)' == 'Axiom.Core' or '$(MSBuildProjectName)' == 'Axiom.Assertions' or '$(MSBuildProjectName)' == 'Axiom.Analyzers' or '$(MSBuildProjectName)' == 'Axiom.Vectors' or '$(MSBuildProjectName)' == 'Axiom.Json' or '$(MSBuildProjectName)' == 'Axiom.Http'">
