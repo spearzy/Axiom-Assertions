@@ -143,6 +143,12 @@ jobs:
       - name: Build
         run: dotnet build Axiom.sln -c Release --no-restore
 
+      - name: Resolve package version
+        id: package-version
+        run: |
+          version="$(dotnet msbuild src/Axiom.Assertions/Axiom.Assertions.csproj -getProperty:VersionPrefix)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       - name: Run package consumption smoke action
         uses: spearzy/dotnet-package-smoke@v1
         with:
@@ -156,6 +162,9 @@ jobs:
             eng/smoke/Axiom.Json.PackageSmoke/Axiom.Json.PackageSmoke.csproj
             eng/smoke/Axiom.Http.PackageSmoke/Axiom.Http.PackageSmoke.csproj
             eng/smoke/Axiom.Vectors.PackageSmoke/Axiom.Vectors.PackageSmoke.csproj
+            starters/Axiom.Assertions.Starter.Xunit/Axiom.Assertions.Starter.Xunit.csproj
+            starters/Axiom.Assertions.Starter.NUnit/Axiom.Assertions.Starter.NUnit.csproj
+            starters/Axiom.Assertions.Starter.MSTest/Axiom.Assertions.Starter.MSTest.csproj
           consumer-target-frameworks: |
             net8.0
             net9.0
@@ -166,6 +175,9 @@ jobs:
           pack-arguments: >-
             --no-build
             --no-restore
+          smoke-restore-arguments: >-
+            -p:AxiomPackageVersion=${{ steps.package-version.outputs.version }}
+            -p:AxiomAssertionsVersion=${{ steps.package-version.outputs.version }}
 
   pack:
     name: Pack (no publish)
@@ -191,20 +203,11 @@ jobs:
       - name: Pack
         run: dotnet pack Axiom.sln -c Release --no-build --output artifacts/packages
 
-      - name: Consumer smoke test (xUnit)
-        run: bash eng/ci/run-consumer-smoke.sh "$GITHUB_WORKSPACE/artifacts/packages" xunit
-
       - name: Consumer analyzer smoke test
         run: bash eng/ci/run-assertions-analyzer-smoke.sh "$GITHUB_WORKSPACE/artifacts/packages"
 
       - name: Standalone analyzer smoke test
         run: bash eng/ci/run-analyzers-package-smoke.sh "$GITHUB_WORKSPACE/artifacts/packages"
-
-      - name: Consumer smoke test (NUnit)
-        run: bash eng/ci/run-consumer-smoke.sh "$GITHUB_WORKSPACE/artifacts/packages" nunit
-
-      - name: Consumer smoke test (MSTest)
-        run: bash eng/ci/run-consumer-smoke.sh "$GITHUB_WORKSPACE/artifacts/packages" mstest
 
       - name: Consumer smoke test (no framework fallback)
         run: bash eng/ci/run-consumer-smoke.sh "$GITHUB_WORKSPACE/artifacts/packages" plain
