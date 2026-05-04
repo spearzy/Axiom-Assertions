@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/).
 
+## [2.4.0] - 2026-05-04
+
+### Added
+- Added framework-specific migration walkthrough docs for xUnit, NUnit, and MSTest.
+- Added repository maintenance docs and templates, including support, roadmap, code of conduct, issue templates, and clearer PR responsibility guidance.
+- Added committed package-consumption smoke projects for `Axiom.Json`, `Axiom.Http`, and `Axiom.Vectors`.
+
+### Changed
+- Reworked the migration hub and related links so staged migration guidance is easier to follow.
+- Reworked the FluentAssertions and Shouldly comparison pages into practical side-by-side evaluation guides.
+- Moved optional runtime package and starter-project smoke checks onto `dotnet-package-smoke`, while keeping analyzer and plain fallback smoke checks bespoke.
+- Updated repository, docs, package metadata, and support links to use the renamed `Axiom-Assertions` repository.
+
+### Fixed
+- Removed obsolete bespoke runtime smoke scripts after their coverage moved to committed smoke projects.
+- Tightened docs and CI validation around package consumption, starter projects, and migration guidance.
+
 ## [2.3.0] - 2026-04-28
 
 ### Added
