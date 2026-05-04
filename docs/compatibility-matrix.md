@@ -32,9 +32,9 @@ The repository includes minimal starter projects for the supported test framewor
 
 | Framework | Starter |
 | --- | --- |
-| xUnit | [Axiom.Assertions.Starter.Xunit](https://github.com/spearzy/Axiom/tree/main/starters/Axiom.Assertions.Starter.Xunit) |
-| NUnit | [Axiom.Assertions.Starter.NUnit](https://github.com/spearzy/Axiom/tree/main/starters/Axiom.Assertions.Starter.NUnit) |
-| MSTest | [Axiom.Assertions.Starter.MSTest](https://github.com/spearzy/Axiom/tree/main/starters/Axiom.Assertions.Starter.MSTest) |
+| xUnit | [Axiom.Assertions.Starter.Xunit](https://github.com/spearzy/Axiom-Assertions/tree/main/starters/Axiom.Assertions.Starter.Xunit) |
+| NUnit | [Axiom.Assertions.Starter.NUnit](https://github.com/spearzy/Axiom-Assertions/tree/main/starters/Axiom.Assertions.Starter.NUnit) |
+| MSTest | [Axiom.Assertions.Starter.MSTest](https://github.com/spearzy/Axiom-Assertions/tree/main/starters/Axiom.Assertions.Starter.MSTest) |
 
 Each starter uses the normal `Axiom.Assertions` install path and keeps the example intentionally small.
 

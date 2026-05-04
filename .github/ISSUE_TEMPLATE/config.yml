@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/spearzy/Axiom/security/advisories/new
+    url: https://github.com/spearzy/Axiom-Assertions/security/advisories/new
     about: Report security issues privately.
   - name: Questions and discussion
-    url: https://github.com/spearzy/Axiom/discussions
+    url: https://github.com/spearzy/Axiom-Assertions/discussions
     about: Use Discussions for questions, design discussion, and open-ended evaluation.

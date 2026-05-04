@@ -28,5 +28,5 @@ If you are not sure which Axiom package to install, start here.
 - you want `HttpResponseMessage` assertions for exact status codes, headers, content types, JSON bodies, or ProblemDetails responses: install `Axiom.Http` on top of `Axiom.Assertions`
 - you want vector, embedding, or retrieval assertions on top of the main package: install `Axiom.Vectors`
 
-Documentation: [spearzy.github.io/Axiom](https://spearzy.github.io/Axiom-Assertions/)
+Documentation: [spearzy.github.io/Axiom-Assertions](https://spearzy.github.io/Axiom-Assertions/)
 Getting started: [Getting Started](https://spearzy.github.io/Axiom-Assertions/getting-started/)
