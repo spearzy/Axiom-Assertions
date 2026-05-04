@@ -66,3 +66,4 @@ For structural assertions, start with the [Equivalency guide](equivalency.md). I
 - Use the [MSTest walkthrough](migrate-from-mstest-assert.md) for direct `Assert.*`, `StringAssert.*`, and `CollectionAssert.*` rewrites.
 - Use the [Analyzer reference](analyzers.md) when you need exact rule IDs and supported shapes.
 - Use [Equivalency](equivalency.md) when migration turns into structural comparison design.
+- Use [Axiom vs FluentAssertions](axiom-vs-fluentassertions.md) or [Axiom vs Shouldly](axiom-vs-shouldly.md) when the real question is whether to switch assertion libraries at all.

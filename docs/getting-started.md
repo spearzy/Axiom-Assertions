@@ -171,7 +171,7 @@ response.Should().HaveProblemDetailsTitle("Validation failed");
 - Browse the full [Assertion Reference](assertion-reference.md)
 - Read [Migrating to Axiom](migrating-to-axiom.md) for the migration planning hub
 - Use the [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), or [MSTest](migrate-from-mstest-assert.md) walkthrough when you are migrating from one framework
-- Compare [Axiom vs FluentAssertions](axiom-vs-fluentassertions.md) or [Axiom vs Shouldly](axiom-vs-shouldly.md) if you are choosing a library
+- Compare the side-by-side guides for [Axiom vs FluentAssertions](axiom-vs-fluentassertions.md) or [Axiom vs Shouldly](axiom-vs-shouldly.md) if you are choosing a library
 - Read [.NET assertion library](dotnet-assertion-library.md) for the broader category overview
 - Read the [Equivalency](equivalency.md) guide for object-graph configuration
 - Read [Custom Assertions](custom-assertions.md) when you want domain-specific extensions
