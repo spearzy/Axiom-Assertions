@@ -50,7 +50,7 @@ The migration analyzers are intentionally conservative. They only suggest rewrit
 | NUnit | common `Is.*`, `Does.*`, and `Has.Count.EqualTo(...)` constraints, plus ordered/range/type constraints and async exception assertions in async contexts |
 | MSTest | scalar assertions, reference/type checks, `StringAssert`, simple `CollectionAssert` containment, ordered/range checks, and awaited async exception assertions |
 
-For a shorter migration planning view, see [Migrating to Axiom](migrating-to-axiom.md).
+For staged migration guidance, start with [Migrating to Axiom](migrating-to-axiom.md), then use the [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), or [MSTest](migrate-from-mstest-assert.md) walkthrough.
 
 ## Async Assertions Must Be Awaited
 
@@ -350,4 +350,4 @@ Ordered-value migrations preserve MSTest's bound-first argument order: `Assert.I
 
 These suggestions use semantic matching against MSTest's real `Assert`, `StringAssert`, and `CollectionAssert` APIs. They intentionally skip message-bearing, comparer, precision, structural-comparison, non-comparable ordering, and other richer MSTest assertion families, plus `StringAssert.StartsWith(...)` and `StringAssert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string.
 
-For a broader mapping table and practical migration notes, see [Migrating to Axiom](migrating-to-axiom.md).
+For practical rollout guidance, see [Migrating to Axiom](migrating-to-axiom.md) and the framework-specific walkthroughs for [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), and [MSTest](migrate-from-mstest-assert.md).

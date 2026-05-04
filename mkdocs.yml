@@ -28,8 +28,10 @@ nav:
   - Compatibility Matrix: compatibility-matrix.md
   - Assertion Reference: assertion-reference.md
   - Compare and Migrate:
-      - Migrate from xUnit Assert to Axiom: migrate-from-xunit-assert.md
       - Migrating to Axiom: migrating-to-axiom.md
+      - Migrate from xUnit Assert to Axiom: migrate-from-xunit-assert.md
+      - Migrate from NUnit Assert to Axiom: migrate-from-nunit-assert.md
+      - Migrate from MSTest Assert to Axiom: migrate-from-mstest-assert.md
       - Axiom vs FluentAssertions: axiom-vs-fluentassertions.md
       - Axiom vs Shouldly: axiom-vs-shouldly.md
   - Guides:

@@ -49,8 +49,10 @@ If your current FluentAssertions suite is healthy, a migration should have a con
 
 If you are assessing migration cost, read:
 
-- [Migrate from xUnit Assert to Axiom](migrate-from-xunit-assert.md)
 - [Migrating to Axiom](migrating-to-axiom.md)
+- [Migrate from xUnit Assert to Axiom](migrate-from-xunit-assert.md)
+- [Migrate from NUnit Assert to Axiom](migrate-from-nunit-assert.md)
+- [Migrate from MSTest Assert to Axiom](migrate-from-mstest-assert.md)
 
 ## Equivalency And Comparison Rules
 

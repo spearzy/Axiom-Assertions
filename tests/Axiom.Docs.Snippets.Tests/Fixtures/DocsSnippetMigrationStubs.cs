@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 // Minimal xUnit/NUnit/MSTest surface for migration examples in the docs. Keep this small and intentional.
 namespace Xunit
@@ -49,6 +50,9 @@ namespace Xunit
         public static void NotSame(object? expected, object? actual) { }
         public static T Throws<T>(Action testCode) where T : Exception => default!;
         public static T Throws<T>(string? paramName, Action testCode) where T : Exception => default!;
+        public static Task<T> ThrowsAsync<T>(Func<Task> testCode) where T : Exception => Task.FromResult(default(T)!);
+        public static Task<T> ThrowsAsync<T>(string? paramName, Func<Task> testCode) where T : Exception => Task.FromResult(default(T)!);
+        public static Task<T> ThrowsAnyAsync<T>(Func<Task> testCode) where T : Exception => Task.FromResult(default(T)!);
         public static T IsType<T>(object? value) => default!;
         public static T IsAssignableFrom<T>(object? value) => default!;
     }
@@ -61,6 +65,8 @@ namespace NUnit.Framework
     public static class Assert
     {
         public static void That<TActual>(TActual actual, IResolveConstraint expression) { }
+        public static Task<T> ThrowsAsync<T>(Func<Task> code) where T : Exception => Task.FromResult(default(T)!);
+        public static Task<T> CatchAsync<T>(Func<Task> code) where T : Exception => Task.FromResult(default(T)!);
     }
 
     public static class Is
@@ -158,6 +164,9 @@ namespace Microsoft.VisualStudio.TestTools.UnitTesting
         public static void IsNotInstanceOfType(object? value, Type wrongType) { }
         public static void IsGreaterThan<T>(T lowerBound, T value) where T : IComparable<T> { }
         public static void IsInRange<T>(T minValue, T maxValue, T value) where T : struct { }
+        public static Task<T> ThrowsExceptionAsync<T>(Func<Task> code) where T : Exception => Task.FromResult(default(T)!);
+        public static Task<T> ThrowsExactlyAsync<T>(Func<Task> code) where T : Exception => Task.FromResult(default(T)!);
+        public static Task<T> ThrowsAsync<T>(Func<Task> code) where T : Exception => Task.FromResult(default(T)!);
     }
 
     public static class StringAssert

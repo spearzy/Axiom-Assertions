@@ -48,6 +48,8 @@ The current migration analyzers cover high-confidence rewrites for all three sup
 
 Unsupported or lossy framework-specific overloads remain manual migrations.
 
+For rollout guidance, use the [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), or [MSTest](migrate-from-mstest-assert.md) migration walkthrough.
+
 ## Related Guides
 
 - [Getting Started](getting-started.md)

@@ -215,6 +215,8 @@ internal static class DocsSnippetExtractor
             || code.Contains("Assert.Same(", StringComparison.Ordinal)
             || code.Contains("Assert.NotSame(", StringComparison.Ordinal)
             || code.Contains("Assert.Throws<", StringComparison.Ordinal)
+            || code.Contains("Assert.ThrowsAsync<", StringComparison.Ordinal)
+            || code.Contains("Assert.ThrowsAnyAsync<", StringComparison.Ordinal)
             || code.Contains("Assert.StartsWith(", StringComparison.Ordinal)
             || code.Contains("Assert.EndsWith(", StringComparison.Ordinal)
             || code.Contains("Assert.IsType<", StringComparison.Ordinal)
@@ -233,7 +235,9 @@ internal static class DocsSnippetExtractor
             || code.Contains("Is.True", StringComparison.Ordinal)
             || code.Contains("Is.False", StringComparison.Ordinal)
             || code.Contains("Is.Empty", StringComparison.Ordinal)
-            || code.Contains("Is.Not.Empty", StringComparison.Ordinal);
+            || code.Contains("Is.Not.Empty", StringComparison.Ordinal)
+            || code.Contains("Assert.ThrowsAsync<", StringComparison.Ordinal)
+            || code.Contains("Assert.CatchAsync<", StringComparison.Ordinal);
     }
 
     private static bool NeedsMstestStubs(string code)
@@ -254,7 +258,10 @@ internal static class DocsSnippetExtractor
             || code.Contains("StringAssert.StartsWith(", StringComparison.Ordinal)
             || code.Contains("StringAssert.EndsWith(", StringComparison.Ordinal)
             || code.Contains("CollectionAssert.Contains(", StringComparison.Ordinal)
-            || code.Contains("CollectionAssert.DoesNotContain(", StringComparison.Ordinal);
+            || code.Contains("CollectionAssert.DoesNotContain(", StringComparison.Ordinal)
+            || code.Contains("Assert.ThrowsExceptionAsync<", StringComparison.Ordinal)
+            || code.Contains("Assert.ThrowsExactlyAsync<", StringComparison.Ordinal)
+            || code.Contains("Assert.ThrowsAsync<", StringComparison.Ordinal);
     }
 
     private static bool IsVectorSnippet(string code)
