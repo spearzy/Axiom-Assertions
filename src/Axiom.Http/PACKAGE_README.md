@@ -27,5 +27,5 @@ This package is designed to be used with `Axiom.Assertions` and reuses `Axiom.Js
 - you only need JSON document or raw JSON assertions without HTTP response helpers: install `Axiom.Json`
 - you want vector and retrieval assertions: install `Axiom.Vectors` on top of `Axiom.Assertions`
 
-Documentation: [spearzy.github.io/Axiom](https://spearzy.github.io/Axiom/)
-Getting started: [Getting Started](https://spearzy.github.io/Axiom/getting-started/)
+Documentation: [spearzy.github.io/Axiom](https://spearzy.github.io/Axiom-Assertions/)
+Getting started: [Getting Started](https://spearzy.github.io/Axiom-Assertions/getting-started/)
