@@ -2,7 +2,7 @@
 
 ![Axiom](assets/images/axiom-logo.png)
 
-[![CI](https://github.com/spearzy/Axiom/actions/workflows/ci.yml/badge.svg)](https://github.com/spearzy/Axiom/actions/workflows/ci.yml)
+[![CI](https://github.com/spearzy/Axiom-Assertions/actions/workflows/ci.yml/badge.svg)](https://github.com/spearzy/Axiom-Assertions/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 `Axiom.Assertions`  
@@ -13,7 +13,7 @@ Axiom Assertions is a fluent assertion library for .NET tests. It focuses on det
 
 Target frameworks: `net8.0`, `net9.0`, and `net10.0`.
 
-Docs site: [spearzy.github.io/Axiom](https://spearzy.github.io/Axiom/)  
+Docs site: [spearzy.github.io/Axiom-Assertions](https://spearzy.github.io/Axiom-Assertions/)
 
 ## Install
 
@@ -137,24 +137,24 @@ response.Should().HaveProblemDetailsTitle("Validation failed");
 
 Use the docs site for the full guides and reference:
 
-- [Getting Started](https://spearzy.github.io/Axiom/getting-started/)
+- [Getting Started](https://spearzy.github.io/Axiom-Assertions/getting-started/)
 - [Starter Projects](starters/)
-- [Compatibility Matrix](https://spearzy.github.io/Axiom/compatibility-matrix/)
-- [Assertion Reference](https://spearzy.github.io/Axiom/assertion-reference/)
-- [Migration Guide](https://spearzy.github.io/Axiom/migrating-to-axiom/)
-- [xUnit migration walkthrough](https://spearzy.github.io/Axiom/migrate-from-xunit-assert/)
-- [NUnit migration walkthrough](https://spearzy.github.io/Axiom/migrate-from-nunit-assert/)
-- [MSTest migration walkthrough](https://spearzy.github.io/Axiom/migrate-from-mstest-assert/)
-- [Axiom vs FluentAssertions](https://spearzy.github.io/Axiom/axiom-vs-fluentassertions/)
-- [Axiom vs Shouldly](https://spearzy.github.io/Axiom/axiom-vs-shouldly/)
-- [.NET assertion library](https://spearzy.github.io/Axiom/dotnet-assertion-library/)
-- [Equivalency Guide](https://spearzy.github.io/Axiom/equivalency/)
-- [JSON Guide](https://spearzy.github.io/Axiom/json/)
-- [HTTP/API Guide](https://spearzy.github.io/Axiom/http/)
-- [Vectors Guide](https://spearzy.github.io/Axiom/vectors/)
-- [Vector assertions for AI and retrieval tests in .NET](https://spearzy.github.io/Axiom/vector-assertions-for-ai-and-retrieval-tests-in-dotnet/)
-- [Analyzers Guide](https://spearzy.github.io/Axiom/analyzers/)
-- [Benchmarks](https://spearzy.github.io/Axiom/benchmarks/)
+- [Compatibility Matrix](https://spearzy.github.io/Axiom-Assertions/compatibility-matrix/)
+- [Assertion Reference](https://spearzy.github.io/Axiom-Assertions/assertion-reference/)
+- [Migration Guide](https://spearzy.github.io/Axiom-Assertions/migrating-to-axiom/)
+- [xUnit migration walkthrough](https://spearzy.github.io/Axiom-Assertions/migrate-from-xunit-assert/)
+- [NUnit migration walkthrough](https://spearzy.github.io/Axiom-Assertions/migrate-from-nunit-assert/)
+- [MSTest migration walkthrough](https://spearzy.github.io/Axiom-Assertions/migrate-from-mstest-assert/)
+- [Axiom vs FluentAssertions](https://spearzy.github.io/Axiom-Assertions/axiom-vs-fluentassertions/)
+- [Axiom vs Shouldly](https://spearzy.github.io/Axiom-Assertions/axiom-vs-shouldly/)
+- [.NET assertion library](https://spearzy.github.io/Axiom-Assertions/dotnet-assertion-library/)
+- [Equivalency Guide](https://spearzy.github.io/Axiom-Assertions/equivalency/)
+- [JSON Guide](https://spearzy.github.io/Axiom-Assertions/json/)
+- [HTTP/API Guide](https://spearzy.github.io/Axiom-Assertions/http/)
+- [Vectors Guide](https://spearzy.github.io/Axiom-Assertions/vectors/)
+- [Vector assertions for AI and retrieval tests in .NET](https://spearzy.github.io/Axiom-Assertions/vector-assertions-for-ai-and-retrieval-tests-in-dotnet/)
+- [Analyzers Guide](https://spearzy.github.io/Axiom-Assertions/analyzers/)
+- [Benchmarks](https://spearzy.github.io/Axiom-Assertions/benchmarks/)
 
 ## Project Status
 

@@ -16,8 +16,8 @@
   <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Axiom.Core' or '$(MSBuildProjectName)' == 'Axiom.Assertions' or '$(MSBuildProjectName)' == 'Axiom.Analyzers' or '$(MSBuildProjectName)' == 'Axiom.Vectors' or '$(MSBuildProjectName)' == 'Axiom.Json' or '$(MSBuildProjectName)' == 'Axiom.Http'">
     <Authors>Axiom contributors</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/spearzy/Axiom</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/spearzy/Axiom</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/spearzy/Axiom-Assertions</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/spearzy/Axiom-Assertions</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageIcon>assets/images/axiom-icon-dark.png</PackageIcon>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>

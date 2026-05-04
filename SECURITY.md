@@ -14,7 +14,7 @@ Please report suspected vulnerabilities privately first.
 
 Use GitHub private vulnerability reporting for this repository:
 
-Report a vulnerability: https://github.com/spearzy/Axiom/security/advisories/new
+Report a vulnerability: https://github.com/spearzy/Axiom-Assertions/security/advisories/new
 
 Please include:
 

@@ -4,7 +4,7 @@ Axiom Assertions is a fluent assertion library for .NET tests. It is designed ar
 
 Target frameworks: `net8.0`, `net9.0`, and `net10.0`.
 
-Documentation: [spearzy.github.io/Axiom](https://spearzy.github.io/Axiom/)
+Documentation: [spearzy.github.io/Axiom-Assertions](https://spearzy.github.io/Axiom-Assertions/)
 
 ## Install
 
@@ -54,7 +54,7 @@ dotnet add package Axiom.Core
 
 `Axiom.Vectors` adds dimension, approximate equality, dot product, Euclidean distance, cosine similarity, zero-vector, NaN/infinity, normalization, and ranked retrieval evaluation assertions for vector, embedding, and search-style test scenarios.
 
-If you are not sure which package to install, use the package guide: [Which Axiom package should I install?](https://spearzy.github.io/Axiom/which-package-should-i-install/)
+If you are not sure which package to install, use the package guide: [Which Axiom package should I install?](https://spearzy.github.io/Axiom-Assertions/which-package-should-i-install/)
 
 ```csharp
 embedding.Should().HaveDotProductWith(expected, expectedDotProduct: 1f, tolerance: 0.001f);
@@ -109,8 +109,8 @@ For shared defaults, prefer `AxiomSettings.Configure(...)`. `AxiomServices.Confi
 
 See the docs site for full setup and customization guidance:
 
-- [Getting Started](https://spearzy.github.io/Axiom/getting-started/)
-- [Assertion Reference](https://spearzy.github.io/Axiom/assertion-reference/)
+- [Getting Started](https://spearzy.github.io/Axiom-Assertions/getting-started/)
+- [Assertion Reference](https://spearzy.github.io/Axiom-Assertions/assertion-reference/)
 
 ## Core Workflows
 
@@ -231,13 +231,13 @@ Axiom currently includes:
 
 ## Documentation
 
-- [Docs site](https://spearzy.github.io/Axiom/)
-- [GitHub repository](https://github.com/spearzy/Axiom)
-- [Getting Started](https://spearzy.github.io/Axiom/getting-started/)
-- [Assertion reference](https://spearzy.github.io/Axiom/assertion-reference/)
-- [Custom assertions guide](https://spearzy.github.io/Axiom/custom-assertions/)
-- [Equivalency guide](https://spearzy.github.io/Axiom/equivalency/)
-- [JSON guide](https://spearzy.github.io/Axiom/json/)
-- [HTTP/API guide](https://spearzy.github.io/Axiom/http/)
-- [Analyzer guide](https://spearzy.github.io/Axiom/analyzers/)
-- [Vectors guide](https://spearzy.github.io/Axiom/vectors/)
+- [Docs site](https://spearzy.github.io/Axiom-Assertions/)
+- [GitHub repository](https://github.com/spearzy/Axiom-Assertions)
+- [Getting Started](https://spearzy.github.io/Axiom-Assertions/getting-started/)
+- [Assertion reference](https://spearzy.github.io/Axiom-Assertions/assertion-reference/)
+- [Custom assertions guide](https://spearzy.github.io/Axiom-Assertions/custom-assertions/)
+- [Equivalency guide](https://spearzy.github.io/Axiom-Assertions/equivalency/)
+- [JSON guide](https://spearzy.github.io/Axiom-Assertions/json/)
+- [HTTP/API guide](https://spearzy.github.io/Axiom-Assertions/http/)
+- [Analyzer guide](https://spearzy.github.io/Axiom-Assertions/analyzers/)
+- [Vectors guide](https://spearzy.github.io/Axiom-Assertions/vectors/)

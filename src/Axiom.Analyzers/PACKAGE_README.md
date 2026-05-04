@@ -24,5 +24,5 @@ dotnet add package Axiom.Analyzers
 - you want `HttpResponseMessage` assertions: install `Axiom.Http` on top of `Axiom.Assertions`
 - you want vector and retrieval assertions: install `Axiom.Vectors` on top of `Axiom.Assertions`
 
-Documentation: [spearzy.github.io/Axiom](https://spearzy.github.io/Axiom-Assertions/)
+Documentation: [spearzy.github.io/Axiom-Assertions](https://spearzy.github.io/Axiom-Assertions/)
 Getting started: [Getting Started](https://spearzy.github.io/Axiom-Assertions/getting-started/)

@@ -26,5 +26,5 @@ This package is designed to be used with `Axiom.Assertions`.
 - you want `HttpResponseMessage` assertions that reuse JSON body comparison: install `Axiom.Http`
 - you want vector and retrieval assertions: install `Axiom.Vectors` on top of `Axiom.Assertions`
 
-Documentation: [spearzy.github.io/Axiom](https://spearzy.github.io/Axiom-Assertions/)
+Documentation: [spearzy.github.io/Axiom-Assertions](https://spearzy.github.io/Axiom-Assertions/)
 Getting started: [Getting Started](https://spearzy.github.io/Axiom-Assertions/getting-started/)

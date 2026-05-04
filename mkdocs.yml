@@ -1,8 +1,8 @@
 site_name: Axiom Assertions
 site_description: Deterministic fluent assertions for .NET tests with batching, analyzers, equivalency, and optional JSON, HTTP/API, vector, and retrieval assertions.
-site_url: https://spearzy.github.io/Axiom/
-repo_url: https://github.com/spearzy/Axiom
-repo_name: spearzy/Axiom
+site_url: https://spearzy.github.io/Axiom-Assertions/
+repo_url: https://github.com/spearzy/Axiom-Assertions
+repo_name: spearzy/Axiom-Assertions
 theme:
   name: material
   palette:
