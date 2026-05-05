@@ -136,7 +136,7 @@ internal readonly record struct JsonMismatch(JsonMismatchKind Kind, string Path,
     public static JsonMismatch ExtraProperty(string path) => new(JsonMismatchKind.ExtraProperty, path, string.Empty, string.Empty);
 
     public static JsonMismatch ValueKindMismatch(string path, JsonValueKind expected, JsonValueKind actual)
-        => new(JsonMismatchKind.ValueKindMismatch, path, expected.ToString(), actual.ToString());
+        => new(JsonMismatchKind.ValueKindMismatch, path, JsonAssertionSupport.FormatValueKind(expected), JsonAssertionSupport.FormatValueKind(actual));
 
     public static JsonMismatch ValueMismatch(string path, string expected, string actual)
         => new(JsonMismatchKind.ValueMismatch, path, expected, actual);

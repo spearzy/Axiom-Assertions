@@ -32,7 +32,7 @@ internal sealed class JsonParsedValue : IDisposable
         Root = root;
         _ownedDocument = ownedDocument;
         InvalidDetail = invalidDetail;
-        DisplayText = hasValue && isValid ? JsonSerializer.Serialize(root) : invalidDetail ?? "<null>";
+        DisplayText = hasValue && isValid ? JsonSerializer.Serialize(root) : invalidDetail is null ? "<null>" : $"invalid JSON ({invalidDetail})";
     }
 
     public bool HasValue { get; }
@@ -101,7 +101,7 @@ internal sealed class JsonParsedValue : IDisposable
         }
         catch (JsonException ex)
         {
-            throw new ArgumentException($"{argumentName} must be valid JSON ({BuildInvalidJsonDetail(ex)}).", argumentName);
+            throw new ArgumentException($"{argumentName} must be valid expected JSON ({BuildInvalidJsonDetail(ex)}).", argumentName);
         }
     }
 
@@ -133,7 +133,7 @@ internal sealed class JsonParsedValue : IDisposable
     {
         var line = exception.LineNumber ?? 0;
         var bytePosition = exception.BytePositionInLine ?? 0;
-        return $"invalid JSON at line {line}, byte {bytePosition}";
+        return $"line {line}, byte {bytePosition}";
     }
 }
 

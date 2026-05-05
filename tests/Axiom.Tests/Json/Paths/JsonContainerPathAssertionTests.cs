@@ -39,7 +39,7 @@ public sealed class JsonContainerPathAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonObjectAtPath("$.roles"));
 
         Assert.Equal(
-            "Expected actual to have JSON object at path $.roles, but found JSON array at $.roles (expected Object).",
+            "Expected actual to have JSON object at path $.roles, but found JSON array at $.roles; expected object.",
             ex.Message);
     }
 
@@ -53,7 +53,7 @@ public sealed class JsonContainerPathAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonArrayAtPath("$.customer"));
 
         Assert.Equal(
-            "Expected actual to have JSON array at path $.customer, but found JSON object at $.customer (expected Array).",
+            "Expected actual to have JSON array at path $.customer, but found JSON object at $.customer; expected array.",
             ex.Message);
     }
 
@@ -79,7 +79,7 @@ public sealed class JsonContainerPathAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonArrayLengthAtPath("$.roles", 3));
 
         Assert.Equal(
-            "Expected actual to have JSON array at path $.roles with length 3, but found JSON array length 2 at $.roles.",
+            "Expected actual to have JSON array at path $.roles with length 3, but found JSON array length mismatch at $.roles: expected 3 but found 2.",
             ex.Message);
     }
 
@@ -93,7 +93,7 @@ public sealed class JsonContainerPathAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonArrayLengthAtPath("$.roles", 1));
 
         Assert.Equal(
-            "Expected actual to have JSON array at path $.roles with length 1, but found JSON string \"admin\" at $.roles (expected Array).",
+            "Expected actual to have JSON array at path $.roles with length 1, but found JSON string \"admin\" at $.roles; expected array.",
             ex.Message);
     }
 
@@ -119,7 +119,7 @@ public sealed class JsonContainerPathAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonPropertyCountAtPath("$.customer", 1));
 
         Assert.Equal(
-            "Expected actual to have JSON object at path $.customer with property count 1, but found JSON object property count 2 at $.customer.",
+            "Expected actual to have JSON object at path $.customer with property count 1, but found JSON object property count mismatch at $.customer: expected 1 but found 2.",
             ex.Message);
     }
 
@@ -133,7 +133,7 @@ public sealed class JsonContainerPathAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonPropertyCountAtPath("$.customer", 1));
 
         Assert.Equal(
-            "Expected actual to have JSON object at path $.customer with property count 1, but found JSON array at $.customer (expected Object).",
+            "Expected actual to have JSON object at path $.customer with property count 1, but found JSON array at $.customer; expected object.",
             ex.Message);
     }
 
@@ -147,7 +147,7 @@ public sealed class JsonContainerPathAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonArrayLengthAtPath("$.customer.roles", 1));
 
         Assert.Equal(
-            "Expected actual to have JSON array at path $.customer.roles with length 1, but found missing path $.customer.roles.",
+            "Expected actual to have JSON array at path $.customer.roles with length 1, but found missing JSON path $.customer.roles.",
             ex.Message);
     }
 
@@ -172,7 +172,7 @@ public sealed class JsonContainerPathAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonObjectAtPath("$.customer"));
 
         Assert.Equal(
-            "Expected actual to have JSON object at path $.customer, but found invalid JSON at line 0, byte 14.",
+            "Expected actual to have JSON object at path $.customer, but found invalid subject JSON (line 0, byte 14).",
             ex.Message);
     }
 

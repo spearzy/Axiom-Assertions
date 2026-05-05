@@ -57,7 +57,7 @@ public sealed class HttpBodyTextAssertionTests
         var exactEx = Assert.Throws<InvalidOperationException>(() => response.Should().HaveBodyText("created"));
         var containEx = Assert.Throws<InvalidOperationException>(() => response.Should().ContainBodyText("created"));
 
-        Assert.Equal("Expected response to have body text \"created\", but found no response content.", exactEx.Message);
-        Assert.Equal("Expected response to contain body text \"created\", but found no response content.", containEx.Message);
+        Assert.Equal("Expected response to have body text \"created\", but found missing response body content.", exactEx.Message);
+        Assert.Equal("Expected response to contain body text \"created\", but found missing response body content.", containEx.Message);
     }
 }

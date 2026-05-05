@@ -35,7 +35,7 @@ internal static class JsonEquivalencyAssertions
             JsonAssertionSupport.Fail(
                 subjectLabel,
                 new Expectation("to be JSON equivalent to", expectedDisplay),
-                new JsonDisplay(subject.InvalidDetail!),
+                new JsonDisplay(JsonAssertionSupport.DescribeInvalidSubjectJson(subjectLabel, subject.InvalidDetail!)),
                 because,
                 callerFilePath,
                 callerLineNumber);
@@ -88,7 +88,7 @@ internal static class JsonEquivalencyAssertions
             JsonAssertionSupport.Fail(
                 subjectLabel,
                 new Expectation("to not be JSON equivalent to", unexpectedDisplay),
-                new JsonDisplay(subject.InvalidDetail!),
+                new JsonDisplay(JsonAssertionSupport.DescribeInvalidSubjectJson(subjectLabel, subject.InvalidDetail!)),
                 because,
                 callerFilePath,
                 callerLineNumber);

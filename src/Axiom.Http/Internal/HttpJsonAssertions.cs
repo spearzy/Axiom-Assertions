@@ -357,26 +357,34 @@ internal static class HttpJsonAssertions
         }
 
         var subjectLabel = HttpAssertionSupport.SubjectLabel(subjectExpression);
-        var titleFailure = JsonAssertionBridge.GetValueKindFailureDetailAtPath(bodyText, "$.title", JsonValueKind.String);
+        var titleFailure = JsonAssertionBridge.GetValueKindFailureDetailAtPath(
+            bodyText,
+            HttpAssertionSupport.ProblemDetailsSubjectLabel(subjectExpression),
+            "$.title",
+            JsonValueKind.String);
         if (titleFailure is not null)
         {
             HttpAssertionSupport.Fail(
                 subjectLabel,
                 expectation,
-                new HttpDisplay(titleFailure),
+                DescribeProblemDetailsMemberFailure("$.title", "string", titleFailure),
                 because,
                 callerFilePath,
                 callerLineNumber);
             return;
         }
 
-        var statusFailure = JsonAssertionBridge.GetValueKindFailureDetailAtPath(bodyText, "$.status", JsonValueKind.Number);
+        var statusFailure = JsonAssertionBridge.GetValueKindFailureDetailAtPath(
+            bodyText,
+            HttpAssertionSupport.ProblemDetailsSubjectLabel(subjectExpression),
+            "$.status",
+            JsonValueKind.Number);
         if (statusFailure is not null)
         {
             HttpAssertionSupport.Fail(
                 subjectLabel,
                 expectation,
-                new HttpDisplay(statusFailure),
+                DescribeProblemDetailsMemberFailure("$.status", "number", statusFailure),
                 because,
                 callerFilePath,
                 callerLineNumber);
@@ -555,7 +563,7 @@ internal static class HttpJsonAssertions
             HttpAssertionSupport.Fail(
                 subjectLabel,
                 expectation,
-                new HttpDisplay("no response content"),
+                HttpAssertionSupport.MissingBodyContent,
                 because,
                 callerFilePath,
                 callerLineNumber);
@@ -587,7 +595,7 @@ internal static class HttpJsonAssertions
             HttpAssertionSupport.Fail(
                 subjectLabel,
                 expectation,
-                new HttpDisplay("no content type"),
+                new HttpDisplay($"missing content type for response body (expected {ProblemJsonMediaType})"),
                 because,
                 callerFilePath,
                 callerLineNumber);
@@ -599,7 +607,7 @@ internal static class HttpJsonAssertions
             HttpAssertionSupport.Fail(
                 subjectLabel,
                 expectation,
-                HttpAssertionSupport.DescribeContentType(contentType),
+                new HttpDisplay($"content type {HttpAssertionSupport.DescribeContentType(contentType)} (expected {ProblemJsonMediaType})"),
                 because,
                 callerFilePath,
                 callerLineNumber);
@@ -607,5 +615,30 @@ internal static class HttpJsonAssertions
         }
 
         return true;
+    }
+
+    private static HttpDisplay DescribeProblemDetailsMemberFailure(string path, string expectedKind, string failureDetail)
+    {
+        if (string.Equals(failureDetail, $"missing JSON path {path}", StringComparison.Ordinal))
+        {
+            return new HttpDisplay($"missing required ProblemDetails member {path}");
+        }
+
+        const string separator = " but found ";
+        var separatorIndex = failureDetail.IndexOf(separator, StringComparison.Ordinal);
+        if (separatorIndex >= 0)
+        {
+            var actual = failureDetail[(separatorIndex + separator.Length)..];
+            return new HttpDisplay($"ProblemDetails member {path} must be {expectedKind}, but found {actual}");
+        }
+
+        var wrongKindSuffix = $" at {path}; expected {expectedKind}";
+        if (failureDetail.EndsWith(wrongKindSuffix, StringComparison.Ordinal))
+        {
+            var actual = failureDetail[..^wrongKindSuffix.Length];
+            return new HttpDisplay($"ProblemDetails member {path} must be {expectedKind}, but found {actual}");
+        }
+
+        return new HttpDisplay(failureDetail);
     }
 }

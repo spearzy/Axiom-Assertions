@@ -43,7 +43,7 @@ public sealed class ProblemDetailsAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveProblemDetails());
 
         Assert.Equal(
-            "Expected response to have problem details, but found application/json; charset=utf-8.",
+            "Expected response to have problem details, but found content type application/json; charset=utf-8 (expected application/problem+json).",
             ex.Message);
     }
 
@@ -58,7 +58,22 @@ public sealed class ProblemDetailsAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveProblemDetails());
 
         Assert.Equal(
-            "Expected response to have problem details, but found missing path $.title.",
+            "Expected response to have problem details, but found missing required ProblemDetails member $.title.",
+            ex.Message);
+    }
+
+    [Fact]
+    public void HaveProblemDetails_Throws_WhenRequiredMemberHasWrongKind()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.BadRequest,
+            "{ \"title\": 400, \"status\": 400 }",
+            "application/problem+json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveProblemDetails());
+
+        Assert.Equal(
+            "Expected response to have problem details, but found ProblemDetails member $.title must be string, but found JSON number 400.",
             ex.Message);
     }
 

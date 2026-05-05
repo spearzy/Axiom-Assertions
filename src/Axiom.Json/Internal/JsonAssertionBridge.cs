@@ -267,6 +267,7 @@ internal static class JsonAssertionBridge
 
     public static string? GetValueKindFailureDetailAtPath(
         string subjectJson,
+        string subjectLabel,
         string path,
         JsonValueKind expectedKind)
     {
@@ -274,7 +275,7 @@ internal static class JsonAssertionBridge
 
         if (!parsed.IsValid)
         {
-            return parsed.InvalidDetail!;
+            return JsonAssertionSupport.DescribeInvalidSubjectJson(subjectLabel, parsed.InvalidDetail!);
         }
 
         var resolution = JsonPathResolver.ResolvePath(parsed.Root, JsonPath.Parse(path));
