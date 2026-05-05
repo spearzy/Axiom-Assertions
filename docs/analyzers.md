@@ -149,7 +149,7 @@ The migration support is intentionally narrow and high-confidence. It only offer
 
 Before:
 
-<!-- axiom-context=migration-gallery -->
+<!-- axiom-context=migration-gallery axiom-framework=xunit -->
 ```csharp
 Assert.Equal(expected, actual);
 Assert.Equal(42, 42, EqualityComparer<int>.Default);
@@ -251,7 +251,7 @@ The NUnit migration support is still intentionally narrow. It covers `Does.*`, d
 
 Before:
 
-<!-- axiom-context=migration-gallery -->
+<!-- axiom-context=migration-gallery axiom-framework=nunit -->
 ```csharp
 Assert.That(actual, Is.EqualTo(expected));
 Assert.That(value, Is.Not.Null);
@@ -340,15 +340,15 @@ MSTest migrations only cover `Assert`, `StringAssert`, and `CollectionAssert` sh
 
 Before:
 
-<!-- axiom-context=migration-gallery -->
+<!-- axiom-context=migration-gallery axiom-framework=mstest -->
 ```csharp
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected, actual);
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsNull(value);
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsFalse(condition);
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsInstanceOfType(value, typeof(IDisposable));
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsGreaterThan(minimum, count);
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsInRange(minimum, maximum, count);
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.StartsWith("ord-", actual);
+Assert.AreEqual(expected, actual);
+Assert.IsNull(value);
+Assert.IsFalse(condition);
+Assert.IsInstanceOfType(value, typeof(IDisposable));
+Assert.IsGreaterThan(minimum, count);
+Assert.IsInRange(minimum, maximum, count);
+Assert.StartsWith("ord-", actual);
 StringAssert.Contains(actual, "archived");
 CollectionAssert.DoesNotContain(values, "blocked");
 CollectionAssert.AllItemsAreUnique(values);

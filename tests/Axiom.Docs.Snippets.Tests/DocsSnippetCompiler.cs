@@ -45,7 +45,7 @@ internal sealed class DocsSnippetCompiler
         var syntaxTrees = new List<SyntaxTree>();
         // Shared fixture code gives docs examples a stable compile context without copying them out of markdown.
         syntaxTrees.AddRange(_generalSupportTrees);
-        if (snippet.NeedsXunit || snippet.NeedsNunit || snippet.NeedsMstest)
+        if (NeedsMigrationStubs(snippet))
         {
             // Migration docs compile against lightweight framework stubs, not the real test frameworks.
             syntaxTrees.AddRange(_migrationStubTrees);
@@ -192,20 +192,7 @@ internal sealed class DocsSnippetCompiler
             builder.AppendLine("using Axiom.Core;");
         }
 
-        if (snippet.NeedsXunit)
-        {
-            builder.AppendLine("using Xunit;");
-        }
-
-        if (snippet.NeedsNunit)
-        {
-            builder.AppendLine("using NUnit.Framework;");
-        }
-
-        if (snippet.NeedsMstest)
-        {
-            builder.AppendLine("using Microsoft.VisualStudio.TestTools.UnitTesting;");
-        }
+        AppendFrameworkUsings(builder, snippet);
 
         foreach (var usingLine in usingLines)
         {
@@ -250,6 +237,59 @@ internal sealed class DocsSnippetCompiler
         builder.AppendLine(snippet.Code);
         builder.AppendLine("#line default");
         return builder.ToString();
+    }
+
+    private static bool NeedsMigrationStubs(DocsSnippet snippet)
+    {
+        return snippet.Framework is not DocsSnippetFramework.None ||
+            snippet.NeedsXunit ||
+            snippet.NeedsNunit ||
+            snippet.NeedsMstest;
+    }
+
+    private static void AppendFrameworkUsings(StringBuilder builder, DocsSnippet snippet)
+    {
+        if (snippet.Framework is not DocsSnippetFramework.None)
+        {
+            // Explicit framework metadata keeps migration docs readable without importing ambiguous Assert types.
+            AppendFrameworkUsing(builder, snippet.Framework);
+            return;
+        }
+
+        if (snippet.NeedsXunit)
+        {
+            builder.AppendLine("using Xunit;");
+        }
+
+        if (snippet.NeedsNunit)
+        {
+            builder.AppendLine("using NUnit.Framework;");
+        }
+
+        if (snippet.NeedsMstest)
+        {
+            builder.AppendLine("using Microsoft.VisualStudio.TestTools.UnitTesting;");
+        }
+    }
+
+    private static void AppendFrameworkUsing(StringBuilder builder, DocsSnippetFramework framework)
+    {
+        switch (framework)
+        {
+            case DocsSnippetFramework.Xunit:
+                builder.AppendLine("using Xunit;");
+                break;
+            case DocsSnippetFramework.Nunit:
+                builder.AppendLine("using NUnit.Framework;");
+                break;
+            case DocsSnippetFramework.Mstest:
+                builder.AppendLine("using Microsoft.VisualStudio.TestTools.UnitTesting;");
+                break;
+            case DocsSnippetFramework.None:
+                break;
+            default:
+                throw new InvalidOperationException($"Unknown docs snippet framework '{framework}'.");
+        }
     }
 
     private static ImmutableHashSet<string> CollectDeclaredNames(string code)
