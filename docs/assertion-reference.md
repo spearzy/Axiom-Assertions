@@ -104,6 +104,10 @@ NotBeJsonEquivalentTo(JsonDocument unexpectedJson)
 NotBeJsonEquivalentTo(JsonElement unexpectedJson)
 HaveJsonPath(path)
 NotHaveJsonPath(path)
+HaveJsonObjectAtPath(path)
+HaveJsonArrayAtPath(path)
+HaveJsonArrayLengthAtPath(path, expectedLength)
+HaveJsonPropertyCountAtPath(path, expectedCount)
 HaveJsonStringAtPath(path, expectedValue)
 HaveJsonNumberAtPath(path, decimal expectedValue)
 HaveJsonNumberAtPath(path, double expectedValue)
@@ -111,7 +115,7 @@ HaveJsonBooleanAtPath(path, expectedValue)
 HaveJsonNullAtPath(path)
 ```
 
-Current first wave JSON semantics:
+Current JSON semantics:
 
 - object property order does not matter
 - array order does matter
@@ -129,9 +133,11 @@ var expectedJson = """{ "roles": ["admin", "author"], "name": "Bob", "id": 1.0 }
 actualJson.Should().BeJsonEquivalentTo(expectedJson);
 actualJson.Should().HaveJsonStringAtPath("$.name", "Bob");
 actualJson.Should().HaveJsonPath("$.roles[1]");
+actualJson.Should().HaveJsonArrayLengthAtPath("$.roles", 2);
 
 using var document = JsonDocument.Parse(actualJson);
 document.Should().HaveJsonNumberAtPath("$.id", 1m);
+document.Should().HaveJsonPropertyCountAtPath("$", 3);
 document.RootElement.Should().NotHaveJsonPath("$.deletedAt");
 ```
 

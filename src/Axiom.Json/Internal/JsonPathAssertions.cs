@@ -196,6 +196,124 @@ internal static class JsonPathAssertions
             callerLineNumber);
     }
 
+    public static void AssertHaveObjectAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var parsedPath = JsonPath.Parse(path);
+        AssertAtPath(
+            subjectInput,
+            subjectExpression,
+            parsedPath,
+            $"to have JSON object at path {parsedPath.DisplayPath}",
+            because,
+            callerFilePath,
+            callerLineNumber,
+            static (element, jsonPath) => element.ValueKind == JsonValueKind.Object
+                ? null
+                : JsonAssertionSupport.DescribeWrongValueKind(element, jsonPath.DisplayPath, "Object"));
+    }
+
+    public static void AssertHaveArrayAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var parsedPath = JsonPath.Parse(path);
+        AssertAtPath(
+            subjectInput,
+            subjectExpression,
+            parsedPath,
+            $"to have JSON array at path {parsedPath.DisplayPath}",
+            because,
+            callerFilePath,
+            callerLineNumber,
+            static (element, jsonPath) => element.ValueKind == JsonValueKind.Array
+                ? null
+                : JsonAssertionSupport.DescribeWrongValueKind(element, jsonPath.DisplayPath, "Array"));
+    }
+
+    public static void AssertHaveArrayLengthAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        int expectedLength,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        if (expectedLength < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(expectedLength), "expectedLength must be greater than or equal to 0.");
+        }
+
+        var parsedPath = JsonPath.Parse(path);
+        AssertAtPath(
+            subjectInput,
+            subjectExpression,
+            parsedPath,
+            $"to have JSON array at path {parsedPath.DisplayPath} with length {expectedLength}",
+            because,
+            callerFilePath,
+            callerLineNumber,
+            (element, jsonPath) =>
+            {
+                if (element.ValueKind != JsonValueKind.Array)
+                {
+                    return JsonAssertionSupport.DescribeWrongValueKind(element, jsonPath.DisplayPath, "Array");
+                }
+
+                var actualLength = element.GetArrayLength();
+                return actualLength == expectedLength
+                    ? null
+                    : $"JSON array length {actualLength} at {jsonPath.DisplayPath}";
+            });
+    }
+
+    public static void AssertHavePropertyCountAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        int expectedCount,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        if (expectedCount < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(expectedCount), "expectedCount must be greater than or equal to 0.");
+        }
+
+        var parsedPath = JsonPath.Parse(path);
+        AssertAtPath(
+            subjectInput,
+            subjectExpression,
+            parsedPath,
+            $"to have JSON object at path {parsedPath.DisplayPath} with property count {expectedCount}",
+            because,
+            callerFilePath,
+            callerLineNumber,
+            (element, jsonPath) =>
+            {
+                if (element.ValueKind != JsonValueKind.Object)
+                {
+                    return JsonAssertionSupport.DescribeWrongValueKind(element, jsonPath.DisplayPath, "Object");
+                }
+
+                var actualCount = CountProperties(element);
+                return actualCount == expectedCount
+                    ? null
+                    : $"JSON object property count {actualCount} at {jsonPath.DisplayPath}";
+            });
+    }
+
     public static void AssertHaveBooleanAtPath(
         JsonInput subjectInput,
         string? subjectExpression,
@@ -279,6 +397,66 @@ internal static class JsonPathAssertions
             callerLineNumber);
     }
 
+    private static void AssertAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        JsonPath parsedPath,
+        string expectationText,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber,
+        Func<JsonElement, JsonPath, string?> failureFactory)
+    {
+        using var subject = JsonParsedValue.ParseSubject(subjectInput);
+        var subjectLabel = JsonAssertionSupport.SubjectLabel(subjectExpression);
+        var expectation = new Expectation(expectationText, IncludeExpectedValue: false);
+
+        if (!subject.HasValue)
+        {
+            JsonAssertionSupport.Fail(subjectLabel, expectation, null, because, callerFilePath, callerLineNumber);
+            return;
+        }
+
+        if (!subject.IsValid)
+        {
+            JsonAssertionSupport.Fail(
+                subjectLabel,
+                expectation,
+                new JsonDisplay(subject.InvalidDetail!),
+                because,
+                callerFilePath,
+                callerLineNumber);
+            return;
+        }
+
+        var resolution = JsonPathResolver.ResolvePath(subject.Root, parsedPath);
+        if (!resolution.Success)
+        {
+            JsonAssertionSupport.Fail(
+                subjectLabel,
+                expectation,
+                new JsonDisplay(resolution.FailureDetail!),
+                because,
+                callerFilePath,
+                callerLineNumber);
+            return;
+        }
+
+        var failure = failureFactory(resolution.Value, parsedPath);
+        if (failure is null)
+        {
+            return;
+        }
+
+        JsonAssertionSupport.Fail(
+            subjectLabel,
+            expectation,
+            new JsonDisplay(failure),
+            because,
+            callerFilePath,
+            callerLineNumber);
+    }
+
     private static void AssertScalarAtPath<TValue>(
         JsonInput subjectInput,
         string? subjectExpression,
@@ -354,5 +532,16 @@ internal static class JsonPathAssertions
             because,
             callerFilePath,
             callerLineNumber);
+    }
+
+    private static int CountProperties(JsonElement element)
+    {
+        var count = 0;
+        foreach (var _ in element.EnumerateObject())
+        {
+            count++;
+        }
+
+        return count;
     }
 }

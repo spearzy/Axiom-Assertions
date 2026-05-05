@@ -7,11 +7,12 @@ description: Use Axiom.Json for deterministic JSON equivalency and path assertio
 
 `Axiom.Json` is the optional Axiom package for deterministic JSON assertions.
 
-It focuses on a small first wave:
+It focuses on:
 
 - structural JSON equivalency
 - simple JSON path existence checks
 - simple scalar value-at-path checks
+- simple object and array shape checks at a path
 
 It does not add HTTP helpers, ASP.NET helpers, direct `Newtonsoft.Json` support, or a full JSONPath engine.
 
@@ -32,7 +33,7 @@ using Axiom.Json;
 
 ## Supported Inputs
 
-The first wave supports:
+The package supports:
 
 - raw JSON `string`
 - `JsonDocument`
@@ -103,7 +104,7 @@ Current semantics:
 
 ## JSON Path Assertions
 
-The first wave uses a deliberately small path syntax:
+Axiom.Json uses a deliberately small path syntax:
 
 - optional root marker: `$`
 - object-member traversal with `.`
@@ -115,7 +116,7 @@ Examples:
 - `$.customer.roles[0]`
 - `items[1].sku`
 
-This is not a full JSONPath implementation. Property names that need escaping are out of scope for this first wave.
+This is not a full JSONPath implementation. Property names that need escaping are out of scope for the current path model.
 
 ```csharp
 using Axiom.Assertions;
@@ -135,11 +136,17 @@ var json = """
 
 json.Should().HaveJsonPath("$.customer.roles[1]");
 json.Should().NotHaveJsonPath("$.customer.email");
+json.Should().HaveJsonObjectAtPath("$.customer");
+json.Should().HaveJsonArrayAtPath("$.customer.roles");
+json.Should().HaveJsonArrayLengthAtPath("$.customer.roles", 2);
+json.Should().HaveJsonPropertyCountAtPath("$.customer", 5);
 json.Should().HaveJsonStringAtPath("$.customer.name", "Bob");
 json.Should().HaveJsonNumberAtPath("$.customer.id", 7m);
 json.Should().HaveJsonBooleanAtPath("$.customer.active", true);
 json.Should().HaveJsonNullAtPath("$.customer.deletedAt");
 ```
+
+Use `HaveJsonObjectAtPath(...)`, `HaveJsonArrayAtPath(...)`, and the count checks when the shape of the JSON at a path matters before checking scalar values inside it.
 
 ## Invalid JSON
 
@@ -147,9 +154,9 @@ For raw JSON string subjects, invalid JSON fails clearly with an `invalid JSON` 
 
 Invalid expected JSON passed as a raw string is treated as an invalid assertion argument and throws `ArgumentException`.
 
-## First-Wave Limits
+## Current Limits
 
-`Axiom.Json` in `2.1.0` is intentionally narrow:
+`Axiom.Json` is intentionally narrow:
 
 - `System.Text.Json` inputs plus raw JSON strings only
 - no direct `Newtonsoft.Json` support

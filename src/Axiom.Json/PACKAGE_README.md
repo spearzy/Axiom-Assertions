@@ -16,6 +16,7 @@ This package is designed to be used with `Axiom.Assertions`.
 
 - structural JSON equivalency checks with deterministic mismatch paths
 - simple JSON path assertions over object members and array indexes
+- object, array, and scalar checks at JSON paths
 - JSON assertions without adding HTTP helpers or a broader API-test layer
 
 ## Install a different package when
