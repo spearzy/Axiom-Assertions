@@ -48,6 +48,32 @@ public sealed class HttpJsonBodyAssertionTests
     }
 
     [Fact]
+    public void ContainerPathAssertions_Pass_WhenBodyMatches()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            """
+            {
+              "user": {
+                "name": "Ada",
+                "roles": ["admin", "author"]
+              }
+            }
+            """,
+            "application/json");
+
+        var ex = Record.Exception(() =>
+        {
+            response.Should().HaveJsonObjectAtPath("$.user");
+            response.Should().HaveJsonArrayAtPath("$.user.roles");
+            response.Should().HaveJsonArrayLengthAtPath("$.user.roles", 2);
+            response.Should().HaveJsonPropertyCountAtPath("$.user", 2);
+        });
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
     public void HaveJsonBodyEquivalentTo_Throws_WithJsonMismatchDetail()
     {
         using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"id\": 2 }", "application/json");
@@ -67,6 +93,103 @@ public sealed class HttpJsonBodyAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonPath("$.id"));
 
         Assert.Equal("Expected response to have JSON path $.id, but found no response content.", ex.Message);
+    }
+
+    [Fact]
+    public void HaveJsonObjectAtPath_Throws_WhenResolvedValueIsNotObject()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"user\": [] }", "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonObjectAtPath("$.user"));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON object at path $.user, but found JSON array at $.user (expected Object).",
+            ex.Message);
+    }
+
+    [Fact]
+    public void HaveJsonArrayAtPath_Throws_WhenResolvedValueIsNotArray()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"roles\": {} }", "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonArrayAtPath("$.roles"));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON array at path $.roles, but found JSON object at $.roles (expected Array).",
+            ex.Message);
+    }
+
+    [Fact]
+    public void HaveJsonArrayLengthAtPath_Throws_WhenLengthDiffers()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"roles\": [\"admin\"] }", "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonArrayLengthAtPath("$.roles", 2));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON array at path $.roles with length 2, but found JSON array length 1 at $.roles.",
+            ex.Message);
+    }
+
+    [Fact]
+    public void HaveJsonPropertyCountAtPath_Throws_WhenPropertyCountDiffers()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"user\": { \"name\": \"Ada\" } }", "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonPropertyCountAtPath("$.user", 2));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON object at path $.user with property count 2, but found JSON object property count 1 at $.user.",
+            ex.Message);
+    }
+
+    [Fact]
+    public void ContainerPathAssertions_Throw_WhenPathDoesNotExist()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"user\": {} }", "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonArrayLengthAtPath("$.user.roles", 1));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON array at path $.user.roles with length 1, but found missing path $.user.roles.",
+            ex.Message);
+    }
+
+    [Fact]
+    public void ContainerPathAssertions_ThrowArgumentException_WhenPathSyntaxIsInvalid()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"user\": {} }", "application/json");
+
+        var ex = Assert.Throws<ArgumentException>(() => response.Should().HaveJsonObjectAtPath("$.user["));
+
+        Assert.Equal("path", ex.ParamName);
+        Assert.Contains("invalid array index segment", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ContainerPathAssertions_Throw_WhenBodyJsonIsInvalid()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"user\": ", "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonObjectAtPath("$.user"));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON object at path $.user, but found invalid JSON at line 0, byte 10.",
+            ex.Message);
+    }
+
+    [Fact]
+    public void ContainerPathAssertions_ThrowArgumentOutOfRangeException_WhenExpectedCountIsNegative()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"roles\": [] }", "application/json");
+
+        var lengthEx = Assert.Throws<ArgumentOutOfRangeException>(
+            () => response.Should().HaveJsonArrayLengthAtPath("$.roles", -1));
+        var countEx = Assert.Throws<ArgumentOutOfRangeException>(
+            () => response.Should().HaveJsonPropertyCountAtPath("$", -1));
+
+        Assert.Equal("expectedLength", lengthEx.ParamName);
+        Assert.Equal("expectedCount", countEx.ParamName);
     }
 
     [Fact]

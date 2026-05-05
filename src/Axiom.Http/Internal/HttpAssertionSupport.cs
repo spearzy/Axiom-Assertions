@@ -21,6 +21,8 @@ internal static class HttpAssertionSupport
 
     public static string SubjectLabel(string? subjectExpression) => string.IsNullOrWhiteSpace(subjectExpression) ? "response" : subjectExpression;
 
+    public static string BodySubjectLabel(string? subjectExpression) => $"{SubjectLabel(subjectExpression)} body";
+
     public static string JsonBodySubjectLabel(string? subjectExpression) => $"{SubjectLabel(subjectExpression)} JSON body";
 
     public static string ProblemDetailsSubjectLabel(string? subjectExpression) => $"{SubjectLabel(subjectExpression)} problem details body";

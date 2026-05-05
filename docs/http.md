@@ -7,11 +7,12 @@ description: Use Axiom.Http for deterministic HttpResponseMessage assertions in 
 
 `Axiom.Http` is the optional Axiom package for practical `HttpResponseMessage` assertions.
 
-It keeps the first wave focused on common API-test needs:
+It stays focused on common API-test needs:
 
 - exact status-code assertions
-- header presence, absence, and exact-value assertions
+- header presence, absence, exact-value, and contained-value assertions
 - focused content-type assertions
+- body-text assertions
 - JSON body assertions that reuse `Axiom.Json`
 - minimal ProblemDetails assertions
 
@@ -33,7 +34,7 @@ using Axiom.Http;
 
 ## Supported Subject
 
-The first wave is intentionally centered on `HttpResponseMessage`.
+The package is intentionally centered on `HttpResponseMessage`.
 
 ```csharp
 using System.Net;
@@ -71,6 +72,7 @@ response.Should().NotHaveStatusCode(404);
 Header lookup checks both response headers and content headers.
 
 `HaveHeaderValue(...)` expects exactly one header value.
+`ContainHeaderValue(...)` checks that any value on the header matches exactly.
 `HaveHeaderValues(...)` checks exact count and exact order.
 
 ```csharp
@@ -90,9 +92,28 @@ response.Headers.Add("X-Trace", ["a", "b"]);
 response.Should().HaveHeader("ETag");
 response.Should().NotHaveHeader("Retry-After");
 response.Should().HaveHeaderValue("ETag", "\"v1\"");
+response.Should().ContainHeaderValue("X-Trace", "b");
 response.Should().HaveHeaderValues("X-Trace", ["a", "b"]);
 response.Should().HaveContentType("application/json");
 response.Should().HaveContentTypeWithCharset("application/json", "utf-8");
+```
+
+## Body Text
+
+Use body-text assertions when the response body is not JSON, or when exact text is the behaviour under test.
+
+```csharp
+using System.Net;
+using System.Net.Http;
+using Axiom.Http;
+
+using var response = new HttpResponseMessage(HttpStatusCode.OK)
+{
+    Content = new StringContent("order created")
+};
+
+response.Should().HaveBodyText("order created");
+response.Should().ContainBodyText("created");
 ```
 
 ## JSON Response Bodies
@@ -127,6 +148,8 @@ var expectedJson = """
 
 response.Should().HaveJsonBodyEquivalentTo(expectedJson);
 response.Should().HaveJsonPath("$.roles[1]");
+response.Should().HaveJsonArrayAtPath("$.roles");
+response.Should().HaveJsonArrayLengthAtPath("$.roles", 2);
 response.Should().HaveJsonStringAtPath("$.name", "Ada");
 response.Should().HaveJsonNumberAtPath("$.id", 1m);
 ```
@@ -135,7 +158,7 @@ If you want JSON assertions over raw JSON strings, `JsonDocument`, or `JsonEleme
 
 ## ProblemDetails
 
-The first wave includes small, direct ProblemDetails assertions for common error-response checks.
+Axiom.Http includes small, direct ProblemDetails assertions for common error-response checks.
 
 These assertions expect a response body with `application/problem+json`.
 
@@ -153,7 +176,8 @@ using var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
           "type": "https://example.test/problems/validation",
           "title": "Validation failed",
           "status": 400,
-          "detail": "Name is required."
+          "detail": "Name is required.",
+          "instance": "/orders/123"
         }
         """,
         Encoding.UTF8,
@@ -165,17 +189,21 @@ response.Should().HaveProblemDetailsTitle("Validation failed");
 response.Should().HaveProblemDetailsStatus(400);
 response.Should().HaveProblemDetailsType("https://example.test/problems/validation");
 response.Should().HaveProblemDetailsDetail("Name is required.");
+response.Should().HaveJsonStringAtPath("$.instance", "/orders/123");
 ```
 
-## First-Wave Limits
+For additional ProblemDetails members and extension members, use the JSON-at-path assertions rather than dedicated ProblemDetails methods.
 
-`Axiom.Http` is intentionally narrow in its first release:
+## Current Limits
+
+`Axiom.Http` is intentionally narrow:
 
 - `HttpResponseMessage` only
 - no ASP.NET-specific result helpers
 - no test-server helpers
 - no category-level status-code assertions
 - no snapshot features
+- no broad ProblemDetails extension-member DSL
 - no full API-client helper layer
 
 For the full method list, see the [Assertion Reference](assertion-reference.md).

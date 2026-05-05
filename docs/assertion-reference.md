@@ -145,7 +145,7 @@ document.RootElement.Should().NotHaveJsonPath("$.deletedAt");
 
 Available in `Axiom.Http`.
 
-The first wave is intentionally focused on `HttpResponseMessage` and composes with `Axiom.Json` for JSON body checks.
+The HTTP package is intentionally focused on `HttpResponseMessage` and composes with `Axiom.Json` for JSON body checks.
 
 ```csharp
 HaveStatusCode(HttpStatusCode expected)
@@ -155,14 +155,21 @@ NotHaveStatusCode(int unexpected)
 HaveHeader(name)
 NotHaveHeader(name)
 HaveHeaderValue(name, expectedValue)
+ContainHeaderValue(name, expectedValue)
 HaveHeaderValues(name, expectedValues)
 HaveContentType(expectedMediaType)
 HaveContentTypeWithCharset(expectedMediaType, expectedCharset)
+HaveBodyText(expected)
+ContainBodyText(expectedSubstring)
 HaveJsonBodyEquivalentTo(string expectedJson)
 HaveJsonBodyEquivalentTo(JsonDocument expectedJson)
 HaveJsonBodyEquivalentTo(JsonElement expectedJson)
 HaveJsonPath(path)
 NotHaveJsonPath(path)
+HaveJsonObjectAtPath(path)
+HaveJsonArrayAtPath(path)
+HaveJsonArrayLengthAtPath(path, expectedLength)
+HaveJsonPropertyCountAtPath(path, expectedCount)
 HaveJsonStringAtPath(path, expectedValue)
 HaveJsonNumberAtPath(path, decimal expectedValue)
 HaveJsonNumberAtPath(path, double expectedValue)
@@ -175,12 +182,14 @@ HaveProblemDetailsType(expectedType)
 HaveProblemDetailsDetail(expectedDetail)
 ```
 
-Current first-wave HTTP semantics:
+Current HTTP semantics:
 
 - status-code assertions are exact and are the primary shape
 - header lookup checks both response headers and content headers
 - `HaveHeaderValue(...)` expects exactly one header value
+- `ContainHeaderValue(...)` passes when any value on the named header matches exactly
 - `HaveHeaderValues(...)` requires exact value count and exact order
+- body-text assertions reuse Axiom string assertion semantics
 - JSON body assertions reuse `Axiom.Json` comparison and path semantics
 - ProblemDetails assertions require `application/problem+json`
 
@@ -208,6 +217,7 @@ using var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
 response.Should().HaveStatusCode(HttpStatusCode.BadRequest);
 response.Should().HaveContentType("application/problem+json");
 response.Should().HaveJsonPath("$.title");
+response.Should().HaveJsonPropertyCountAtPath("$", 4);
 response.Should().HaveProblemDetailsTitle("Validation failed");
 response.Should().HaveProblemDetailsStatus(400);
 ```

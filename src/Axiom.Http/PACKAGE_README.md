@@ -16,6 +16,7 @@ This package is designed to be used with `Axiom.Assertions` and reuses `Axiom.Js
 
 - exact `HttpResponseMessage` status code assertions
 - practical header and content-type assertions for API tests
+- body-text assertions for non-JSON response checks
 - JSON body assertions without rebuilding JSON comparison logic
 - focused ProblemDetails assertions for common error-response tests
 

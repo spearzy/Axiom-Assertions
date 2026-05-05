@@ -28,4 +28,28 @@ public sealed class HttpBatchRoutingTests
         Assert.Null(callEx);
         Assert.Throws<InvalidOperationException>(() => batch.Dispose());
     }
+
+    [Fact]
+    public void HaveBodyText_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "created");
+        using var batch = new Axiom.Core.Batch();
+
+        var callEx = Record.Exception(() => response.Should().HaveBodyText("queued"));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void HaveJsonArrayLengthAtPath_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"roles\": [\"admin\"] }", "application/json");
+        using var batch = new Axiom.Core.Batch();
+
+        var callEx = Record.Exception(() => response.Should().HaveJsonArrayLengthAtPath("$.roles", 2));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
 }
