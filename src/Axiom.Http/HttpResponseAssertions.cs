@@ -139,6 +139,27 @@ public sealed class HttpResponseAssertions
         return new AndContinuation<HttpResponseAssertions>(this);
     }
 
+    public AndContinuation<HttpResponseAssertions> ContainHeaderValue(
+        string name,
+        string expectedValue,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(expectedValue);
+
+        HttpResponseAssertionEngine.AssertContainHeaderValue(
+            Subject,
+            SubjectExpression,
+            name,
+            expectedValue,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
     public AndContinuation<HttpResponseAssertions> HaveHeaderValues(
         string name,
         string[] expectedValues,
@@ -153,6 +174,44 @@ public sealed class HttpResponseAssertions
             SubjectExpression,
             name,
             expectedValues,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveBodyText(
+        string expected,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(expected);
+
+        HttpResponseAssertionEngine.AssertHaveBodyText(
+            Subject,
+            SubjectExpression,
+            expected,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> ContainBodyText(
+        string expectedSubstring,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(expectedSubstring);
+
+        HttpResponseAssertionEngine.AssertContainBodyText(
+            Subject,
+            SubjectExpression,
+            expectedSubstring,
             because,
             callerFilePath,
             callerLineNumber);
@@ -281,6 +340,78 @@ public sealed class HttpResponseAssertions
             Subject,
             SubjectExpression,
             path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveJsonObjectAtPath(
+        string path,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        HttpJsonAssertions.AssertHaveJsonObjectAtPath(
+            Subject,
+            SubjectExpression,
+            path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveJsonArrayAtPath(
+        string path,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        HttpJsonAssertions.AssertHaveJsonArrayAtPath(
+            Subject,
+            SubjectExpression,
+            path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveJsonArrayLengthAtPath(
+        string path,
+        int expectedLength,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        HttpJsonAssertions.AssertHaveJsonArrayLengthAtPath(
+            Subject,
+            SubjectExpression,
+            path,
+            expectedLength,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveJsonPropertyCountAtPath(
+        string path,
+        int expectedCount,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        HttpJsonAssertions.AssertHaveJsonPropertyCountAtPath(
+            Subject,
+            SubjectExpression,
+            path,
+            expectedCount,
             because,
             callerFilePath,
             callerLineNumber);

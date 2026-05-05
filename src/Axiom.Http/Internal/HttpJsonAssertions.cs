@@ -113,6 +113,124 @@ internal static class HttpJsonAssertions
             callerLineNumber);
     }
 
+    public static void AssertHaveJsonObjectAtPath(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string path,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        JsonAssertionBridge.ValidatePath(path);
+        var expectation = new Expectation($"to have JSON object at path {path}", IncludeExpectedValue: false);
+
+        if (!TryGetBodyText(subject, subjectExpression, expectation, because, callerFilePath, callerLineNumber, out var bodyText))
+        {
+            return;
+        }
+
+        JsonAssertionBridge.AssertHaveObjectAtPath(
+            bodyText,
+            HttpAssertionSupport.JsonBodySubjectLabel(subjectExpression),
+            path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+    }
+
+    public static void AssertHaveJsonArrayAtPath(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string path,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        JsonAssertionBridge.ValidatePath(path);
+        var expectation = new Expectation($"to have JSON array at path {path}", IncludeExpectedValue: false);
+
+        if (!TryGetBodyText(subject, subjectExpression, expectation, because, callerFilePath, callerLineNumber, out var bodyText))
+        {
+            return;
+        }
+
+        JsonAssertionBridge.AssertHaveArrayAtPath(
+            bodyText,
+            HttpAssertionSupport.JsonBodySubjectLabel(subjectExpression),
+            path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+    }
+
+    public static void AssertHaveJsonArrayLengthAtPath(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string path,
+        int expectedLength,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        if (expectedLength < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(expectedLength), "expectedLength must be greater than or equal to 0.");
+        }
+
+        JsonAssertionBridge.ValidatePath(path);
+        var expectation = new Expectation(
+            $"to have JSON array at path {path} with length {expectedLength}",
+            IncludeExpectedValue: false);
+
+        if (!TryGetBodyText(subject, subjectExpression, expectation, because, callerFilePath, callerLineNumber, out var bodyText))
+        {
+            return;
+        }
+
+        JsonAssertionBridge.AssertHaveArrayLengthAtPath(
+            bodyText,
+            HttpAssertionSupport.JsonBodySubjectLabel(subjectExpression),
+            path,
+            expectedLength,
+            because,
+            callerFilePath,
+            callerLineNumber);
+    }
+
+    public static void AssertHaveJsonPropertyCountAtPath(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string path,
+        int expectedCount,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        if (expectedCount < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(expectedCount), "expectedCount must be greater than or equal to 0.");
+        }
+
+        JsonAssertionBridge.ValidatePath(path);
+        var expectation = new Expectation(
+            $"to have JSON object at path {path} with property count {expectedCount}",
+            IncludeExpectedValue: false);
+
+        if (!TryGetBodyText(subject, subjectExpression, expectation, because, callerFilePath, callerLineNumber, out var bodyText))
+        {
+            return;
+        }
+
+        JsonAssertionBridge.AssertHavePropertyCountAtPath(
+            bodyText,
+            HttpAssertionSupport.JsonBodySubjectLabel(subjectExpression),
+            path,
+            expectedCount,
+            because,
+            callerFilePath,
+            callerLineNumber);
+    }
+
     public static void AssertHaveJsonNumberAtPath(
         HttpResponseMessage? subject,
         string? subjectExpression,

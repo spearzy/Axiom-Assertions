@@ -1,3 +1,4 @@
+using Axiom.Assertions.AssertionTypes;
 using Axiom.Core.Failures;
 
 namespace Axiom.Http;
@@ -126,6 +127,54 @@ internal static class HttpResponseAssertionEngine
         if (actualValues.Length == 1 && string.Equals(actualValues[0], expectedValue, StringComparison.Ordinal))
         {
             return;
+        }
+
+        HttpAssertionSupport.Fail(
+            subjectLabel,
+            expectation,
+            HttpAssertionSupport.DescribeHeader(name, actualValues),
+            because,
+            callerFilePath,
+            callerLineNumber);
+    }
+
+    public static void AssertContainHeaderValue(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string name,
+        string expectedValue,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        HttpAssertionSupport.ValidateHeaderName(name);
+        var subjectLabel = HttpAssertionSupport.SubjectLabel(subjectExpression);
+        var expectation = new Expectation($"to contain header {name} value", expectedValue);
+
+        if (subject is null)
+        {
+            HttpAssertionSupport.Fail(subjectLabel, expectation, null, because, callerFilePath, callerLineNumber);
+            return;
+        }
+
+        if (!HttpAssertionSupport.TryGetHeaderValues(subject, name, out var actualValues))
+        {
+            HttpAssertionSupport.Fail(
+                subjectLabel,
+                expectation,
+                new HttpDisplay($"missing header {name}"),
+                because,
+                callerFilePath,
+                callerLineNumber);
+            return;
+        }
+
+        foreach (var actualValue in actualValues)
+        {
+            if (string.Equals(actualValue, expectedValue, StringComparison.Ordinal))
+            {
+                return;
+            }
         }
 
         HttpAssertionSupport.Fail(
@@ -269,6 +318,42 @@ internal static class HttpResponseAssertionEngine
             callerLineNumber);
     }
 
+    public static void AssertHaveBodyText(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string expected,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var expectation = new Expectation("to have body text", expected);
+        if (!TryGetBodyText(subject, subjectExpression, expectation, because, callerFilePath, callerLineNumber, out var bodyText))
+        {
+            return;
+        }
+
+        new StringAssertions(bodyText, HttpAssertionSupport.BodySubjectLabel(subjectExpression))
+            .Be(expected, because, callerFilePath, callerLineNumber);
+    }
+
+    public static void AssertContainBodyText(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string expectedSubstring,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var expectation = new Expectation("to contain body text", expectedSubstring);
+        if (!TryGetBodyText(subject, subjectExpression, expectation, because, callerFilePath, callerLineNumber, out var bodyText))
+        {
+            return;
+        }
+
+        new StringAssertions(bodyText, HttpAssertionSupport.BodySubjectLabel(subjectExpression))
+            .Contain(expectedSubstring, because, callerFilePath, callerLineNumber);
+    }
+
     private static void AssertStatusCode(
         HttpResponseMessage? subject,
         string? subjectExpression,
@@ -299,5 +384,40 @@ internal static class HttpResponseAssertionEngine
             because,
             callerFilePath,
             callerLineNumber);
+    }
+
+    private static bool TryGetBodyText(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        Expectation expectation,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber,
+        out string bodyText)
+    {
+        var subjectLabel = HttpAssertionSupport.SubjectLabel(subjectExpression);
+        if (subject is null)
+        {
+            bodyText = string.Empty;
+            HttpAssertionSupport.Fail(subjectLabel, expectation, null, because, callerFilePath, callerLineNumber);
+            return false;
+        }
+
+        var content = HttpAssertionSupport.ReadContent(subject);
+        if (string.IsNullOrEmpty(content))
+        {
+            bodyText = string.Empty;
+            HttpAssertionSupport.Fail(
+                subjectLabel,
+                expectation,
+                new HttpDisplay("no response content"),
+                because,
+                callerFilePath,
+                callerLineNumber);
+            return false;
+        }
+
+        bodyText = content;
+        return true;
     }
 }

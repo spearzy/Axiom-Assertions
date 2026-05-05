@@ -116,6 +116,70 @@ internal static class JsonAssertionBridge
             callerFilePath,
             callerLineNumber);
 
+    public static void AssertHaveObjectAtPath(
+        string subjectJson,
+        string subjectLabel,
+        string path,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonAssertionEngine.AssertHaveJsonObjectAtPath(
+            JsonInput.FromString(subjectJson),
+            subjectLabel,
+            path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertHaveArrayAtPath(
+        string subjectJson,
+        string subjectLabel,
+        string path,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonAssertionEngine.AssertHaveJsonArrayAtPath(
+            JsonInput.FromString(subjectJson),
+            subjectLabel,
+            path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertHaveArrayLengthAtPath(
+        string subjectJson,
+        string subjectLabel,
+        string path,
+        int expectedLength,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonAssertionEngine.AssertHaveJsonArrayLengthAtPath(
+            JsonInput.FromString(subjectJson),
+            subjectLabel,
+            path,
+            expectedLength,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertHavePropertyCountAtPath(
+        string subjectJson,
+        string subjectLabel,
+        string path,
+        int expectedCount,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonAssertionEngine.AssertHaveJsonPropertyCountAtPath(
+            JsonInput.FromString(subjectJson),
+            subjectLabel,
+            path,
+            expectedCount,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
     public static void AssertHaveNumberAtPath(
         string subjectJson,
         string subjectLabel,
