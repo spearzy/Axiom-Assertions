@@ -60,6 +60,7 @@ public sealed class HaveMeanReciprocalRankTests
 
         Assert.Contains("Expected queries to have mean reciprocal rank equal to 1 within tolerance 0.001", ex.Message);
         Assert.Contains("actual mean reciprocal rank was 0.5 across 3 queries", ex.Message);
+        Assert.Contains("1 query had no relevant hit", ex.Message);
     }
 
     [Fact]

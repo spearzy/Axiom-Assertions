@@ -48,6 +48,7 @@ public sealed class HaveReciprocalRankTests
         Assert.Contains("Expected results to have reciprocal rank for item \"doc-7\" equal to 0.5 within tolerance 0.001", ex.Message);
         Assert.Contains("actual reciprocal rank for item \"doc-7\" was 0.333333333333333", ex.Message);
         Assert.Contains("first found at rank 3", ex.Message);
+        Assert.Contains("result count 4", ex.Message);
     }
 
     [Fact]
@@ -60,6 +61,7 @@ public sealed class HaveReciprocalRankTests
 
         Assert.Contains("Expected results to have reciprocal rank for item \"doc-7\" equal to 1 within tolerance 0.001", ex.Message);
         Assert.Contains("item \"doc-7\" was missing entirely; actual reciprocal rank was 0", ex.Message);
+        Assert.Contains("result count 3", ex.Message);
     }
 
     [Fact]

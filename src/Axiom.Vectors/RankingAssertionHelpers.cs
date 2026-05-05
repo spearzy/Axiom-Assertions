@@ -27,6 +27,21 @@ internal static class RankingAssertionHelpers
     public static string FormatValue(object? value)
         => Formatter.Format(value);
 
+    public static string DescribeResultCount<T>(IReadOnlyList<T> results)
+        => $"result count {results.Count}";
+
+    public static string DescribeTopKWindow<T>(IReadOnlyList<T> results, int k)
+    {
+        var inspected = Math.Min(k, results.Count);
+        var detail = $"inspected top {inspected} of {results.Count} result(s)";
+        if (inspected == 0)
+        {
+            return detail + "; top-k window was empty";
+        }
+
+        return detail + "; top-k window " + FormatTopKWindow(results, inspected);
+    }
+
     public static void ValidatePositive(int value, string paramName)
     {
         if (value <= 0)
@@ -109,4 +124,15 @@ internal static class RankingAssertionHelpers
 
     private static string BuildReasonClause(string? because)
         => string.IsNullOrWhiteSpace(because) ? string.Empty : $" because {because.Trim()}";
+
+    private static string FormatTopKWindow<T>(IReadOnlyList<T> results, int inspected)
+    {
+        var formatted = new string[inspected];
+        for (var index = 0; index < inspected; index++)
+        {
+            formatted[index] = FormatValue(results[index]);
+        }
+
+        return "[" + string.Join(", ", formatted) + "]";
+    }
 }

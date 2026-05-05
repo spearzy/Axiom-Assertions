@@ -59,7 +59,7 @@ public sealed class HaveHitRateAtTests
             queries.Should().HaveHitRateAt(k: 1, expectedHitRate: 1d, tolerance: 0.001d));
 
         Assert.Contains("Expected queries to have hit rate@1 equal to 1 within tolerance 0.001", ex.Message);
-        Assert.Contains("actual hit rate@1 was 0.5 (1 of 2 queries had a relevant hit)", ex.Message);
+        Assert.Contains("actual hit rate@1 was 0.5 (1 of 2 queries had a relevant hit; inspected top 1)", ex.Message);
     }
 
     [Fact]

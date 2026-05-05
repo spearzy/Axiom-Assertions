@@ -107,6 +107,7 @@ var similarity = embedding.Should().HaveCosineSimilarityWith(expected).ActualSim
 ```
 
 Zero vectors are handled explicitly and produce deterministic failures instead of ambiguous `NaN` output.
+Threshold failures include the computed similarity and the shortfall, excess, or range direction.
 
 The returned continuation exposes:
 
@@ -148,14 +149,25 @@ Ranks are 1-based.
 using Axiom.Assertions;
 using Axiom.Vectors;
 
-results.Should().ContainInTopK("doc-7", 2);
-results.Should().HaveRank("doc-7", 2);
-results.Should().HaveRecallAt(2, relevantItems, expectedRecall: 0.5);
-results.Should().HavePrecisionAt(2, relevantItems, expectedPrecision: 0.5);
-results.Should().HaveReciprocalRank("doc-7", expectedReciprocalRank: 0.5);
+var results = new[]
+{
+    "account-overview",
+    "reset-password",
+    "billing-update",
+    "delete-account"
+};
 
-queries.Should().HaveMeanReciprocalRank(expectedMeanReciprocalRank: 0.75);
-queries.Should().HaveHitRateAt(k: 1, expectedHitRate: 0.5);
+var relevantItems = new[]
+{
+    "reset-password",
+    "billing-update"
+};
+
+results.Should().ContainInTopK("reset-password", 3);
+results.Should().HaveRank("reset-password", 2);
+results.Should().HaveRecallAt(3, relevantItems, expectedRecall: 1.0);
+results.Should().HavePrecisionAt(3, relevantItems, expectedPrecision: 0.666666666666667, tolerance: 0.001);
+results.Should().HaveReciprocalRank("reset-password", expectedReciprocalRank: 0.5);
 ```
 
 | Assertion | What it checks |
@@ -176,6 +188,8 @@ queries.Should().HaveHitRateAt(k: 1, expectedHitRate: 0.5);
 
 If the item is present but ranked too low, the failure reports the found rank. If it is missing entirely, the failure says so explicitly.
 
+Top-k failures also include the inspected top-k window so the misplaced or missing item is easier to debug.
+
 ### Recall@K And Precision@K
 
 `HaveRecallAt(...)` and `HavePrecisionAt(...)` evaluate the top `k` results against a non-empty relevant-item set.
@@ -186,6 +200,7 @@ If the item is present but ranked too low, the failure reports the found rank. I
 - The ranking metric assertions default to exact comparison with `tolerance: 0`.
 - Pass a tolerance explicitly when you want an approximate numeric comparison.
 - When no relevant item is found in the inspected top `k`, the computed recall or precision is `0`.
+- Metric failures include the matched relevant count and the inspected top-k window.
 
 ### Reciprocal Rank, Mean Reciprocal Rank, And Hit Rate
 
@@ -201,9 +216,16 @@ using Axiom.Vectors;
 
 var queries = new[]
 {
-    new RankingQuery<string>(["doc-2", "doc-7", "doc-5"], ["doc-2"]),
-    new RankingQuery<string>(["doc-8", "doc-5", "doc-3"], ["doc-5"]),
+    new RankingQuery<string>(
+        ["reset-password", "account-overview"],
+        ["reset-password"]),
+    new RankingQuery<string>(
+        ["shipping-update", "billing-update"],
+        ["billing-update"]),
 };
+
+queries.Should().HaveMeanReciprocalRank(expectedMeanReciprocalRank: 0.75);
+queries.Should().HaveHitRateAt(k: 1, expectedHitRate: 0.5);
 ```
 
 For these aggregate metrics:

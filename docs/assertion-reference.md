@@ -627,11 +627,20 @@ embedding.Should().BeNormalized(tolerance: 0.001f);
 new float[] { 0f, 0f }.Should().BeZeroVector();
 embedding.Should().NotBeZeroVector();
 
-results.Should().ContainInTopK("doc-7", 2);
-results.Should().HaveRank("doc-7", 2);
-results.Should().HaveRecallAt(2, relevantItems, expectedRecall: 0.5);
-results.Should().HavePrecisionAt(2, relevantItems, expectedPrecision: 0.5);
-results.Should().HaveReciprocalRank("doc-7", expectedReciprocalRank: 0.5);
+var results = new[] { "account-overview", "reset-password", "billing-update" };
+var relevantItems = new[] { "reset-password", "billing-update" };
+
+results.Should().ContainInTopK("reset-password", 3);
+results.Should().HaveRank("reset-password", 2);
+results.Should().HaveRecallAt(3, relevantItems, expectedRecall: 1.0);
+results.Should().HavePrecisionAt(3, relevantItems, expectedPrecision: 0.666666666666667, tolerance: 0.001);
+results.Should().HaveReciprocalRank("reset-password", expectedReciprocalRank: 0.5);
+
+var queries = new[]
+{
+    new RankingQuery<string>(["reset-password", "account-overview"], ["reset-password"]),
+    new RankingQuery<string>(["shipping-update", "billing-update"], ["billing-update"]),
+};
 
 queries.Should().HaveMeanReciprocalRank(expectedMeanReciprocalRank: 0.75);
 queries.Should().HaveHitRateAt(k: 1, expectedHitRate: 0.5);
