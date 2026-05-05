@@ -227,6 +227,30 @@ public sealed class NunitAssertMigrationDescriptorTests
                 Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
                 Assert.Equal("Migrate NUnit Assert.CatchAsync to Axiom", rule.Title.ToString());
                 Assert.Equal("NUnit Assert.CatchAsync<TException>(...) can be migrated to 'await ...Should().ThrowAsync<TException>()', appending '.Thrown' when the exception is used", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1078", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Has.Member constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(collection, Has.Member(expected)) can be migrated to 'collection.Should().Contain(expected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1079", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Has.No.Member constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(collection, Has.No.Member(unexpected)) can be migrated to 'collection.Should().NotContain(unexpected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1080", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate NUnit Assert.That Is.Unique constraint to Axiom", rule.Title.ToString());
+                Assert.Equal("NUnit Assert.That(collection, Is.Unique) can be migrated to 'collection.Should().HaveUniqueItems()'", rule.MessageFormat.ToString());
             });
     }
 }

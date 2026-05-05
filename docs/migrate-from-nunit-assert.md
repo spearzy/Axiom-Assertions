@@ -11,7 +11,7 @@ The NUnit path is useful, but it is narrower and more conservative than the xUni
 
 This path is a good fit when your NUnit tests mostly use simple `Assert.That(...)` constraints and direct async exception assertions.
 
-It works best for tests built from clear `Is.*`, `Does.*`, and `Has.Count.EqualTo(...)` shapes: equality, nullability, booleans, emptiness, string containment, count, reference identity, ordered comparisons, ranges, generic type constraints, and direct async exception checks.
+It works best for tests built from clear `Is.*`, `Does.*`, and direct `Has.*` shapes: equality, nullability, booleans, emptiness, string containment, count, collection membership, uniqueness, reference identity, ordered comparisons, ranges, generic type constraints, and direct async exception checks.
 
 It is not a good fit for a fully automatic migration of rich constraint chains. Those deserve manual review.
 
@@ -21,7 +21,8 @@ The analyzer supports conservative rewrites for:
 
 - `Is.EqualTo(...)`, `Is.Not.EqualTo(...)`, `Is.Null`, `Is.Not.Null`, `Is.True`, `Is.False`, `Is.Empty`, and `Is.Not.Empty`
 - `Does.Contain(...)`, `Does.Not.Contain(...)`, `Does.StartWith(...)`, and `Does.EndWith(...)` on string subjects when the expected value is clear
-- `Has.Count.EqualTo(...)`
+- `Has.Count.EqualTo(...)`, `Has.Member(...)`, and `Has.No.Member(...)`
+- `Is.Unique`
 - `Is.SameAs(...)` and `Is.Not.SameAs(...)`
 - `Is.GreaterThan(...)`, `Is.GreaterThanOrEqualTo(...)`, `Is.LessThan(...)`, `Is.LessThanOrEqualTo(...)`, and `Is.InRange(...)`
 - `Is.TypeOf<T>()`, `Is.InstanceOf<T>()`, `Is.AssignableTo<T>()`, `Is.Not.InstanceOf<T>()`, and `Is.Not.AssignableTo<T>()`
@@ -37,7 +38,7 @@ A good first pass is:
 
 1. Rewrite equality, null, boolean, and emptiness assertions.
 2. Rewrite simple string `Does.*` assertions.
-3. Rewrite count, reference identity, ordered/range, and generic type constraints.
+3. Rewrite count, direct collection membership, uniqueness, reference identity, ordered/range, and generic type constraints.
 4. Review async exception rewrites separately.
 5. Leave richer chains and custom comparison logic for manual migration.
 
@@ -55,6 +56,9 @@ Assert.That(actual, Is.EqualTo(expected));
 Assert.That(value, Is.Not.Null);
 Assert.That(condition, Is.True);
 Assert.That(values, Has.Count.EqualTo(3));
+Assert.That(values, Has.Member("active"));
+Assert.That(values, Has.No.Member("blocked"));
+Assert.That(values, Is.Unique);
 Assert.That(actual, Does.Contain("sub"));
 Assert.That(actual, Does.StartWith("pre"));
 ```
@@ -67,6 +71,9 @@ actual.Should().Be(expected);
 value.Should().NotBeNull();
 condition.Should().BeTrue();
 values.Should().HaveCount(3);
+values.Should().Contain("active");
+values.Should().NotContain("blocked");
+values.Should().HaveUniqueItems();
 actual.Should().Contain("sub");
 actual.Should().StartWith("pre");
 ```
@@ -126,9 +133,10 @@ Keep these manual during a NUnit migration:
 - richer constraint chains where several expectations are composed together
 - comparer and tolerance variants
 - message-bearing `Assert.That(...)` overloads
-- `Has.*` chains beyond `Has.Count.EqualTo(...)`
+- richer `Has.*` chains beyond direct count/member checks
 - runtime `Type` constraints
 - `Is.Not.TypeOf<T>()`
+- `Is.Not.Unique`
 - async exception assertions outside an async context
 - `AsyncTestDelegate` variable rewrites
 - prefix or suffix constraints where the expected value is not obviously non-null
@@ -140,7 +148,7 @@ The narrower analyzer path is deliberate. NUnit constraints can hide important s
 A realistic NUnit rollout is:
 
 1. Pick one fixture or namespace with simple assertions.
-2. Apply analyzer fixes for direct `Is.*`, `Does.*`, and `Has.Count.EqualTo(...)` cases.
+2. Apply analyzer fixes for direct `Is.*`, `Does.*`, and simple `Has.*` cases.
 3. Review ordered/range/type rewrites as a separate batch.
 4. Review async exception rewrites separately from scalar assertions.
 5. Mark richer constraint chains for manual migration.

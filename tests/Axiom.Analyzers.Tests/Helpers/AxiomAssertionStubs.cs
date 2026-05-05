@@ -70,6 +70,10 @@ internal static class AxiomAssertionStubs
                     where TCollection : IEnumerable<TItem>
                     => default;
 
+                public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> HaveUniqueItems<TCollection>(this Axiom.Assertions.ValueAssertions<TCollection> assertions)
+                    where TCollection : IEnumerable
+                    => default;
+
                 public static ContainKeyContinuation<Axiom.Assertions.ValueAssertions<TDictionary>, TValue> ContainKey<TDictionary, TKey, TValue>(this Axiom.Assertions.ValueAssertions<TDictionary> assertions, TKey expectedKey)
                     where TDictionary : IReadOnlyDictionary<TKey, TValue>
                     => default;

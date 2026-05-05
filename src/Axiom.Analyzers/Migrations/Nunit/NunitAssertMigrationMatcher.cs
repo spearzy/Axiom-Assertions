@@ -205,7 +205,10 @@ internal static class NunitAssertMigrationMatcher
             NunitAssertMigrationKind.NotContainSubstring => TryMatchDoesStringMethod(constraintOperation, symbols, "Contain", negated: true, out expectedExpression, out expectedArgument),
             NunitAssertMigrationKind.StartWith => TryMatchDoesStringMethod(constraintOperation, symbols, "StartWith", negated: false, out expectedExpression, out expectedArgument),
             NunitAssertMigrationKind.EndWith => TryMatchDoesStringMethod(constraintOperation, symbols, "EndWith", negated: false, out expectedExpression, out expectedArgument),
+            NunitAssertMigrationKind.Contain => TryMatchHasMember(constraintOperation, symbols, negated: false, out expectedExpression, out expectedArgument),
+            NunitAssertMigrationKind.NotContain => TryMatchHasMember(constraintOperation, symbols, negated: true, out expectedExpression, out expectedArgument),
             NunitAssertMigrationKind.HaveCount => TryMatchCountEqualTo(constraintOperation, symbols, out expectedExpression, out expectedArgument),
+            NunitAssertMigrationKind.HaveUniqueItems => TryMatchPropertyConstraint(constraintOperation, symbols, "Unique", negated: false),
             NunitAssertMigrationKind.BeSameAs => TryMatchSameAs(constraintOperation, symbols, negated: false, out expectedExpression, out expectedArgument),
             NunitAssertMigrationKind.NotBeSameAs => TryMatchSameAs(constraintOperation, symbols, negated: true, out expectedExpression, out expectedArgument),
             NunitAssertMigrationKind.BeGreaterThan => TryMatchIsSingleArgumentMethod(constraintOperation, symbols, "GreaterThan", out expectedExpression, out expectedArgument),
@@ -387,6 +390,50 @@ internal static class NunitAssertMigrationMatcher
             !IsDirectHasCountExpression(invocation.Instance, symbols))
         {
             return false;
+        }
+
+        expectedExpression = invocationSyntax.ArgumentList.Arguments[0].Expression;
+        expectedArgument = invocation.Arguments[0];
+        return true;
+    }
+
+    private static bool TryMatchHasMember(
+        IOperation constraintOperation,
+        NunitAssertMigrationSymbols symbols,
+        bool negated,
+        out ExpressionSyntax? expectedExpression,
+        out IArgumentOperation? expectedArgument)
+    {
+        expectedExpression = null;
+        expectedArgument = null;
+
+        // NUnit exposes both Has.Member(value) and Has.No.Member(value) as a
+        // Member(...) invocation. The difference is the invocation receiver:
+        // null/static Has for the positive form, or the intermediate Has.No
+        // constraint expression for the negated form.
+        if (constraintOperation is not IInvocationOperation invocation ||
+            invocation.Syntax is not InvocationExpressionSyntax invocationSyntax ||
+            invocation.TargetMethod.Name != "Member" ||
+            invocation.Arguments.Length != 1)
+        {
+            return false;
+        }
+
+        if (negated)
+        {
+            if (!symbols.IsConstraintExpressionType(invocation.TargetMethod.ContainingType) ||
+                !IsDirectHasNoExpression(invocation.Instance, symbols))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (invocation.Instance is not null ||
+                !symbols.IsHasType(invocation.TargetMethod.ContainingType))
+            {
+                return false;
+            }
         }
 
         expectedExpression = invocationSyntax.ArgumentList.Arguments[0].Expression;
@@ -579,6 +626,20 @@ internal static class NunitAssertMigrationMatcher
                symbols.IsCountConstraintExpressionType(propertyReference.Type);
     }
 
+    private static bool IsDirectHasNoExpression(IOperation? operation, NunitAssertMigrationSymbols symbols)
+    {
+        var unwrapped = operation is null ? null : UnwrapConversions(operation);
+
+        // Only accept the direct Has.No.Member(...) shape. If another operation
+        // appears in the chain, for example Has.No.Member(...).Using(comparer),
+        // this no longer matches and the migration stays manual.
+        return unwrapped is IPropertyReferenceOperation propertyReference &&
+               propertyReference.Property.Name == "No" &&
+               propertyReference.Instance is null &&
+               symbols.IsHasType(propertyReference.Property.ContainingType) &&
+               symbols.IsConstraintExpressionType(propertyReference.Type);
+    }
+
     private static bool IsSupportedSubject(
         IArgumentOperation subjectArgument,
         ITypeSymbol subjectType,
@@ -601,8 +662,12 @@ internal static class NunitAssertMigrationMatcher
                 => IsSupportedStringConstraintSubject(subjectArgument, subjectType, expectedArgument, symbols, requireConstantExpected: false),
             NunitAssertMigrationKind.StartWith or NunitAssertMigrationKind.EndWith
                 => IsSupportedStringConstraintSubject(subjectArgument, subjectType, expectedArgument, symbols, requireConstantExpected: true),
+            NunitAssertMigrationKind.Contain or NunitAssertMigrationKind.NotContain
+                => IsSupportedCollectionContainmentSubject(subjectArgument, subjectType, expectedArgument, symbols),
             NunitAssertMigrationKind.HaveCount
                 => IsSupportedCountSubject(subjectArgument, subjectType, expectedArgument, symbols),
+            NunitAssertMigrationKind.HaveUniqueItems
+                => IsSupportedReceiverExpression(subjectArgument, subjectType, symbols.SupportsUniqueItemsMigrationReceiver),
             NunitAssertMigrationKind.BeSameAs or NunitAssertMigrationKind.NotBeSameAs
                 => IsSupportedReferenceEqualitySubject(subjectArgument, subjectType, expectedArgument, symbols),
             NunitAssertMigrationKind.BeGreaterThan or
@@ -715,6 +780,51 @@ internal static class NunitAssertMigrationMatcher
 
         var expectedType = UnwrapConversions(expectedArgument.Value).Type;
         return expectedType?.SpecialType == SpecialType.System_Int32;
+    }
+
+    private static bool IsSupportedCollectionContainmentSubject(
+        IArgumentOperation subjectArgument,
+        ITypeSymbol subjectType,
+        IArgumentOperation? expectedArgument,
+        NunitAssertMigrationSymbols symbols)
+    {
+        // The rewrite is only safe when the receiver's element type is known and
+        // the expected item can be implicitly converted to that element type.
+        // This avoids flagging non-generic collections or unrelated item values.
+        return expectedArgument is not null &&
+               IsSupportedReceiverExpression(subjectArgument, subjectType, symbols.SupportsCollectionContainmentMigrationReceiver) &&
+               symbols.TryGetEnumerableElementType(subjectType, out var elementType) &&
+               elementType is not null &&
+               IsSupportedCollectionExpectedExpression(expectedArgument, elementType, symbols);
+    }
+
+    private static bool IsSupportedCollectionExpectedExpression(
+        IArgumentOperation expectedArgument,
+        ITypeSymbol elementType,
+        NunitAssertMigrationSymbols symbols)
+    {
+        var operation = UnwrapConversions(expectedArgument.Value);
+        if (operation.Type is null)
+        {
+            // Null/default can only be migrated when the collection element type
+            // could actually hold that value. For value-type element collections,
+            // Has.Member(null) is not a safe Contain(null) rewrite.
+            if (IsNullLikeExpectedExpression(operation))
+            {
+                return NunitAssertMigrationSymbols.IsNullableOrReferenceType(elementType);
+            }
+
+            return false;
+        }
+
+        if (symbols.IsAsyncEnumerableLike(operation.Type) ||
+            symbols.IsSpanOrMemoryLike(operation.Type))
+        {
+            return false;
+        }
+
+        var conversion = symbols.Compilation.ClassifyConversion(operation.Type, elementType);
+        return conversion.Exists && conversion.IsImplicit;
     }
 
     private static bool IsSupportedReferenceEqualitySubject(
@@ -848,5 +958,8 @@ internal static class NunitAssertMigrationMatcher
                     NunitAssertMigrationKind.BeFalse or
                     NunitAssertMigrationKind.BeEmpty or
                     NunitAssertMigrationKind.NotBeEmpty or
-                    NunitAssertMigrationKind.HaveCount;
+                    NunitAssertMigrationKind.Contain or
+                    NunitAssertMigrationKind.NotContain or
+                    NunitAssertMigrationKind.HaveCount or
+                    NunitAssertMigrationKind.HaveUniqueItems;
 }
