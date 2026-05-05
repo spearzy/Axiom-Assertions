@@ -5,14 +5,15 @@ This roadmap is short on purpose. It shows current priorities and likely next st
 ## Now
 
 - Keep Axiom.Assertions stable and predictable as the default install path.
-- Keep making migration easier for xUnit, NUnit, and MSTest users.
-- Keep package guidance, compatibility guidance, and starter projects current.
-- Keep optional packages small and focused.
+- Keep migration analyzers conservative and expand them only where the mapping is exact.
+- Keep optional packages small, focused, and driven by real test-suite needs.
+- Keep package-consumption, docs, and release validation aligned with the shipped packages.
 
 ## Next
 
-- Add better migration walkthroughs and side-by-side evaluation guidance.
-- Keep smoke coverage and release validation aligned with the shipped packages.
+- Reduce adoption friction with targeted migration and API-test improvements.
+- Improve diagnostics and examples where they help real test suites more than broader new surface area.
+- Add new assertion surface only when there is a clear, common use case.
 
 ## Later
 
