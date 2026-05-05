@@ -46,7 +46,7 @@ The migration analyzers are intentionally conservative. They only suggest rewrit
 
 | Framework | Current migration coverage |
 | --- | --- |
-| xUnit | scalar assertions, strings including safe `StringComparison` overloads, dictionary key lookup, `Single(...)`, synchronous exceptions, and awaited async exception assertions |
+| xUnit | scalar assertions, strings including safe `StringComparison` overloads, dictionary key lookup, `Single(...)`, type/reference checks, simple range checks, synchronous exceptions, and awaited async exception assertions |
 | NUnit | common `Is.*`, `Does.*`, and `Has.Count.EqualTo(...)` constraints, plus ordered/range/type constraints and async exception assertions in async contexts |
 | MSTest | scalar assertions, reference/type checks, `StringAssert`, simple `CollectionAssert` containment, ordered/range checks, and awaited async exception assertions |
 
@@ -142,6 +142,8 @@ Rules:
 - `AXM1023` for `Assert.EndsWith(expectedSuffix, actualString)` and `StringComparison` overloads when the suffix is an obvious non-null constant string
 - `AXM1054` for awaited `Assert.ThrowsAsync<TException>(...)`, including non-null constant `paramName` + `Func<Task>` overloads and appending `.Thrown` when the exception is used
 - `AXM1055` for awaited `Assert.ThrowsAnyAsync<TException>(...)`, appending `.Thrown` when the exception is used
+- `AXM1076` for `Assert.IsNotAssignableFrom<T>(actual)`
+- `AXM1077` for `Assert.InRange(actual, low, high)`
 
 The migration support is intentionally narrow and high-confidence. It only offers diagnostics and code fixes for xUnit assertion shapes that map cleanly to Axiom's fluent API without changing value flow or subtle overload semantics.
 
@@ -162,6 +164,8 @@ Assert.Contains(key, lookup);
 var found = Assert.Contains(key, lookup);
 var item = Assert.Single(values);
 var match = Assert.Single(values, value => value > 0);
+Assert.IsNotAssignableFrom<IDisposable>(actualObject);
+Assert.InRange(count, minimum, maximum);
 Assert.Throws<InvalidOperationException>(() => work());
 var ex = Assert.Throws<ArgumentNullException>("name", () => work());
 ```
@@ -183,6 +187,8 @@ lookup.Should().ContainKey(key);
 var found = lookup.Should().ContainKey(key).WhoseValue;
 var item = values.Should().ContainSingle().SingleItem;
 var match = values.Should().ContainSingle(value => value > 0).SingleItem;
+actualObject.Should().NotBeAssignableTo<IDisposable>();
+count.Should().BeInRange(minimum, maximum);
 new Action(() => work()).Should().Throw<InvalidOperationException>();
 var ex = new Action(() => work()).Should().Throw<ArgumentNullException>().WithParamName("name").Thrown;
 ```
@@ -203,6 +209,8 @@ They also intentionally skip shapes that are not obviously semantics-preserving 
 - `Assert.Throws<TException>(paramName, ...)` when `paramName` is not an obvious non-null constant string
 - non-awaited `Assert.ThrowsAsync<TException>(...)` and `Assert.ThrowsAnyAsync<TException>(...)` shapes
 - `Assert.ThrowsAsync<TException>(paramName, ...)` when `paramName` is not an obvious non-null constant string
+- `Assert.IsNotType<T>(...)`, because Axiom does not currently expose an exact type-exclusion assertion
+- `Assert.NotInRange(...)` and comparer-bearing range overloads
 
 ## NUnit Assert Migration Suggestions
 

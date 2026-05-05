@@ -55,6 +55,8 @@ namespace Xunit
         public static Task<T> ThrowsAnyAsync<T>(Func<Task> testCode) where T : Exception => Task.FromResult(default(T)!);
         public static T IsType<T>(object? value) => default!;
         public static T IsAssignableFrom<T>(object? value) => default!;
+        public static void IsNotAssignableFrom<T>(object? value) { }
+        public static void InRange<T>(T actual, T low, T high) where T : IComparable<T> { }
     }
 }
 

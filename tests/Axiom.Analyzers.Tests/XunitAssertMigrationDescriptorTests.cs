@@ -211,6 +211,22 @@ public sealed class XunitAssertMigrationDescriptorTests
                 Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
                 Assert.Equal("Migrate xUnit Assert.ThrowsAnyAsync to Axiom", rule.Title.ToString());
                 Assert.Equal("xUnit Assert.ThrowsAnyAsync<TException>(...) can be migrated to 'await ...Should().ThrowAsync<TException>()' and append '.Thrown' when the exception is used", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1076", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.IsNotAssignableFrom to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.IsNotAssignableFrom<T>(...) can be migrated to 'value.Should().NotBeAssignableTo<T>()'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1077", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate xUnit Assert.InRange to Axiom", rule.Title.ToString());
+                Assert.Equal("xUnit Assert.InRange(actual, low, high) can be migrated to 'actual.Should().BeInRange(low, high)'", rule.MessageFormat.ToString());
             });
     }
 

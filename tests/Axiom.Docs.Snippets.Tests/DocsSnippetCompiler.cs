@@ -432,6 +432,11 @@ internal sealed class DocsSnippetCompiler
             lines.Add("var actual = \"prefix-sub-suffix\";");
         }
 
+        if (code.Contains("actualObject", StringComparison.Ordinal))
+        {
+            lines.Add("var actualObject = new object();");
+        }
+
         if (code.Contains("expected", StringComparison.Ordinal))
         {
             lines.Add("var expected = \"expected\";");

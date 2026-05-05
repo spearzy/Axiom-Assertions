@@ -82,6 +82,13 @@ internal static class XunitAssertStubs
                 public static object IsType(Type expectedType, object? value) => default!;
                 public static T IsAssignableFrom<T>(object? value) => default!;
                 public static object IsAssignableFrom(Type expectedType, object? value) => default!;
+                public static void IsNotType<T>(object? value) { }
+                public static void IsNotType(Type expectedType, object? value) { }
+                public static void IsNotAssignableFrom<T>(object? value) { }
+                public static void IsNotAssignableFrom(Type expectedType, object? value) { }
+                public static void InRange<T>(T actual, T low, T high) where T : IComparable<T> { }
+                public static void InRange<T>(T actual, T low, T high, IComparer<T> comparer) { }
+                public static void NotInRange<T>(T actual, T low, T high) where T : IComparable<T> { }
 
                 public static T Throws<T>(Action testCode) where T : Exception => default!;
                 public static T Throws<T>(Func<object?> testCode) where T : Exception => default!;

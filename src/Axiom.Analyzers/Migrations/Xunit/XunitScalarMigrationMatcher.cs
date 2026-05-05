@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Operations;
 
 namespace Axiom.Analyzers.XunitMigration;
@@ -25,6 +26,8 @@ internal static class XunitScalarMigrationMatcher
                 => !resultIsConsumed && !symbols.IsAsyncEnumerableLike(method.Parameters[0].Type),
             XunitAssertMigrationKind.BeSameAs or XunitAssertMigrationKind.NotBeSameAs
                 => !resultIsConsumed && IsSupportedReferenceEqualityOverload(invocation, symbols),
+            XunitAssertMigrationKind.BeInRange
+                => !resultIsConsumed && IsSupportedRangeOverload(invocation, symbols),
             _ => false,
         };
     }
@@ -99,5 +102,37 @@ internal static class XunitScalarMigrationMatcher
 
         var actualType = XunitAssertMigrationMatcher.GetArgumentType(invocation.Arguments[1]);
         return actualType is not null && symbols.SupportsReferenceEqualityMigrationReceiver(actualType);
+    }
+
+    private static bool IsSupportedRangeOverload(
+        IInvocationOperation invocation,
+        XunitAssertMigrationSymbols symbols)
+    {
+        if (invocation.Arguments.Length != 3)
+        {
+            return false;
+        }
+
+        var subjectType = XunitAssertMigrationMatcher.GetArgumentType(invocation.Arguments[0]);
+        return subjectType is not null &&
+               symbols.SupportsOrderedValueMigrationReceiver(subjectType) &&
+               IsSupportedOrderedExpectedExpression(invocation.Arguments[1], subjectType, symbols) &&
+               IsSupportedOrderedExpectedExpression(invocation.Arguments[2], subjectType, symbols);
+    }
+
+    private static bool IsSupportedOrderedExpectedExpression(
+        IArgumentOperation expectedArgument,
+        ITypeSymbol subjectType,
+        XunitAssertMigrationSymbols symbols)
+    {
+        var operation = XunitAssertMigrationMatcher.UnwrapConversions(expectedArgument.Value);
+        if (operation.Type is null ||
+            !symbols.SupportsOrderedValueMigrationReceiver(operation.Type))
+        {
+            return false;
+        }
+
+        var conversion = symbols.Compilation.ClassifyConversion(operation.Type, subjectType);
+        return conversion.Exists && conversion.IsImplicit;
     }
 }

@@ -79,4 +79,6 @@ public static class AxiomAnalyzerIds
     public const string MigrateMstestAssertIsLessThan = "AXM1073";
     public const string MigrateMstestAssertIsLessThanOrEqualTo = "AXM1074";
     public const string MigrateMstestAssertIsInRange = "AXM1075";
+    public const string MigrateXunitAssertIsNotAssignableFrom = "AXM1076";
+    public const string MigrateXunitAssertInRange = "AXM1077";
 }

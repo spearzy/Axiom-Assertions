@@ -128,7 +128,8 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
             XunitAssertMigrationKind.BeEmpty or
             XunitAssertMigrationKind.NotBeEmpty or
             XunitAssertMigrationKind.BeSameAs or
-            XunitAssertMigrationKind.NotBeSameAs
+            XunitAssertMigrationKind.NotBeSameAs or
+            XunitAssertMigrationKind.BeInRange
                 => XunitScalarMigrationRewriter.BuildReplacementExpression(match),
 
             XunitAssertMigrationKind.Contain or
@@ -153,7 +154,8 @@ public sealed class XunitAssertMigrationCodeFixProvider : CodeFixProvider
                 => XunitAsyncThrowsMigrationRewriter.BuildReplacementExpression(match, semanticModel),
 
             XunitAssertMigrationKind.BeOfType or
-            XunitAssertMigrationKind.BeAssignableTo
+            XunitAssertMigrationKind.BeAssignableTo or
+            XunitAssertMigrationKind.NotBeAssignableTo
                 => XunitTypeMigrationRewriter.BuildReplacementExpression(match),
 
             _ => throw new ArgumentOutOfRangeException(nameof(match)),

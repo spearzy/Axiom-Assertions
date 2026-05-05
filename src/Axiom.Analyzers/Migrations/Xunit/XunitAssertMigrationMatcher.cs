@@ -99,7 +99,10 @@ internal static class XunitAssertMigrationMatcher
             var typeArgumentSyntax = GetTypeArgumentSyntax(spec.Kind, invocationSyntax);
 
             // Some fixes only make sense for generic source calls.
-            if (spec.Kind is XunitAssertMigrationKind.Throw or XunitAssertMigrationKind.BeOfType or XunitAssertMigrationKind.BeAssignableTo &&
+            if ((spec.Kind is XunitAssertMigrationKind.Throw or
+                    XunitAssertMigrationKind.BeOfType or
+                    XunitAssertMigrationKind.BeAssignableTo or
+                    XunitAssertMigrationKind.NotBeAssignableTo) &&
                 typeArgumentSyntax is null)
             {
                 continue;
@@ -167,7 +170,8 @@ internal static class XunitAssertMigrationMatcher
             XunitAssertMigrationKind.BeEmpty or
             XunitAssertMigrationKind.NotBeEmpty or
             XunitAssertMigrationKind.BeSameAs or
-            XunitAssertMigrationKind.NotBeSameAs
+            XunitAssertMigrationKind.NotBeSameAs or
+            XunitAssertMigrationKind.BeInRange
                 => XunitScalarMigrationMatcher.IsSafeSupportedOverload(invocation, spec.Kind, symbols, resultIsConsumed),
 
             XunitAssertMigrationKind.Contain or
@@ -195,7 +199,8 @@ internal static class XunitAssertMigrationMatcher
                     GetAwaitExpressionSyntax(invocation.Syntax) is not null),
 
             XunitAssertMigrationKind.BeOfType or
-            XunitAssertMigrationKind.BeAssignableTo
+            XunitAssertMigrationKind.BeAssignableTo or
+            XunitAssertMigrationKind.NotBeAssignableTo
                 => XunitTypeMigrationMatcher.IsSafeSupportedOverload(invocation, spec.Kind, symbols, resultIsConsumed),
 
             _ => false,
@@ -284,6 +289,8 @@ internal static class XunitAssertMigrationMatcher
         SeparatedSyntaxList<ArgumentSyntax> arguments)
         => kind switch
         {
+            XunitAssertMigrationKind.BeInRange
+                => arguments[1].Expression,
             XunitAssertMigrationKind.Be or
             XunitAssertMigrationKind.NotBe or
             XunitAssertMigrationKind.BeSameAs or
@@ -319,6 +326,7 @@ internal static class XunitAssertMigrationMatcher
         {
             XunitAssertMigrationKind.Be or
             XunitAssertMigrationKind.NotBe or
+            XunitAssertMigrationKind.BeInRange or
             XunitAssertMigrationKind.ContainSubstring or
             XunitAssertMigrationKind.NotContainSubstring or
             XunitAssertMigrationKind.StartWith or
@@ -337,7 +345,8 @@ internal static class XunitAssertMigrationMatcher
             not XunitAssertMigrationKind.ThrowExactlyAsync and
             not XunitAssertMigrationKind.ThrowAsync and
             not XunitAssertMigrationKind.BeOfType and
-            not XunitAssertMigrationKind.BeAssignableTo)
+            not XunitAssertMigrationKind.BeAssignableTo and
+            not XunitAssertMigrationKind.NotBeAssignableTo)
         {
             return null;
         }

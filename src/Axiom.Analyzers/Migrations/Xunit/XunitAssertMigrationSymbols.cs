@@ -5,6 +5,7 @@ namespace Axiom.Analyzers.XunitMigration;
 internal sealed class XunitAssertMigrationSymbols
 {
     private XunitAssertMigrationSymbols(
+        Compilation compilation,
         INamedTypeSymbol? xunitAssertType,
         INamedTypeSymbol? enumerableType,
         INamedTypeSymbol? genericEnumerableType,
@@ -20,6 +21,8 @@ internal sealed class XunitAssertMigrationSymbols
         INamedTypeSymbol? predicateType,
         INamedTypeSymbol? actionType,
         INamedTypeSymbol? funcType,
+        INamedTypeSymbol? comparableType,
+        INamedTypeSymbol? genericComparableType,
         INamedTypeSymbol? taskType,
         INamedTypeSymbol? genericTaskType,
         INamedTypeSymbol? valueTaskType,
@@ -30,6 +33,7 @@ internal sealed class XunitAssertMigrationSymbols
         INamedTypeSymbol? memoryType,
         INamedTypeSymbol? readOnlyMemoryType)
     {
+        Compilation = compilation;
         XunitAssertType = xunitAssertType;
         EnumerableType = enumerableType;
         GenericEnumerableType = genericEnumerableType;
@@ -45,6 +49,8 @@ internal sealed class XunitAssertMigrationSymbols
         PredicateType = predicateType;
         ActionType = actionType;
         FuncType = funcType;
+        ComparableType = comparableType;
+        GenericComparableType = genericComparableType;
         TaskType = taskType;
         GenericTaskType = genericTaskType;
         ValueTaskType = valueTaskType;
@@ -56,6 +62,7 @@ internal sealed class XunitAssertMigrationSymbols
         ReadOnlyMemoryType = readOnlyMemoryType;
     }
 
+    public Compilation Compilation { get; }
     public INamedTypeSymbol? XunitAssertType { get; }
 
     private INamedTypeSymbol? EnumerableType { get; }
@@ -72,6 +79,8 @@ internal sealed class XunitAssertMigrationSymbols
     public INamedTypeSymbol? PredicateType { get; }
     public INamedTypeSymbol? ActionType { get; }
     private INamedTypeSymbol? FuncType { get; }
+    private INamedTypeSymbol? ComparableType { get; }
+    private INamedTypeSymbol? GenericComparableType { get; }
     private INamedTypeSymbol? TaskType { get; }
     private INamedTypeSymbol? GenericTaskType { get; }
     private INamedTypeSymbol? ValueTaskType { get; }
@@ -87,6 +96,7 @@ internal sealed class XunitAssertMigrationSymbols
     public static XunitAssertMigrationSymbols Create(Compilation compilation)
     {
         return new XunitAssertMigrationSymbols(
+            compilation,
             compilation.GetTypeByMetadataName("Xunit.Assert"),
             compilation.GetTypeByMetadataName("System.Collections.IEnumerable"),
             compilation.GetTypeByMetadataName("System.Collections.Generic.IEnumerable`1"),
@@ -102,6 +112,8 @@ internal sealed class XunitAssertMigrationSymbols
             compilation.GetTypeByMetadataName("System.Predicate`1"),
             compilation.GetTypeByMetadataName("System.Action"),
             compilation.GetTypeByMetadataName("System.Func`1"),
+            compilation.GetTypeByMetadataName("System.IComparable"),
+            compilation.GetTypeByMetadataName("System.IComparable`1"),
             compilation.GetTypeByMetadataName("System.Threading.Tasks.Task"),
             compilation.GetTypeByMetadataName("System.Threading.Tasks.Task`1"),
             compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask"),
@@ -223,6 +235,11 @@ internal sealed class XunitAssertMigrationSymbols
         return !UsesSpecializedShouldReceiver(type);
     }
 
+    public bool SupportsOrderedValueMigrationReceiver(ITypeSymbol type)
+    {
+        return !UsesSpecializedShouldReceiver(type) && IsComparableLike(type);
+    }
+
     public bool SupportsStringContainmentMigrationReceiver(ITypeSymbol type)
     {
         return IsStringType(type);
@@ -333,6 +350,37 @@ internal sealed class XunitAssertMigrationSymbols
 
     private static bool IsStringType(ITypeSymbol type)
         => type.SpecialType == SpecialType.System_String;
+
+    private bool IsComparableLike(ITypeSymbol type)
+    {
+        if (type.SpecialType == SpecialType.System_String)
+        {
+            return false;
+        }
+
+        foreach (var candidate in type.AllInterfaces)
+        {
+            if (SymbolEqualityComparer.Default.Equals(candidate, ComparableType) ||
+                SymbolEqualityComparer.Default.Equals(candidate.OriginalDefinition, GenericComparableType))
+            {
+                return true;
+            }
+        }
+
+        return type.SpecialType is SpecialType.System_Byte or
+            SpecialType.System_SByte or
+            SpecialType.System_Int16 or
+            SpecialType.System_UInt16 or
+            SpecialType.System_Int32 or
+            SpecialType.System_UInt32 or
+            SpecialType.System_Int64 or
+            SpecialType.System_UInt64 or
+            SpecialType.System_Single or
+            SpecialType.System_Double or
+            SpecialType.System_Decimal or
+            SpecialType.System_Char or
+            SpecialType.System_DateTime;
+    }
 
     public bool IsDictionaryLike(ITypeSymbol type)
     {
