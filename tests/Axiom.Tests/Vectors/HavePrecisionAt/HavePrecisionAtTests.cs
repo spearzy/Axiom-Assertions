@@ -49,6 +49,7 @@ public sealed class HavePrecisionAtTests
         Assert.Contains("Expected results to have precision@2 equal to 1 within tolerance 0.001", ex.Message);
         Assert.Contains("actual precision@2 was 0.5", ex.Message);
         Assert.Contains("matched 1 unique relevant item(s); denominator 2", ex.Message);
+        Assert.Contains("inspected top 2 of 3 result(s); top-k window [\"doc-2\", \"doc-7\"]", ex.Message);
     }
 
     [Fact]

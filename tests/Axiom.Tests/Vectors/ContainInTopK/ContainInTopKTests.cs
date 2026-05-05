@@ -45,6 +45,7 @@ public sealed class ContainInTopKTests
 
         Assert.Contains("Expected results to contain item \"doc-7\" in the top 2 result(s)", ex.Message);
         Assert.Contains("item \"doc-7\" was found at rank 3", ex.Message);
+        Assert.Contains("inspected top 2 of 4 result(s); top-k window [\"doc-1\", \"doc-2\"]", ex.Message);
     }
 
     [Fact]

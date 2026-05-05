@@ -32,7 +32,7 @@ public static class RankingValueAssertionExtensions
                 RankingAssertionHelpers.BuildFailureMessage(
                     SubjectLabel(assertions),
                     expectation,
-                    $"item {RankingAssertionHelpers.FormatValue(target)} was missing entirely",
+                    $"item {RankingAssertionHelpers.FormatValue(target)} was missing entirely; {RankingAssertionHelpers.DescribeTopKWindow(results, k)}",
                     because),
                 callerFilePath,
                 callerLineNumber);
@@ -43,7 +43,7 @@ public static class RankingValueAssertionExtensions
                 RankingAssertionHelpers.BuildFailureMessage(
                     SubjectLabel(assertions),
                     expectation,
-                    $"item {RankingAssertionHelpers.FormatValue(target)} was found at rank {rank.Value}",
+                    $"item {RankingAssertionHelpers.FormatValue(target)} was found at rank {rank.Value}; {RankingAssertionHelpers.DescribeTopKWindow(results, k)}",
                     because),
                 callerFilePath,
                 callerLineNumber);
@@ -77,7 +77,7 @@ public static class RankingValueAssertionExtensions
                 RankingAssertionHelpers.BuildFailureMessage(
                     SubjectLabel(assertions),
                     expectation,
-                    $"item {RankingAssertionHelpers.FormatValue(target)} was missing entirely",
+                    $"item {RankingAssertionHelpers.FormatValue(target)} was missing entirely; {RankingAssertionHelpers.DescribeResultCount(results)}",
                     because),
                 callerFilePath,
                 callerLineNumber);
@@ -88,7 +88,7 @@ public static class RankingValueAssertionExtensions
                 RankingAssertionHelpers.BuildFailureMessage(
                     SubjectLabel(assertions),
                     expectation,
-                    $"item {RankingAssertionHelpers.FormatValue(target)} was found at rank {rank.Value}",
+                    $"item {RankingAssertionHelpers.FormatValue(target)} was found at rank {rank.Value}; {RankingAssertionHelpers.DescribeResultCount(results)}",
                     because),
                 callerFilePath,
                 callerLineNumber);
@@ -128,7 +128,7 @@ public static class RankingValueAssertionExtensions
                 RankingAssertionHelpers.BuildFailureMessage(
                     SubjectLabel(assertions),
                     expectation,
-                    $"actual recall@{k} was {RankingAssertionHelpers.FormatMetric(actualRecall)} (matched {matchedCount} of {relevantSet.Count} relevant item(s))",
+                    $"actual recall@{k} was {RankingAssertionHelpers.FormatMetric(actualRecall)} (matched {matchedCount} of {relevantSet.Count} relevant item(s); {RankingAssertionHelpers.DescribeTopKWindow(results, k)})",
                     because),
                 callerFilePath,
                 callerLineNumber);
@@ -168,7 +168,7 @@ public static class RankingValueAssertionExtensions
                 RankingAssertionHelpers.BuildFailureMessage(
                     SubjectLabel(assertions),
                     expectation,
-                    $"actual precision@{k} was {RankingAssertionHelpers.FormatMetric(actualPrecision)} (matched {matchedCount} unique relevant item(s); denominator {k})",
+                    $"actual precision@{k} was {RankingAssertionHelpers.FormatMetric(actualPrecision)} (matched {matchedCount} unique relevant item(s); denominator {k}; {RankingAssertionHelpers.DescribeTopKWindow(results, k)})",
                     because),
                 callerFilePath,
                 callerLineNumber);
@@ -203,8 +203,8 @@ public static class RankingValueAssertionExtensions
         if (double.IsNaN(actualReciprocalRank) || Math.Abs(actualReciprocalRank - expectedReciprocalRank) > tolerance)
         {
             var detail = rank is null
-                ? $"item {RankingAssertionHelpers.FormatValue(target)} was missing entirely; actual reciprocal rank was 0"
-                : $"actual reciprocal rank for item {RankingAssertionHelpers.FormatValue(target)} was {RankingAssertionHelpers.FormatMetric(actualReciprocalRank)} (first found at rank {rank.Value})";
+                ? $"item {RankingAssertionHelpers.FormatValue(target)} was missing entirely; actual reciprocal rank was 0; {RankingAssertionHelpers.DescribeResultCount(results)}"
+                : $"actual reciprocal rank for item {RankingAssertionHelpers.FormatValue(target)} was {RankingAssertionHelpers.FormatMetric(actualReciprocalRank)} (first found at rank {rank.Value}; {RankingAssertionHelpers.DescribeResultCount(results)})";
 
             Fail(
                 RankingAssertionHelpers.BuildFailureMessage(
@@ -393,9 +393,15 @@ public static class RankingValueAssertionExtensions
         }
 
         var reciprocalRankSum = 0d;
+        var queriesWithoutRelevantHit = 0;
         foreach (var query in queries)
         {
             var rank = RankingAssertionHelpers.FindFirstRelevantRank(query.RankedResults, query.RelevantSet);
+            if (rank is null)
+            {
+                queriesWithoutRelevantHit++;
+            }
+
             reciprocalRankSum += rank is null ? 0d : 1d / rank.Value;
         }
 
@@ -406,7 +412,7 @@ public static class RankingValueAssertionExtensions
                 RankingAssertionHelpers.BuildFailureMessage(
                     SubjectLabel(assertions),
                     expectation,
-                    $"actual mean reciprocal rank was {RankingAssertionHelpers.FormatMetric(actualMeanReciprocalRank)} across {queries.Count} quer{(queries.Count == 1 ? "y" : "ies")}",
+                    $"actual mean reciprocal rank was {RankingAssertionHelpers.FormatMetric(actualMeanReciprocalRank)} across {queries.Count} quer{(queries.Count == 1 ? "y" : "ies")} ({queriesWithoutRelevantHit} quer{(queriesWithoutRelevantHit == 1 ? "y" : "ies")} had no relevant hit)",
                     because),
                 callerFilePath,
                 callerLineNumber);
@@ -462,7 +468,7 @@ public static class RankingValueAssertionExtensions
                 RankingAssertionHelpers.BuildFailureMessage(
                     SubjectLabel(assertions),
                     expectation,
-                    $"actual hit rate@{k} was {RankingAssertionHelpers.FormatMetric(actualHitRate)} ({hitCount} of {queries.Count} quer{(queries.Count == 1 ? "y" : "ies")} had a relevant hit)",
+                    $"actual hit rate@{k} was {RankingAssertionHelpers.FormatMetric(actualHitRate)} ({hitCount} of {queries.Count} quer{(queries.Count == 1 ? "y" : "ies")} had a relevant hit; inspected top {k})",
                     because),
                 callerFilePath,
                 callerLineNumber);

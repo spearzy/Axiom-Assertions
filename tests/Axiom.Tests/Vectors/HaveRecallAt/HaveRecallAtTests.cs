@@ -49,6 +49,7 @@ public sealed class HaveRecallAtTests
         Assert.Contains("Expected results to have recall@2 equal to 1 within tolerance 0.001", ex.Message);
         Assert.Contains("actual recall@2 was 0.5", ex.Message);
         Assert.Contains("matched 1 of 2 relevant item(s)", ex.Message);
+        Assert.Contains("inspected top 2 of 3 result(s); top-k window [\"doc-2\", \"doc-7\"]", ex.Message);
     }
 
     [Fact]

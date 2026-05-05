@@ -45,6 +45,7 @@ public sealed class HaveRankTests
 
         Assert.Contains("Expected results to have item \"doc-7\" at rank 2", ex.Message);
         Assert.Contains("item \"doc-7\" was found at rank 3", ex.Message);
+        Assert.Contains("result count 4", ex.Message);
     }
 
     [Fact]

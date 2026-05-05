@@ -63,7 +63,7 @@ public readonly struct CosineSimilarityAssertions<TNumeric>
         {
             Fail(
                 $"to have cosine similarity with expected at least {_assertions.FormatNumeric(threshold)}",
-                $"computed cosine similarity {_assertions.FormatNumeric(_similarity)}",
+                $"computed cosine similarity {_assertions.FormatNumeric(_similarity)} (shortfall {_assertions.FormatNumeric(threshold - _similarity)})",
                 because,
                 callerFilePath,
                 callerLineNumber);
@@ -93,7 +93,7 @@ public readonly struct CosineSimilarityAssertions<TNumeric>
         {
             Fail(
                 $"to have cosine similarity with expected at most {_assertions.FormatNumeric(threshold)}",
-                $"computed cosine similarity {_assertions.FormatNumeric(_similarity)}",
+                $"computed cosine similarity {_assertions.FormatNumeric(_similarity)} (excess {_assertions.FormatNumeric(_similarity - threshold)})",
                 because,
                 callerFilePath,
                 callerLineNumber);
@@ -121,9 +121,13 @@ public readonly struct CosineSimilarityAssertions<TNumeric>
 
         if (_similarity < minimumThreshold || _similarity > maximumThreshold)
         {
+            var detail = _similarity < minimumThreshold
+                ? $"computed cosine similarity {_assertions.FormatNumeric(_similarity)} (below minimum by {_assertions.FormatNumeric(minimumThreshold - _similarity)})"
+                : $"computed cosine similarity {_assertions.FormatNumeric(_similarity)} (above maximum by {_assertions.FormatNumeric(_similarity - maximumThreshold)})";
+
             Fail(
                 expectation,
-                $"computed cosine similarity {_assertions.FormatNumeric(_similarity)}",
+                detail,
                 because,
                 callerFilePath,
                 callerLineNumber);

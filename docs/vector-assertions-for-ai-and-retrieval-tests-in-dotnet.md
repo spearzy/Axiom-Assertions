@@ -26,7 +26,16 @@ using Axiom.Vectors;
 
 embedding.Should().HaveDimension(1536);
 embedding.Should().HaveCosineSimilarityWith(expected).AtLeast(0.995f);
-results.Should().ContainInTopK("doc-7", 2);
+
+var results = new[] { "account-overview", "reset-password", "billing-update" };
+results.Should().ContainInTopK("reset-password", 3);
+
+var queries = new[]
+{
+    new RankingQuery<string>(["reset-password", "account-overview"], ["reset-password"]),
+    new RankingQuery<string>(["shipping-update", "billing-update"], ["billing-update"]),
+};
+
 queries.Should().HaveMeanReciprocalRank(expectedMeanReciprocalRank: 0.75);
 ```
 

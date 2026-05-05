@@ -88,7 +88,7 @@ public sealed class HaveCosineSimilarityWithTests
             embedding.Should().HaveCosineSimilarityWith(expected).AtLeast(0.5f));
 
         Assert.Contains("Expected embedding to have cosine similarity with expected at least 0.5", ex.Message);
-        Assert.Contains("computed cosine similarity 0", ex.Message);
+        Assert.Contains("computed cosine similarity 0 (shortfall 0.5)", ex.Message);
     }
 
     [Fact]
@@ -101,7 +101,7 @@ public sealed class HaveCosineSimilarityWithTests
             embedding.Should().HaveCosineSimilarityWith(expected).AtMost(0.2f));
 
         Assert.Contains("Expected embedding to have cosine similarity with expected at most 0.2", ex.Message);
-        Assert.Contains("computed cosine similarity 1", ex.Message);
+        Assert.Contains("computed cosine similarity 1 (excess 0.8)", ex.Message);
     }
 
     [Fact]
@@ -111,10 +111,10 @@ public sealed class HaveCosineSimilarityWithTests
         float[] expected = [1f, 0f];
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
-            embedding.Should().HaveCosineSimilarityWith(expected).Between(0.5f, 0.9f));
+            embedding.Should().HaveCosineSimilarityWith(expected).Between(0.5f, 0.75f));
 
-        Assert.Contains("Expected embedding to have cosine similarity with expected between 0.5 and 0.9 inclusive", ex.Message);
-        Assert.Contains("computed cosine similarity 1", ex.Message);
+        Assert.Contains("Expected embedding to have cosine similarity with expected between 0.5 and 0.75 inclusive", ex.Message);
+        Assert.Contains("computed cosine similarity 1 (above maximum by 0.25)", ex.Message);
     }
 
     [Fact]
