@@ -195,6 +195,62 @@ public sealed class MstestAssertMigrationDescriptorTests
                 Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
                 Assert.Equal("Migrate MSTest Assert.IsInRange to Axiom", rule.Title.ToString());
                 Assert.Equal("MSTest Assert.IsInRange(minValue, maxValue, value) can be migrated to 'value.Should().BeInRange(minValue, maxValue)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1081", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.Contains string check to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.Contains(expectedSubstring, actual) can be migrated to 'actual.Should().Contain(expectedSubstring)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1082", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.DoesNotContain string check to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.DoesNotContain(unexpectedSubstring, actual) can be migrated to 'actual.Should().NotContain(unexpectedSubstring)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1083", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.StartsWith to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.StartsWith(expectedPrefix, actual) can be migrated to 'actual.Should().StartWith(expectedPrefix)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1084", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.EndsWith to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.EndsWith(expectedSuffix, actual) can be migrated to 'actual.Should().EndWith(expectedSuffix)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1085", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.Contains collection check to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.Contains(expected, collection) can be migrated to 'collection.Should().Contain(expected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1086", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest Assert.DoesNotContain collection check to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest Assert.DoesNotContain(unexpected, collection) can be migrated to 'collection.Should().NotContain(unexpected)'", rule.MessageFormat.ToString());
+            },
+            rule =>
+            {
+                Assert.Equal("AXM1087", rule.Id);
+                Assert.Equal("Migration", rule.Category);
+                Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
+                Assert.Equal("Migrate MSTest CollectionAssert.AllItemsAreUnique to Axiom", rule.Title.ToString());
+                Assert.Equal("MSTest CollectionAssert.AllItemsAreUnique(collection) can be migrated to 'collection.Should().HaveUniqueItems()'", rule.MessageFormat.ToString());
             });
     }
 }

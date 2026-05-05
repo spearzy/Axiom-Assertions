@@ -48,7 +48,7 @@ The migration analyzers are intentionally conservative. They only suggest rewrit
 | --- | --- |
 | xUnit | scalar assertions, strings including safe `StringComparison` overloads, dictionary key lookup, `Single(...)`, type/reference checks, simple range checks, synchronous exceptions, and awaited async exception assertions |
 | NUnit | common `Is.*`, `Does.*`, and `Has.Count.EqualTo(...)` constraints, plus ordered/range/type constraints and async exception assertions in async contexts |
-| MSTest | scalar assertions, reference/type checks, `StringAssert`, simple `CollectionAssert` containment, ordered/range checks, and awaited async exception assertions |
+| MSTest | scalar assertions, reference/type checks, direct string/collection containment, collection uniqueness, ordered/range checks, and awaited async exception assertions |
 
 For staged migration guidance, start with [Migrating to Axiom](migrating-to-axiom.md), then use the [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), or [MSTest](migrate-from-mstest-assert.md) walkthrough.
 
@@ -149,7 +149,7 @@ The migration support is intentionally narrow and high-confidence. It only offer
 
 Before:
 
-<!-- axiom-context=migration-gallery -->
+<!-- axiom-context=migration-gallery axiom-framework=xunit -->
 ```csharp
 Assert.Equal(expected, actual);
 Assert.Equal(42, 42, EqualityComparer<int>.Default);
@@ -251,7 +251,7 @@ The NUnit migration support is still intentionally narrow. It covers `Does.*`, d
 
 Before:
 
-<!-- axiom-context=migration-gallery -->
+<!-- axiom-context=migration-gallery axiom-framework=nunit -->
 ```csharp
 Assert.That(actual, Is.EqualTo(expected));
 Assert.That(value, Is.Not.Null);
@@ -328,21 +328,30 @@ Rules:
 - `AXM1073` for `Assert.IsLessThan(upperBound, value)`
 - `AXM1074` for `Assert.IsLessThanOrEqualTo(upperBound, value)`
 - `AXM1075` for `Assert.IsInRange(minValue, maxValue, value)`
+- `AXM1081` for `Assert.Contains(expectedSubstring, actual)`, including `StringComparison` overloads
+- `AXM1082` for `Assert.DoesNotContain(unexpectedSubstring, actual)`, including `StringComparison` overloads
+- `AXM1083` for `Assert.StartsWith(expectedPrefix, actual)`, including `StringComparison` overloads, when `expectedPrefix` is an obvious non-null constant string
+- `AXM1084` for `Assert.EndsWith(expectedSuffix, actual)`, including `StringComparison` overloads, when `expectedSuffix` is an obvious non-null constant string
+- `AXM1085` for `Assert.Contains(expected, collection)`
+- `AXM1086` for `Assert.DoesNotContain(unexpected, collection)`
+- `AXM1087` for `CollectionAssert.AllItemsAreUnique(collection)`
 
 MSTest migrations only cover `Assert`, `StringAssert`, and `CollectionAssert` shapes that map directly to Axiom without carrying extra message, comparer, precision, or structural-comparison semantics across.
 
 Before:
 
-<!-- axiom-context=migration-gallery -->
+<!-- axiom-context=migration-gallery axiom-framework=mstest -->
 ```csharp
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.AreEqual(expected, actual);
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsNull(value);
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsFalse(condition);
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsInstanceOfType(value, typeof(IDisposable));
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsGreaterThan(minimum, count);
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsInRange(minimum, maximum, count);
+Assert.AreEqual(expected, actual);
+Assert.IsNull(value);
+Assert.IsFalse(condition);
+Assert.IsInstanceOfType(value, typeof(IDisposable));
+Assert.IsGreaterThan(minimum, count);
+Assert.IsInRange(minimum, maximum, count);
+Assert.StartsWith("ord-", actual);
 StringAssert.Contains(actual, "archived");
 CollectionAssert.DoesNotContain(values, "blocked");
+CollectionAssert.AllItemsAreUnique(values);
 ```
 
 After:
@@ -355,8 +364,10 @@ condition.Should().BeFalse();
 value.Should().BeAssignableTo<IDisposable>();
 count.Should().BeGreaterThan(minimum);
 count.Should().BeInRange(minimum, maximum);
+actual.Should().StartWith("ord-");
 actual.Should().Contain("archived");
 values.Should().NotContain("blocked");
+values.Should().HaveUniqueItems();
 ```
 
 Async exception migrations intentionally require an awaited MSTest call. Exact-type MSTest shapes (`ThrowsExceptionAsync<TException>` and `ThrowsExactlyAsync<TException>`) map to `ThrowExactlyAsync<TException>()`; derived-type `ThrowsAsync<TException>` maps to `ThrowAsync<TException>()`.
@@ -365,6 +376,6 @@ MSTest does not expose xUnit's `ThrowsAnyAsync<TException>` or async `paramName`
 
 Ordered-value migrations preserve MSTest's bound-first argument order: `Assert.IsGreaterThan(lowerBound, value)` becomes `value.Should().BeGreaterThan(lowerBound)`.
 
-These suggestions use semantic matching against MSTest's real `Assert`, `StringAssert`, and `CollectionAssert` APIs. They intentionally skip message-bearing, comparer, precision, structural-comparison, non-comparable ordering, and other richer MSTest assertion families, plus `StringAssert.StartsWith(...)` and `StringAssert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string.
+These suggestions use semantic matching against MSTest's real `Assert`, `StringAssert`, and `CollectionAssert` APIs. They intentionally skip message-bearing, comparer, precision, structural-comparison, non-comparable ordering, and other richer MSTest assertion families, plus `StringAssert.StartsWith(...)`, `StringAssert.EndsWith(...)`, `Assert.StartsWith(...)`, and `Assert.EndsWith(...)` when the expected prefix or suffix is not an obvious non-null constant string.
 
 For practical rollout guidance, see [Migrating to Axiom](migrating-to-axiom.md) and the framework-specific walkthroughs for [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), and [MSTest](migrate-from-mstest-assert.md).

@@ -173,6 +173,16 @@ namespace Microsoft.VisualStudio.TestTools.UnitTesting
         public static void IsNotInstanceOfType(object? value, Type wrongType) { }
         public static void IsGreaterThan<T>(T lowerBound, T value) where T : IComparable<T> { }
         public static void IsInRange<T>(T minValue, T maxValue, T value) where T : struct { }
+        public static void Contains(string substring, string value) { }
+        public static void Contains(string substring, string value, StringComparison comparisonType) { }
+        public static void Contains<T>(T expected, IEnumerable<T> collection) { }
+        public static void DoesNotContain(string substring, string value) { }
+        public static void DoesNotContain(string substring, string value, StringComparison comparisonType) { }
+        public static void DoesNotContain<T>(T unexpected, IEnumerable<T> collection) { }
+        public static void StartsWith(string expectedPrefix, string value) { }
+        public static void StartsWith(string expectedPrefix, string value, StringComparison comparisonType) { }
+        public static void EndsWith(string expectedSuffix, string value) { }
+        public static void EndsWith(string expectedSuffix, string value, StringComparison comparisonType) { }
         public static Task<T> ThrowsExceptionAsync<T>(Func<Task> code) where T : Exception => Task.FromResult(default(T)!);
         public static Task<T> ThrowsExactlyAsync<T>(Func<Task> code) where T : Exception => Task.FromResult(default(T)!);
         public static Task<T> ThrowsAsync<T>(Func<Task> code) where T : Exception => Task.FromResult(default(T)!);
@@ -189,5 +199,6 @@ namespace Microsoft.VisualStudio.TestTools.UnitTesting
     {
         public static void Contains(ICollection? collection, object? element) { }
         public static void DoesNotContain(ICollection? collection, object? element) { }
+        public static void AllItemsAreUnique(ICollection? collection) { }
     }
 }

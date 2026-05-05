@@ -14,6 +14,14 @@ public enum DocsSnippetShape
     SignatureCatalog,
 }
 
+public enum DocsSnippetFramework
+{
+    None,
+    Xunit,
+    Nunit,
+    Mstest,
+}
+
 public sealed record DocsSnippet(
     string RelativePath,
     int Index,
@@ -22,6 +30,7 @@ public sealed record DocsSnippet(
     string Code,
     DocsSnippetContext Context,
     DocsSnippetShape Shape,
+    DocsSnippetFramework Framework,
     bool NeedsXunit,
     bool NeedsNunit,
     bool NeedsMstest,

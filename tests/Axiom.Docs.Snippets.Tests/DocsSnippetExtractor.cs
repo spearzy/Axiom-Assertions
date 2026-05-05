@@ -9,6 +9,7 @@ internal static class DocsSnippetExtractor
 {
     // Markdown fences can opt into a specific verification setup when inference is not enough.
     private const string ContextKey = "axiom-context=";
+    private const string FrameworkKey = "axiom-framework=";
     private const string HtmlCommentOpen = "<!--";
     private const string HtmlCommentClose = "-->";
 
@@ -40,16 +41,16 @@ internal static class DocsSnippetExtractor
         var snippetStartLine = 0;
         var snippetLines = new List<string>();
         var snippetIndex = 0;
-        string? pendingContextToken = null;
+        string? pendingOptionsToken = null;
 
         for (var lineIndex = 0; lineIndex < lines.Length; lineIndex++)
         {
             var line = lines[lineIndex];
             if (!insideFence)
             {
-                if (TryExtractContextToken(line, out var contextToken))
+                if (TryExtractOptionsToken(line, out var optionsToken))
                 {
-                    pendingContextToken = contextToken;
+                    pendingOptionsToken = optionsToken;
                     continue;
                 }
 
@@ -57,7 +58,7 @@ internal static class DocsSnippetExtractor
                 {
                     if (!string.IsNullOrWhiteSpace(line))
                     {
-                        pendingContextToken = null;
+                        pendingOptionsToken = null;
                     }
 
                     continue;
@@ -66,21 +67,21 @@ internal static class DocsSnippetExtractor
                 infoString = line[3..].Trim();
                 if (!IsCSharpFence(infoString))
                 {
-                    pendingContextToken = null;
+                    pendingOptionsToken = null;
                     continue;
                 }
 
-                if (pendingContextToken is not null)
+                if (pendingOptionsToken is not null)
                 {
                     infoString = string.IsNullOrEmpty(infoString)
-                        ? pendingContextToken
-                        : $"{infoString} {pendingContextToken}";
+                        ? pendingOptionsToken
+                        : $"{infoString} {pendingOptionsToken}";
                 }
 
                 insideFence = true;
                 snippetStartLine = lineIndex + 2;
                 snippetLines.Clear();
-                pendingContextToken = null;
+                pendingOptionsToken = null;
                 continue;
             }
 
@@ -109,6 +110,7 @@ internal static class DocsSnippetExtractor
         var trimmedCode = code.TrimEnd();
         var infoTokens = SplitInfoString(infoString);
         var context = ResolveContext(relativePath, trimmedCode, infoTokens);
+        var framework = ResolveFramework(relativePath, infoTokens);
         var needsXunit = NeedsXunitStubs(trimmedCode);
         var needsNunit = NeedsNunitStubs(trimmedCode);
         var needsMstest = NeedsMstestStubs(trimmedCode);
@@ -122,6 +124,7 @@ internal static class DocsSnippetExtractor
             trimmedCode,
             context,
             shape,
+            framework,
             needsXunit,
             needsNunit,
             needsMstest,
@@ -160,6 +163,33 @@ internal static class DocsSnippetExtractor
         }
 
         return DocsSnippetContext.General;
+    }
+
+    private static DocsSnippetFramework ResolveFramework(string relativePath, IReadOnlyList<string> infoTokens)
+    {
+        foreach (var token in infoTokens)
+        {
+            if (!token.StartsWith(FrameworkKey, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            return token[FrameworkKey.Length..] switch
+            {
+                "xunit" => DocsSnippetFramework.Xunit,
+                "nunit" => DocsSnippetFramework.Nunit,
+                "mstest" => DocsSnippetFramework.Mstest,
+                var unknown => throw new InvalidOperationException($"Unknown docs snippet framework '{unknown}' in {relativePath}."),
+            };
+        }
+
+        return relativePath switch
+        {
+            "docs/migrate-from-xunit-assert.md" => DocsSnippetFramework.Xunit,
+            "docs/migrate-from-nunit-assert.md" => DocsSnippetFramework.Nunit,
+            "docs/migrate-from-mstest-assert.md" => DocsSnippetFramework.Mstest,
+            _ => DocsSnippetFramework.None,
+        };
     }
 
     private static DocsSnippetShape ResolveShape(string relativePath, int index, string code, out string? skipReason)
@@ -328,23 +358,24 @@ internal static class DocsSnippetExtractor
             .ToArray();
     }
 
-    private static bool TryExtractContextToken(string line, out string? contextToken)
+    private static bool TryExtractOptionsToken(string line, out string? optionsToken)
     {
         var trimmed = line.Trim();
         if (!trimmed.StartsWith(HtmlCommentOpen, StringComparison.Ordinal) || !trimmed.EndsWith(HtmlCommentClose, StringComparison.Ordinal))
         {
-            contextToken = null;
+            optionsToken = null;
             return false;
         }
 
         var content = trimmed[HtmlCommentOpen.Length..^HtmlCommentClose.Length].Trim();
-        if (!content.StartsWith(ContextKey, StringComparison.Ordinal))
+        var tokens = SplitInfoString($"csharp {content}");
+        if (!tokens.Any(token => token.StartsWith(ContextKey, StringComparison.Ordinal) || token.StartsWith(FrameworkKey, StringComparison.Ordinal)))
         {
-            contextToken = null;
+            optionsToken = null;
             return false;
         }
 
-        contextToken = content;
+        optionsToken = content;
         return true;
     }
 }

@@ -108,9 +108,9 @@ Before:
 
 <!-- axiom-context=migration-gallery -->
 ```csharp
-await NUnit.Framework.Assert.ThrowsAsync<InvalidOperationException>(
+await Assert.ThrowsAsync<InvalidOperationException>(
     async () => await Task.FromException(new InvalidOperationException()));
-await NUnit.Framework.Assert.CatchAsync<Exception>(
+await Assert.CatchAsync<Exception>(
     async () => await Task.FromException(new ArgumentException()));
 ```
 

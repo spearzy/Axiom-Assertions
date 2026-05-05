@@ -15,6 +15,7 @@ internal sealed class MstestAssertMigrationSymbols
         INamedTypeSymbol? dictionaryType,
         INamedTypeSymbol? readOnlyDictionaryType,
         INamedTypeSymbol? nonGenericDictionaryType,
+        INamedTypeSymbol? stringComparisonType,
         INamedTypeSymbol? comparableType,
         INamedTypeSymbol? genericComparableType,
         INamedTypeSymbol? actionType,
@@ -38,6 +39,7 @@ internal sealed class MstestAssertMigrationSymbols
         DictionaryType = dictionaryType;
         ReadOnlyDictionaryType = readOnlyDictionaryType;
         NonGenericDictionaryType = nonGenericDictionaryType;
+        StringComparisonType = stringComparisonType;
         ComparableType = comparableType;
         GenericComparableType = genericComparableType;
         ActionType = actionType;
@@ -62,6 +64,7 @@ internal sealed class MstestAssertMigrationSymbols
     private INamedTypeSymbol? DictionaryType { get; }
     private INamedTypeSymbol? ReadOnlyDictionaryType { get; }
     private INamedTypeSymbol? NonGenericDictionaryType { get; }
+    private INamedTypeSymbol? StringComparisonType { get; }
     private INamedTypeSymbol? ComparableType { get; }
     private INamedTypeSymbol? GenericComparableType { get; }
     private INamedTypeSymbol? ActionType { get; }
@@ -93,6 +96,7 @@ internal sealed class MstestAssertMigrationSymbols
             compilation.GetTypeByMetadataName("System.Collections.Generic.IDictionary`2"),
             compilation.GetTypeByMetadataName("System.Collections.Generic.IReadOnlyDictionary`2"),
             compilation.GetTypeByMetadataName("System.Collections.IDictionary"),
+            compilation.GetTypeByMetadataName("System.StringComparison"),
             compilation.GetTypeByMetadataName("System.IComparable"),
             compilation.GetTypeByMetadataName("System.IComparable`1"),
             compilation.GetTypeByMetadataName("System.Action"),
@@ -228,10 +232,21 @@ internal sealed class MstestAssertMigrationSymbols
            !IsAsyncEnumerableLike(type) &&
            !IsDictionaryLike(type);
 
+    public bool SupportsUniqueItemsMigrationReceiver(ITypeSymbol type)
+        => IsEnumerableLike(type) &&
+           !IsAsyncEnumerableLike(type) &&
+           !IsStringType(type) &&
+           !IsDictionaryLike(type);
+
     public bool SupportsOrderedValueMigrationReceiver(ITypeSymbol type)
     {
         return !UsesSpecializedShouldReceiver(type) && IsComparableLike(type);
     }
+
+    public bool IsStringComparison(ITypeSymbol? type)
+        => StringComparisonType is not null &&
+           type is not null &&
+           SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, StringComparisonType);
 
     public bool IsFuncReturningTask(ITypeSymbol type)
     {
