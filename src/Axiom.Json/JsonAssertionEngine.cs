@@ -83,6 +83,70 @@ internal static class JsonAssertionEngine
             callerFilePath,
             callerLineNumber);
 
+    public static void AssertHaveJsonObjectAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonPathAssertions.AssertHaveObjectAtPath(
+            subjectInput,
+            subjectExpression,
+            path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertHaveJsonArrayAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonPathAssertions.AssertHaveArrayAtPath(
+            subjectInput,
+            subjectExpression,
+            path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertHaveJsonArrayLengthAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        int expectedLength,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonPathAssertions.AssertHaveArrayLengthAtPath(
+            subjectInput,
+            subjectExpression,
+            path,
+            expectedLength,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertHaveJsonPropertyCountAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        int expectedCount,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonPathAssertions.AssertHavePropertyCountAtPath(
+            subjectInput,
+            subjectExpression,
+            path,
+            expectedCount,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
     public static void AssertHaveJsonNumberAtPath(
         JsonInput subjectInput,
         string? subjectExpression,

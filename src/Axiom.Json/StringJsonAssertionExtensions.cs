@@ -200,6 +200,90 @@ public static class StringJsonAssertionExtensions
         return new AndContinuation<StringAssertions>(assertions);
     }
 
+    public static AndContinuation<StringAssertions> HaveJsonObjectAtPath(
+        this StringAssertions assertions,
+        string path,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        JsonAssertionEngine.AssertHaveJsonObjectAtPath(
+            JsonInput.FromString(assertions.Subject),
+            assertions.SubjectExpression,
+            path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<StringAssertions>(assertions);
+    }
+
+    public static AndContinuation<StringAssertions> HaveJsonArrayAtPath(
+        this StringAssertions assertions,
+        string path,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        JsonAssertionEngine.AssertHaveJsonArrayAtPath(
+            JsonInput.FromString(assertions.Subject),
+            assertions.SubjectExpression,
+            path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<StringAssertions>(assertions);
+    }
+
+    public static AndContinuation<StringAssertions> HaveJsonArrayLengthAtPath(
+        this StringAssertions assertions,
+        string path,
+        int expectedLength,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        JsonAssertionEngine.AssertHaveJsonArrayLengthAtPath(
+            JsonInput.FromString(assertions.Subject),
+            assertions.SubjectExpression,
+            path,
+            expectedLength,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<StringAssertions>(assertions);
+    }
+
+    public static AndContinuation<StringAssertions> HaveJsonPropertyCountAtPath(
+        this StringAssertions assertions,
+        string path,
+        int expectedCount,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        JsonAssertionEngine.AssertHaveJsonPropertyCountAtPath(
+            JsonInput.FromString(assertions.Subject),
+            assertions.SubjectExpression,
+            path,
+            expectedCount,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<StringAssertions>(assertions);
+    }
+
     public static AndContinuation<StringAssertions> HaveJsonNumberAtPath(
         this StringAssertions assertions,
         string path,

@@ -186,6 +186,78 @@ public sealed class JsonAssertions
         return new AndContinuation<JsonAssertions>(this);
     }
 
+    public AndContinuation<JsonAssertions> HaveJsonObjectAtPath(
+        string path,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        JsonAssertionEngine.AssertHaveJsonObjectAtPath(
+            SubjectInput,
+            SubjectExpression,
+            path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<JsonAssertions>(this);
+    }
+
+    public AndContinuation<JsonAssertions> HaveJsonArrayAtPath(
+        string path,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        JsonAssertionEngine.AssertHaveJsonArrayAtPath(
+            SubjectInput,
+            SubjectExpression,
+            path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<JsonAssertions>(this);
+    }
+
+    public AndContinuation<JsonAssertions> HaveJsonArrayLengthAtPath(
+        string path,
+        int expectedLength,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        JsonAssertionEngine.AssertHaveJsonArrayLengthAtPath(
+            SubjectInput,
+            SubjectExpression,
+            path,
+            expectedLength,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<JsonAssertions>(this);
+    }
+
+    public AndContinuation<JsonAssertions> HaveJsonPropertyCountAtPath(
+        string path,
+        int expectedCount,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        JsonAssertionEngine.AssertHaveJsonPropertyCountAtPath(
+            SubjectInput,
+            SubjectExpression,
+            path,
+            expectedCount,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<JsonAssertions>(this);
+    }
+
     public AndContinuation<JsonAssertions> HaveJsonNumberAtPath(
         string path,
         decimal expectedValue,
