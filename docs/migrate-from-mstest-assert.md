@@ -100,8 +100,8 @@ Before:
 
 <!-- axiom-context=migration-gallery -->
 ```csharp
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsGreaterThan(minimum, count);
-Microsoft.VisualStudio.TestTools.UnitTesting.Assert.IsInRange(minimum, maximum, count);
+Assert.IsGreaterThan(minimum, count);
+Assert.IsInRange(minimum, maximum, count);
 ```
 
 After:
@@ -118,9 +118,9 @@ Before:
 
 <!-- axiom-context=migration-gallery -->
 ```csharp
-await Microsoft.VisualStudio.TestTools.UnitTesting.Assert.ThrowsExceptionAsync<InvalidOperationException>(
+await Assert.ThrowsExceptionAsync<InvalidOperationException>(
     async () => await Task.FromException(new InvalidOperationException()));
-await Microsoft.VisualStudio.TestTools.UnitTesting.Assert.ThrowsAsync<Exception>(
+await Assert.ThrowsAsync<Exception>(
     async () => await Task.FromException(new ArgumentException()));
 ```
 

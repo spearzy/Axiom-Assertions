@@ -112,10 +112,6 @@ internal static class AxiomAssertionStubs
                     where TCollection : IEnumerable
                     => default;
 
-                public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> HaveUniqueItems<TCollection>(this Axiom.Assertions.ValueAssertions<TCollection> assertions)
-                    where TCollection : IEnumerable
-                    => default;
-
                 public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> HaveCount<TCollection>(this Axiom.Assertions.ValueAssertions<TCollection> assertions, int expectedCount)
                     where TCollection : IEnumerable
                     => default;
