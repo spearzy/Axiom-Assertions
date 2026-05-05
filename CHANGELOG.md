@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/).
 
+## [2.5.0] - 2026-05-05
+
+### Added
+- Expanded high-confidence migration analyzer coverage for xUnit, NUnit, and MSTest with additional range, assignability, membership, uniqueness, string, and collection assertion shapes.
+- Added JSON path assertions for object and array kind checks, array length, and object property count.
+- Added HTTP assertions for response body text, header value containment, and JSON object/array/count checks over response bodies.
+
+### Changed
+- Improved JSON and HTTP failure output for invalid JSON, missing paths, wrong-kind values, body-text mismatches, JSON body mismatches, missing response content, and ProblemDetails precondition failures.
+- Improved vector diagnostics and examples so ranking, retrieval-quality, and similarity failures are easier to interpret in real tests.
+- Aligned release package-consumption smoke validation with the `dotnet-package-smoke` flow already used in CI, while keeping analyzer and plain fallback smoke checks bespoke.
+
+### Fixed
+- Tightened analyzer, JSON, HTTP, vectors, and docs verification coverage around the expanded `2.5.0` assertion and migration surface.
+
 ## [2.4.0] - 2026-05-04
 
 ### Added

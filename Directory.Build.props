@@ -6,7 +6,7 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
-    <AxiomRepositoryPackageVersion>2.4.0</AxiomRepositoryPackageVersion>
+    <AxiomRepositoryPackageVersion>2.5.0</AxiomRepositoryPackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MSBuildProjectName)' != 'Axiom.Tests'">

@@ -122,31 +122,41 @@ jobs:
           --output artifacts/packages
           /p:PackageVersion=${{ steps.version.outputs.version }}
 
+      - name: Run package consumption smoke action
+        uses: spearzy/dotnet-package-smoke@v1
+        with:
+          package-projects: |
+            src/Axiom.Assertions/Axiom.Assertions.csproj
+            src/Axiom.Core/Axiom.Core.csproj
+            src/Axiom.Json/Axiom.Json.csproj
+            src/Axiom.Http/Axiom.Http.csproj
+            src/Axiom.Vectors/Axiom.Vectors.csproj
+          smoke-projects: |
+            eng/smoke/Axiom.Json.PackageSmoke/Axiom.Json.PackageSmoke.csproj
+            eng/smoke/Axiom.Http.PackageSmoke/Axiom.Http.PackageSmoke.csproj
+            eng/smoke/Axiom.Vectors.PackageSmoke/Axiom.Vectors.PackageSmoke.csproj
+            starters/Axiom.Assertions.Starter.Xunit/Axiom.Assertions.Starter.Xunit.csproj
+            starters/Axiom.Assertions.Starter.NUnit/Axiom.Assertions.Starter.NUnit.csproj
+            starters/Axiom.Assertions.Starter.MSTest/Axiom.Assertions.Starter.MSTest.csproj
+          consumer-target-frameworks: |
+            net8.0
+            net9.0
+            net10.0
+          configuration: Release
+          restore-before-pack: false
+          build-before-pack: false
+          pack-arguments: >-
+            --no-build
+            --no-restore
+            /p:PackageVersion=${{ steps.version.outputs.version }}
+          smoke-restore-arguments: >-
+            -p:AxiomPackageVersion=${{ steps.version.outputs.version }}
+            -p:AxiomAssertionsVersion=${{ steps.version.outputs.version }}
+
       - name: Consumer analyzer smoke test (standalone)
         run: >
           bash eng/ci/run-analyzers-package-smoke.sh
           "$GITHUB_WORKSPACE/artifacts/packages"
-
-      - name: Consumer smoke test (xUnit)
-        run: >
-          bash eng/ci/run-consumer-smoke.sh
-          "$GITHUB_WORKSPACE/artifacts/packages"
-          "${{ steps.version.outputs.version }}"
-          xunit
-
-      - name: Consumer smoke test (NUnit)
-        run: >
-          bash eng/ci/run-consumer-smoke.sh
-          "$GITHUB_WORKSPACE/artifacts/packages"
-          "${{ steps.version.outputs.version }}"
-          nunit
-
-      - name: Consumer smoke test (MSTest)
-        run: >
-          bash eng/ci/run-consumer-smoke.sh
-          "$GITHUB_WORKSPACE/artifacts/packages"
-          "${{ steps.version.outputs.version }}"
-          mstest
 
       - name: Consumer smoke test (no framework fallback)
         run: >
