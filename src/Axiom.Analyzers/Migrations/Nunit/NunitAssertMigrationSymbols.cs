@@ -177,6 +177,28 @@ internal sealed class NunitAssertMigrationSymbols
         return ImplementsInterface(type, EnumerableType) || ImplementsInterface(type, GenericEnumerableType);
     }
 
+    public bool IsGenericEnumerableLike(ITypeSymbol type)
+    {
+        if (type.SpecialType == SpecialType.System_String)
+        {
+            return false;
+        }
+
+        if (type is IArrayTypeSymbol)
+        {
+            return true;
+        }
+
+        if (GenericEnumerableType is not null &&
+            type is INamedTypeSymbol namedType &&
+            SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, GenericEnumerableType))
+        {
+            return true;
+        }
+
+        return ImplementsInterface(type, GenericEnumerableType);
+    }
+
     public bool IsAsyncEnumerableLike(ITypeSymbol type)
     {
         if (AsyncEnumerableType is null)
@@ -222,6 +244,18 @@ internal sealed class NunitAssertMigrationSymbols
     public bool SupportsCountMigrationReceiver(ITypeSymbol type)
         => IsEnumerableLike(type) && !IsAsyncEnumerableLike(type) && !IsStringType(type);
 
+    // Has.Member(...) must map to collection.Should().Contain(item), so we only
+    // accept receivers with a discoverable IEnumerable<T> element type. Non-generic
+    // IEnumerable would make the item type ambiguous and risks an unsafe rewrite.
+    public bool SupportsCollectionContainmentMigrationReceiver(ITypeSymbol type)
+        => IsGenericEnumerableLike(type) && !IsAsyncEnumerableLike(type) && !UsesSpecializedShouldReceiver(type);
+
+    // Is.Unique maps to HaveUniqueItems(), which works over the non-generic
+    // collection receiver too. Strings and async streams still use specialized
+    // assertion receivers, so they stay out of this migration path.
+    public bool SupportsUniqueItemsMigrationReceiver(ITypeSymbol type)
+        => IsEnumerableLike(type) && !IsAsyncEnumerableLike(type) && !IsStringType(type);
+
     public bool SupportsOrderedComparisonMigrationReceiver(ITypeSymbol type)
         => type.SpecialType != SpecialType.System_Object &&
            !IsEnumerableLike(type) &&
@@ -240,6 +274,46 @@ internal sealed class NunitAssertMigrationSymbols
 
         return type is INamedTypeSymbol namedType &&
                namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
+    }
+
+    public bool TryGetEnumerableElementType(ITypeSymbol type, out ITypeSymbol? elementType)
+    {
+        // Roslyn gives arrays separately from interface implementations. Treat
+        // arrays as IEnumerable<T> for migration safety, using their element type
+        // as the expected item type for Has.Member(...).
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            elementType = arrayType.ElementType;
+            return true;
+        }
+
+        // Direct IEnumerable<T> receivers expose the item type on the receiver
+        // itself, for example IEnumerable<Order> values.
+        if (GenericEnumerableType is not null &&
+            type is INamedTypeSymbol namedType &&
+            SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, GenericEnumerableType) &&
+            namedType.TypeArguments.Length == 1)
+        {
+            elementType = namedType.TypeArguments[0];
+            return true;
+        }
+
+        // Most real collection types are List<T>, HashSet<T>, etc. Roslyn
+        // exposes their implemented interfaces through AllInterfaces, so this is
+        // the safe place to recover T without guessing from the concrete type.
+        foreach (var candidate in type.AllInterfaces)
+        {
+            if (GenericEnumerableType is not null &&
+                SymbolEqualityComparer.Default.Equals(candidate.OriginalDefinition, GenericEnumerableType) &&
+                candidate.TypeArguments.Length == 1)
+            {
+                elementType = candidate.TypeArguments[0];
+                return true;
+            }
+        }
+
+        elementType = null;
+        return false;
     }
 
     private bool UsesSpecializedShouldReceiver(ITypeSymbol type)
@@ -307,6 +381,9 @@ internal sealed class NunitAssertMigrationSymbols
             return false;
         }
 
+        // Compare both constructed interfaces and original definitions so
+        // IEnumerable<int> can be matched against the metadata symbol
+        // IEnumerable<T> without binding to one concrete type argument.
         foreach (var candidate in type.AllInterfaces)
         {
             var originalDefinition = candidate.OriginalDefinition;
