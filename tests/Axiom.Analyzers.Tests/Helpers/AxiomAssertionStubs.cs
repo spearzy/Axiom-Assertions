@@ -32,6 +32,7 @@ internal static class AxiomAssertionStubs
                 public AndContinuation<ValueAssertions<T>> BeOfType<TExpected>() => default;
                 public AndContinuation<ValueAssertions<T>> BeAssignableTo<TExpected>() => default;
                 public AndContinuation<ValueAssertions<T>> NotBeAssignableTo<TExpected>() => default;
+                public AndContinuation<ValueAssertions<T>> BeInRange(T minimum, T maximum) => default;
                 public AndContinuation<ValueAssertions<T>> BeSameAs(T? expectedReference) => default;
                 public AndContinuation<ValueAssertions<T>> NotBeSameAs(T? unexpectedReference) => default;
             }

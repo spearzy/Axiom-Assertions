@@ -11,7 +11,7 @@ The xUnit path is the strongest analyzer-backed migration path in Axiom today. I
 
 This path is a good fit when your xUnit tests mostly use straightforward `Assert.*` calls and you want to move gradually to fluent assertions without redesigning the whole suite at once.
 
-It works best when tests already check one clear fact per assertion: equality, nullability, string containment, collection membership, dictionary keys, single-item expectations, type checks, or direct exception assertions.
+It works best when tests already check one clear fact per assertion: equality, nullability, string containment, collection membership, dictionary keys, single-item expectations, type checks, simple range checks, or direct exception assertions.
 
 It is a weaker fit when your suite leans heavily on custom comparers, precision rules, string-equality options, inspectors, or broad structural comparisons.
 
@@ -25,6 +25,8 @@ Examples include:
 - `Assert.Contains("sub", actual, StringComparison.OrdinalIgnoreCase)` to `actual.Should().Contain("sub", StringComparison.OrdinalIgnoreCase)`
 - `Assert.Contains(key, lookup)` to `lookup.Should().ContainKey(key)` and `.WhoseValue` when the old returned value was used
 - `Assert.Single(values)` and `Assert.Single(values, predicate)` to `ContainSingle(...)` and `.SingleItem` when needed
+- `Assert.IsNotAssignableFrom<T>(value)` to `value.Should().NotBeAssignableTo<T>()`
+- `Assert.InRange(actual, low, high)` to `actual.Should().BeInRange(low, high)` for simple comparable values
 - `Assert.Throws<TException>(...)`, awaited `Assert.ThrowsAsync<TException>(...)`, and awaited `Assert.ThrowsAnyAsync<TException>(...)` when the target Axiom exception assertion is exact
 
 For exact rule IDs and edge cases, use the [Analyzer reference](analyzers.md).
@@ -40,6 +42,7 @@ Good first-pass candidates:
 - simple collection checks
 - dictionary key checks
 - `Single(...)` checks where the returned value flow remains obvious
+- direct type and range checks
 - direct exception assertions
 
 Do not use the first pass to redesign structural assertions. Mark those for manual review.
@@ -92,6 +95,24 @@ var item = values.Should().ContainSingle().SingleItem;
 var match = values.Should().ContainSingle(IsPositive).SingleItem;
 ```
 
+Type and range assertions:
+
+Before:
+
+<!-- axiom-context=migration-gallery -->
+```csharp
+Assert.IsNotAssignableFrom<IDisposable>(actualObject);
+Assert.InRange(count, minimum, maximum);
+```
+
+After:
+
+<!-- axiom-context=migration-gallery -->
+```csharp
+actualObject.Should().NotBeAssignableTo<IDisposable>();
+count.Should().BeInRange(minimum, maximum);
+```
+
 Exception assertions:
 
 Before:
@@ -142,6 +163,8 @@ Keep these manual during an xUnit migration:
 - string-equality special cases such as ignore-case equality options
 - precision and tolerance assertions
 - comparer edge cases that do not map directly to a current local-comparer assertion
+- `Assert.IsNotType<T>(...)`, because Axiom does not currently expose an exact type-exclusion assertion
+- `Assert.NotInRange(...)` and comparer-bearing range overloads
 - inspector overloads and message-bearing overloads
 - consumed exception cases outside the supported `.Thrown` flows
 - span or memory string overloads

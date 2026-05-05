@@ -19,6 +19,7 @@ internal static class XunitTypeMigrationRewriter
         {
             XunitAssertMigrationKind.BeOfType => "BeOfType",
             XunitAssertMigrationKind.BeAssignableTo => "BeAssignableTo",
+            XunitAssertMigrationKind.NotBeAssignableTo => "NotBeAssignableTo",
             _ => throw new ArgumentOutOfRangeException(nameof(kind)),
         };
     }

@@ -191,6 +191,97 @@ public sealed class XunitAssertMigrationTypeTests
     }
 
     [Fact]
+    public async Task AssertIsNotAssignableFrom_IsFlagged_AndFixed()
+    {
+        const string source =
+            """
+                using Xunit;
+
+                public sealed class Sample
+                {
+                    public void Check(object actual)
+                    {
+                        {|AXM1076:Assert.IsNotAssignableFrom<System.IDisposable>(actual)|};
+                    }
+                }
+                """;
+
+        const string fixedSource =
+            """
+                using Xunit;
+                using Axiom.Assertions;
+
+                public sealed class Sample
+                {
+                    public void Check(object actual)
+                    {
+                        actual.Should().NotBeAssignableTo<System.IDisposable>();
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyCodeFixAsync<XunitAssertMigrationAnalyzer, XunitAssertMigrationCodeFixProvider>(source, fixedSource);
+    }
+
+    [Fact]
+    public async Task AssertIsNotAssignableFrom_StringActual_IsNotFlagged()
+    {
+        const string source =
+            """
+                using Xunit;
+
+                public sealed class Sample
+                {
+                    public void Check(string actual)
+                    {
+                        Assert.IsNotAssignableFrom<object>(actual);
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertIsNotAssignableFrom_NonGenericOverload_IsNotFlagged()
+    {
+        const string source =
+            """
+                using System;
+                using Xunit;
+
+                public sealed class Sample
+                {
+                    public void Check(object actual)
+                    {
+                        Assert.IsNotAssignableFrom(typeof(IDisposable), actual);
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task AssertIsNotType_IsNotFlagged()
+    {
+        const string source =
+            """
+                using Xunit;
+
+                public sealed class Sample
+                {
+                    public void Check(object actual)
+                    {
+                        Assert.IsNotType<string>(actual);
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
     public async Task FullyQualifiedXunitAssertIsType_IsFlagged()
     {
         const string source =
@@ -217,6 +308,23 @@ public sealed class XunitAssertMigrationTypeTests
                     public void Check(object actual)
                     {
                         {|AXM1016:Xunit.Assert.IsAssignableFrom<System.IDisposable>(actual)|};
+                    }
+                }
+                """;
+
+        await AnalyzerVerifier.VerifyAnalyzerAsync<XunitAssertMigrationAnalyzer>(source);
+    }
+
+    [Fact]
+    public async Task FullyQualifiedXunitAssertIsNotAssignableFrom_IsFlagged()
+    {
+        const string source =
+            """
+                public sealed class Sample
+                {
+                    public void Check(object actual)
+                    {
+                        {|AXM1076:Xunit.Assert.IsNotAssignableFrom<System.IDisposable>(actual)|};
                     }
                 }
                 """;

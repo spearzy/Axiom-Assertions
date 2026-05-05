@@ -220,7 +220,9 @@ internal static class DocsSnippetExtractor
             || code.Contains("Assert.StartsWith(", StringComparison.Ordinal)
             || code.Contains("Assert.EndsWith(", StringComparison.Ordinal)
             || code.Contains("Assert.IsType<", StringComparison.Ordinal)
-            || code.Contains("Assert.IsAssignableFrom<", StringComparison.Ordinal);
+            || code.Contains("Assert.IsAssignableFrom<", StringComparison.Ordinal)
+            || code.Contains("Assert.IsNotAssignableFrom<", StringComparison.Ordinal)
+            || code.Contains("Assert.InRange(", StringComparison.Ordinal);
     }
 
     private static bool NeedsNunitStubs(string code)

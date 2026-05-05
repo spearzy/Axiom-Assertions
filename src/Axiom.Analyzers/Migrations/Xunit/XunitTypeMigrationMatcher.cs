@@ -19,6 +19,7 @@ internal static class XunitTypeMigrationMatcher
         {
             XunitAssertMigrationKind.BeOfType => IsSupportedGenericTypeAssertionOverload(invocation, symbols),
             XunitAssertMigrationKind.BeAssignableTo => IsSupportedGenericTypeAssertionOverload(invocation, symbols),
+            XunitAssertMigrationKind.NotBeAssignableTo => IsSupportedGenericTypeAssertionOverload(invocation, symbols),
             _ => false,
         };
     }

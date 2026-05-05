@@ -30,6 +30,8 @@ internal enum XunitAssertMigrationKind
     ThrowAsync,
     BeOfType,
     BeAssignableTo,
+    NotBeAssignableTo,
+    BeInRange,
 }
 
 internal sealed class XunitAssertMigrationSpec
@@ -303,6 +305,24 @@ internal static class XunitAssertMigrationSpecs
             "Migrate xUnit Assert.IsAssignableFrom to Axiom",
             "xUnit Assert.IsAssignableFrom<T>(...) can be migrated to 'value.Should().BeAssignableTo<T>()'",
             "Convert to 'value.Should().BeAssignableTo<T>()'"),
+        new(
+            AxiomAnalyzerIds.MigrateXunitAssertIsNotAssignableFrom,
+            "IsNotAssignableFrom",
+            1,
+            alternateArgumentCount: null,
+            XunitAssertMigrationKind.NotBeAssignableTo,
+            "Migrate xUnit Assert.IsNotAssignableFrom to Axiom",
+            "xUnit Assert.IsNotAssignableFrom<T>(...) can be migrated to 'value.Should().NotBeAssignableTo<T>()'",
+            "Convert to 'value.Should().NotBeAssignableTo<T>()'"),
+        new(
+            AxiomAnalyzerIds.MigrateXunitAssertInRange,
+            "InRange",
+            3,
+            alternateArgumentCount: null,
+            XunitAssertMigrationKind.BeInRange,
+            "Migrate xUnit Assert.InRange to Axiom",
+            "xUnit Assert.InRange(actual, low, high) can be migrated to 'actual.Should().BeInRange(low, high)'",
+            "Convert to 'actual.Should().BeInRange(low, high)'"),
     ];
 
     public static ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =

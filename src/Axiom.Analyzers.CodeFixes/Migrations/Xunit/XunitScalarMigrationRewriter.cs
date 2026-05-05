@@ -29,6 +29,7 @@ internal static class XunitScalarMigrationRewriter
             XunitAssertMigrationKind.NotBeEmpty => "NotBeEmpty",
             XunitAssertMigrationKind.BeSameAs => "BeSameAs",
             XunitAssertMigrationKind.NotBeSameAs => "NotBeSameAs",
+            XunitAssertMigrationKind.BeInRange => "BeInRange",
             _ => throw new ArgumentOutOfRangeException(nameof(kind)),
         };
     }
