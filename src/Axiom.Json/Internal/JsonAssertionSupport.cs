@@ -20,8 +20,15 @@ internal static class JsonAssertionSupport
 
     public static string SubjectLabel(string? subjectExpression) => string.IsNullOrWhiteSpace(subjectExpression) ? "value" : subjectExpression;
 
+    public static string DescribeInvalidSubjectJson(string subjectLabel, string detail)
+    {
+        return subjectLabel is "value" or "actual"
+            ? $"invalid subject JSON ({detail})"
+            : $"invalid JSON in {subjectLabel} ({detail})";
+    }
+
     public static string DescribeWrongValueKind(JsonElement element, string path, string expectedKind)
-        => $"{DescribeElement(element)} at {path} (expected {expectedKind})";
+        => $"{DescribeElement(element)} at {path}; expected {expectedKind.ToLowerInvariant()}";
 
     public static string DescribeElement(JsonElement element)
     {
@@ -42,7 +49,7 @@ internal static class JsonAssertionSupport
     public static string FormatValueKind(JsonValueKind valueKind)
         => valueKind switch
         {
-            JsonValueKind.True or JsonValueKind.False => "Boolean",
-            _ => valueKind.ToString()
+            JsonValueKind.True or JsonValueKind.False => "boolean",
+            _ => valueKind.ToString().ToLowerInvariant()
         };
 }

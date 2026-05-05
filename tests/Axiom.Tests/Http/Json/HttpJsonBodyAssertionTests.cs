@@ -92,7 +92,7 @@ public sealed class HttpJsonBodyAssertionTests
 
         var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonPath("$.id"));
 
-        Assert.Equal("Expected response to have JSON path $.id, but found no response content.", ex.Message);
+        Assert.Equal("Expected response to have JSON path $.id, but found missing response body content.", ex.Message);
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public sealed class HttpJsonBodyAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonObjectAtPath("$.user"));
 
         Assert.Equal(
-            "Expected response JSON body to have JSON object at path $.user, but found JSON array at $.user (expected Object).",
+            "Expected response JSON body to have JSON object at path $.user, but found JSON array at $.user; expected object.",
             ex.Message);
     }
 
@@ -115,7 +115,7 @@ public sealed class HttpJsonBodyAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonArrayAtPath("$.roles"));
 
         Assert.Equal(
-            "Expected response JSON body to have JSON array at path $.roles, but found JSON object at $.roles (expected Array).",
+            "Expected response JSON body to have JSON array at path $.roles, but found JSON object at $.roles; expected array.",
             ex.Message);
     }
 
@@ -127,7 +127,7 @@ public sealed class HttpJsonBodyAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonArrayLengthAtPath("$.roles", 2));
 
         Assert.Equal(
-            "Expected response JSON body to have JSON array at path $.roles with length 2, but found JSON array length 1 at $.roles.",
+            "Expected response JSON body to have JSON array at path $.roles with length 2, but found JSON array length mismatch at $.roles: expected 2 but found 1.",
             ex.Message);
     }
 
@@ -139,7 +139,7 @@ public sealed class HttpJsonBodyAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonPropertyCountAtPath("$.user", 2));
 
         Assert.Equal(
-            "Expected response JSON body to have JSON object at path $.user with property count 2, but found JSON object property count 1 at $.user.",
+            "Expected response JSON body to have JSON object at path $.user with property count 2, but found JSON object property count mismatch at $.user: expected 2 but found 1.",
             ex.Message);
     }
 
@@ -151,7 +151,7 @@ public sealed class HttpJsonBodyAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonArrayLengthAtPath("$.user.roles", 1));
 
         Assert.Equal(
-            "Expected response JSON body to have JSON array at path $.user.roles with length 1, but found missing path $.user.roles.",
+            "Expected response JSON body to have JSON array at path $.user.roles with length 1, but found missing JSON path $.user.roles.",
             ex.Message);
     }
 
@@ -174,7 +174,7 @@ public sealed class HttpJsonBodyAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonObjectAtPath("$.user"));
 
         Assert.Equal(
-            "Expected response JSON body to have JSON object at path $.user, but found invalid JSON at line 0, byte 10.",
+            "Expected response JSON body to have JSON object at path $.user, but found invalid JSON in response JSON body (line 0, byte 10).",
             ex.Message);
     }
 

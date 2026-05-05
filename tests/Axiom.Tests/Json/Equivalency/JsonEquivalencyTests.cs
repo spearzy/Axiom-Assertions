@@ -116,7 +116,7 @@ public sealed class JsonEquivalencyTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().BeJsonEquivalentTo(expected));
 
         Assert.Equal(
-            "Expected actual to be JSON equivalent to {\"id\":1}, but found JSON value kind mismatch at $.id: expected Number but found String.",
+            "Expected actual to be JSON equivalent to {\"id\":1}, but found JSON value kind mismatch at $.id: expected number but found string.",
             ex.Message);
     }
 
@@ -195,7 +195,7 @@ public sealed class JsonEquivalencyTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().BeJsonEquivalentTo(expected));
 
         Assert.Equal(
-            "Expected actual to be JSON equivalent to {\"id\":1}, but found invalid JSON at line 0, byte 8.",
+            "Expected actual to be JSON equivalent to {\"id\":1}, but found invalid subject JSON (line 0, byte 8).",
             ex.Message);
     }
 
@@ -210,7 +210,7 @@ public sealed class JsonEquivalencyTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().NotBeJsonEquivalentTo(unexpected));
 
         Assert.Equal(
-            "Expected actual to not be JSON equivalent to {\"id\":2}, but found invalid JSON at line 0, byte 8.",
+            "Expected actual to not be JSON equivalent to {\"id\":2}, but found invalid subject JSON (line 0, byte 8).",
             ex.Message);
     }
 
@@ -225,7 +225,8 @@ public sealed class JsonEquivalencyTests
         var ex = Assert.Throws<ArgumentException>(() => actual.Should().BeJsonEquivalentTo(expected));
 
         Assert.Equal("expectedJson", ex.ParamName);
-        Assert.Contains("expectedJson must be valid JSON", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("expectedJson must be valid expected JSON", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("line 0, byte 8", ex.Message, StringComparison.Ordinal);
     }
 
     [Fact]

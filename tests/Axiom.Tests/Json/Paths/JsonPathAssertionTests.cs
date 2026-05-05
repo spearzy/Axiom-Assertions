@@ -38,7 +38,21 @@ public sealed class JsonPathAssertionTests
 
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonPath("$.user.email"));
 
-        Assert.Equal("Expected actual to have JSON path $.user.email, but found missing path $.user.email.", ex.Message);
+        Assert.Equal("Expected actual to have JSON path $.user.email, but found missing JSON path $.user.email.", ex.Message);
+    }
+
+    [Fact]
+    public void HaveJsonPath_Throws_WhenTraversalStopsAtWrongKind()
+    {
+        const string actual = """
+            { "user": [] }
+            """;
+
+        var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonPath("$.user.email"));
+
+        Assert.Equal(
+            "Expected actual to have JSON path $.user.email, but found could not resolve JSON path $.user.email: expected object at $.user but found array.",
+            ex.Message);
     }
 
     [Fact]
@@ -127,7 +141,7 @@ public sealed class JsonPathAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonNumberAtPath("$.score", 1m));
 
         Assert.Equal(
-            "Expected actual to have JSON number at path $.score equal to 1, but found JSON string \"1\" at $.score (expected Number).",
+            "Expected actual to have JSON number at path $.score equal to 1, but found JSON string \"1\" at $.score; expected number.",
             ex.Message);
     }
 
@@ -141,7 +155,7 @@ public sealed class JsonPathAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonNullAtPath("$.deletedAt"));
 
         Assert.Equal(
-            "Expected actual to have JSON null at path $.deletedAt, but found JSON boolean false at $.deletedAt.",
+            "Expected actual to have JSON null at path $.deletedAt, but found JSON boolean false at $.deletedAt; expected null.",
             ex.Message);
     }
 
@@ -153,7 +167,7 @@ public sealed class JsonPathAssertionTests
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonPath("$.user.id"));
 
         Assert.Equal(
-            "Expected actual to have JSON path $.user.id, but found invalid JSON at line 0, byte 10.",
+            "Expected actual to have JSON path $.user.id, but found invalid subject JSON (line 0, byte 10).",
             ex.Message);
     }
 

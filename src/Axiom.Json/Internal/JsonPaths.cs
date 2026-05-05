@@ -133,12 +133,12 @@ internal static class JsonPathResolver
                 if (current.ValueKind != JsonValueKind.Object)
                 {
                     return JsonPathResolution.Failed(
-                        $"path traversal stopped at {currentPath}: expected Object but found {JsonAssertionSupport.FormatValueKind(current.ValueKind)}.");
+                        $"could not resolve JSON path {path.DisplayPath}: expected object at {currentPath} but found {JsonAssertionSupport.FormatValueKind(current.ValueKind)}");
                 }
 
                 if (!current.TryGetProperty(segment.PropertyName, out current))
                 {
-                    return JsonPathResolution.Failed($"missing path {nextPath}");
+                    return JsonPathResolution.Failed($"missing JSON path {nextPath}");
                 }
 
                 currentPath = nextPath;
@@ -150,12 +150,12 @@ internal static class JsonPathResolver
             if (current.ValueKind != JsonValueKind.Array)
             {
                 return JsonPathResolution.Failed(
-                    $"path traversal stopped at {currentPath}: expected Array but found {JsonAssertionSupport.FormatValueKind(current.ValueKind)}.");
+                    $"could not resolve JSON path {path.DisplayPath}: expected array at {currentPath} but found {JsonAssertionSupport.FormatValueKind(current.ValueKind)}");
             }
 
             if (arrayIndex < 0 || arrayIndex >= current.GetArrayLength())
             {
-                return JsonPathResolution.Failed($"missing path {indexedPath}");
+                return JsonPathResolution.Failed($"missing JSON path {indexedPath}");
             }
 
             var elementIndex = 0;

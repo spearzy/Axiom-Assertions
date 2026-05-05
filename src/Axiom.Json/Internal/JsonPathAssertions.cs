@@ -29,7 +29,7 @@ internal static class JsonPathAssertions
             JsonAssertionSupport.Fail(
                 subjectLabel,
                 expectation,
-                new JsonDisplay(subject.InvalidDetail!),
+                new JsonDisplay(JsonAssertionSupport.DescribeInvalidSubjectJson(subjectLabel, subject.InvalidDetail!)),
                 because,
                 callerFilePath,
                 callerLineNumber);
@@ -75,7 +75,7 @@ internal static class JsonPathAssertions
             JsonAssertionSupport.Fail(
                 subjectLabel,
                 expectation,
-                new JsonDisplay(subject.InvalidDetail!),
+                new JsonDisplay(JsonAssertionSupport.DescribeInvalidSubjectJson(subjectLabel, subject.InvalidDetail!)),
                 because,
                 callerFilePath,
                 callerLineNumber);
@@ -149,7 +149,7 @@ internal static class JsonPathAssertions
             JsonAssertionSupport.Fail(
                 subjectLabel,
                 expectation,
-                new JsonDisplay(subject.InvalidDetail!),
+                new JsonDisplay(JsonAssertionSupport.DescribeInvalidSubjectJson(subjectLabel, subject.InvalidDetail!)),
                 because,
                 callerFilePath,
                 callerLineNumber);
@@ -273,7 +273,7 @@ internal static class JsonPathAssertions
                 var actualLength = element.GetArrayLength();
                 return actualLength == expectedLength
                     ? null
-                    : $"JSON array length {actualLength} at {jsonPath.DisplayPath}";
+                    : $"JSON array length mismatch at {jsonPath.DisplayPath}: expected {expectedLength} but found {actualLength}";
             });
     }
 
@@ -310,7 +310,7 @@ internal static class JsonPathAssertions
                 var actualCount = CountProperties(element);
                 return actualCount == expectedCount
                     ? null
-                    : $"JSON object property count {actualCount} at {jsonPath.DisplayPath}";
+                    : $"JSON object property count mismatch at {jsonPath.DisplayPath}: expected {expectedCount} but found {actualCount}";
             });
     }
 
@@ -363,7 +363,7 @@ internal static class JsonPathAssertions
             JsonAssertionSupport.Fail(
                 subjectLabel,
                 expectation,
-                new JsonDisplay(subject.InvalidDetail!),
+                new JsonDisplay(JsonAssertionSupport.DescribeInvalidSubjectJson(subjectLabel, subject.InvalidDetail!)),
                 because,
                 callerFilePath,
                 callerLineNumber);
@@ -391,7 +391,7 @@ internal static class JsonPathAssertions
         JsonAssertionSupport.Fail(
             subjectLabel,
             expectation,
-            new JsonDisplay($"{JsonAssertionSupport.DescribeElement(resolution.Value)} at {parsedPath.DisplayPath}"),
+            new JsonDisplay(JsonAssertionSupport.DescribeWrongValueKind(resolution.Value, parsedPath.DisplayPath, "Null")),
             because,
             callerFilePath,
             callerLineNumber);
@@ -422,7 +422,7 @@ internal static class JsonPathAssertions
             JsonAssertionSupport.Fail(
                 subjectLabel,
                 expectation,
-                new JsonDisplay(subject.InvalidDetail!),
+                new JsonDisplay(JsonAssertionSupport.DescribeInvalidSubjectJson(subjectLabel, subject.InvalidDetail!)),
                 because,
                 callerFilePath,
                 callerLineNumber);
@@ -487,7 +487,7 @@ internal static class JsonPathAssertions
             JsonAssertionSupport.Fail(
                 subjectLabel,
                 expectation,
-                new JsonDisplay(subject.InvalidDetail!),
+                new JsonDisplay(JsonAssertionSupport.DescribeInvalidSubjectJson(subjectLabel, subject.InvalidDetail!)),
                 because,
                 callerFilePath,
                 callerLineNumber);

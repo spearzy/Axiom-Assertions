@@ -410,7 +410,7 @@ internal static class HttpResponseAssertionEngine
             HttpAssertionSupport.Fail(
                 subjectLabel,
                 expectation,
-                new HttpDisplay("no response content"),
+                HttpAssertionSupport.MissingBodyContent,
                 because,
                 callerFilePath,
                 callerLineNumber);

@@ -7,6 +7,8 @@ namespace Axiom.Http;
 
 internal static class HttpAssertionSupport
 {
+    public static HttpDisplay MissingBodyContent { get; } = new("missing response body content");
+
     public static void Fail(
         string subjectLabel,
         Expectation expectation,
