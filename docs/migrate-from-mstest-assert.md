@@ -5,7 +5,7 @@ description: A practical staged walkthrough for moving MSTest Assert, StringAsse
 
 # Migrate from MSTest Assert to Axiom
 
-The MSTest path is focused on direct assertion shapes that map cleanly to Axiom. It is useful for scalar assertions, string checks, simple collection containment, ordered/range checks, type/reference checks, and awaited async exception assertions.
+The MSTest path is focused on direct assertion shapes that map cleanly to Axiom. It is useful for scalar assertions, string checks, simple collection containment, collection uniqueness, ordered/range checks, type/reference checks, and awaited async exception assertions.
 
 It is not intended to rewrite MSTest's broader collection comparison or message-heavy overloads automatically.
 
@@ -25,8 +25,11 @@ The analyzer supports conservative rewrites for:
 - `Assert.IsNull(...)`, `Assert.IsNotNull(...)`, `Assert.IsTrue(...)`, and `Assert.IsFalse(...)`
 - `Assert.AreSame(...)` and `Assert.AreNotSame(...)`
 - `Assert.IsInstanceOfType(...)` and `Assert.IsNotInstanceOfType(...)`
+- newer `Assert.Contains(...)`, `Assert.DoesNotContain(...)`, `Assert.StartsWith(...)`, and `Assert.EndsWith(...)` string checks when the expected value is clear
+- newer `Assert.Contains(...)` and `Assert.DoesNotContain(...)` collection checks
 - `StringAssert.Contains(...)`, `StringAssert.StartsWith(...)`, and `StringAssert.EndsWith(...)` when the expected value is clear
 - `CollectionAssert.Contains(...)` and `CollectionAssert.DoesNotContain(...)`
+- `CollectionAssert.AllItemsAreUnique(...)`
 - `Assert.IsGreaterThan(...)`, `Assert.IsGreaterThanOrEqualTo(...)`, `Assert.IsLessThan(...)`, `Assert.IsLessThanOrEqualTo(...)`, and `Assert.IsInRange(...)`
 - awaited `Assert.ThrowsExceptionAsync<TException>(...)`, `Assert.ThrowsExactlyAsync<TException>(...)`, and `Assert.ThrowsAsync<TException>(...)`
 
@@ -40,7 +43,7 @@ A good first pass is:
 
 1. Rewrite equality, null, boolean, reference, and type checks.
 2. Rewrite simple `StringAssert.*` checks.
-3. Rewrite simple collection containment checks.
+3. Rewrite simple collection containment and uniqueness checks.
 4. Review ordered/range rewrites separately because MSTest uses bound-first argument order.
 5. Review awaited async exception rewrites separately.
 6. Leave structural collection comparisons and message-bearing overloads manual.
@@ -75,16 +78,20 @@ Before:
 
 <!-- axiom-context=migration-gallery -->
 ```csharp
+Assert.StartsWith("ord-", actual);
 StringAssert.Contains(actual, "sub");
 CollectionAssert.Contains(values, "expected");
+CollectionAssert.AllItemsAreUnique(values);
 ```
 
 After:
 
 <!-- axiom-context=migration-gallery -->
 ```csharp
+actual.Should().StartWith("ord-");
 actual.Should().Contain("sub");
 values.Should().Contain("expected");
+values.Should().HaveUniqueItems();
 ```
 
 Ordered and range assertions:
@@ -135,7 +142,7 @@ Keep these manual during an MSTest migration:
 
 - `CollectionAssert.AreEqual(...)`, `CollectionAssert.AreEquivalent(...)`, and structural collection comparison
 - precision, comparer, and message-bearing overloads
-- broader MSTest assertion families that are not direct scalar/string/containment checks
+- broader MSTest assertion families that are not direct scalar/string/containment/uniqueness checks
 - async exception assertions that are not awaited
 - xUnit-style async `paramName` and `ThrowsAnyAsync<TException>` shapes, which MSTest does not expose
 - ordered assertions where the values are not clearly comparable
@@ -149,7 +156,7 @@ A realistic MSTest rollout is:
 
 1. Pick one test project or namespace.
 2. Apply analyzer fixes for scalar `Assert.*` calls.
-3. Review `StringAssert.*` and simple `CollectionAssert.*` rewrites.
+3. Review string checks plus simple collection containment and uniqueness rewrites.
 4. Review ordered/range rewrites with attention to bound-first argument order.
 5. Review awaited async exception rewrites separately.
 6. Keep structural collection and object-graph assertions manual.

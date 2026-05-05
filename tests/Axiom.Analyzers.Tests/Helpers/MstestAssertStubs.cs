@@ -6,6 +6,7 @@ internal static class MstestAssertStubs
         """
         using System;
         using System.Collections;
+        using System.Collections.Generic;
         using System.Threading.Tasks;
 
         namespace Microsoft.VisualStudio.TestTools.UnitTesting
@@ -47,6 +48,22 @@ internal static class MstestAssertStubs
                 public static void IsLessThan<T>(T upperBound, T value, string message = "") where T : IComparable<T> { }
                 public static void IsLessThanOrEqualTo<T>(T upperBound, T value, string message = "") where T : IComparable<T> { }
                 public static void IsInRange<T>(T minValue, T maxValue, T value, string message = "") where T : struct { }
+                public static void Contains(string substring, string value) { }
+                public static void Contains(string substring, string value, StringComparison comparisonType) { }
+                public static void Contains(string substring, string value, string message) { }
+                public static void Contains<T>(T expected, IEnumerable<T> collection) { }
+                public static void Contains<T>(T expected, IEnumerable<T> collection, IEqualityComparer<T> comparer) { }
+                public static void DoesNotContain(string substring, string value) { }
+                public static void DoesNotContain(string substring, string value, StringComparison comparisonType) { }
+                public static void DoesNotContain(string substring, string value, string message) { }
+                public static void DoesNotContain<T>(T unexpected, IEnumerable<T> collection) { }
+                public static void DoesNotContain<T>(T unexpected, IEnumerable<T> collection, IEqualityComparer<T> comparer) { }
+                public static void StartsWith(string expectedPrefix, string value) { }
+                public static void StartsWith(string expectedPrefix, string value, StringComparison comparisonType) { }
+                public static void StartsWith(string expectedPrefix, string value, string message) { }
+                public static void EndsWith(string expectedSuffix, string value) { }
+                public static void EndsWith(string expectedSuffix, string value, StringComparison comparisonType) { }
+                public static void EndsWith(string expectedSuffix, string value, string message) { }
             }
 
             public static class StringAssert
@@ -65,6 +82,8 @@ internal static class MstestAssertStubs
                 public static void Contains(ICollection? collection, object? element, string message) { }
                 public static void DoesNotContain(ICollection? collection, object? element) { }
                 public static void DoesNotContain(ICollection? collection, object? element, string message) { }
+                public static void AllItemsAreUnique(ICollection? collection) { }
+                public static void AllItemsAreUnique(ICollection? collection, string message) { }
                 public static void AreEqual(ICollection? expected, ICollection? actual) { }
                 public static void AreEquivalent(ICollection? expected, ICollection? actual) { }
             }

@@ -81,4 +81,11 @@ public static class AxiomAnalyzerIds
     public const string MigrateMstestAssertIsInRange = "AXM1075";
     public const string MigrateXunitAssertIsNotAssignableFrom = "AXM1076";
     public const string MigrateXunitAssertInRange = "AXM1077";
+    public const string MigrateMstestAssertContainsSubstring = "AXM1081";
+    public const string MigrateMstestAssertDoesNotContainSubstring = "AXM1082";
+    public const string MigrateMstestAssertStartsWith = "AXM1083";
+    public const string MigrateMstestAssertEndsWith = "AXM1084";
+    public const string MigrateMstestAssertContains = "AXM1085";
+    public const string MigrateMstestAssertDoesNotContain = "AXM1086";
+    public const string MigrateMstestCollectionAssertAllItemsAreUnique = "AXM1087";
 }

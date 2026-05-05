@@ -44,9 +44,13 @@ internal static class AxiomAssertionStubs
                 public AndContinuation<StringAssertions> BeNull() => default;
                 public AndContinuation<StringAssertions> NotBeNull() => default;
                 public AndContinuation<StringAssertions> Contain(string expectedSubstring) => default;
+                public AndContinuation<StringAssertions> Contain(string expectedSubstring, StringComparison comparison) => default;
                 public AndContinuation<StringAssertions> NotContain(string unexpectedSubstring) => default;
+                public AndContinuation<StringAssertions> NotContain(string unexpectedSubstring, StringComparison comparison) => default;
                 public AndContinuation<StringAssertions> StartWith(string expectedPrefix) => default;
+                public AndContinuation<StringAssertions> StartWith(string expectedPrefix, StringComparison comparison) => default;
                 public AndContinuation<StringAssertions> EndWith(string expectedSuffix) => default;
+                public AndContinuation<StringAssertions> EndWith(string expectedSuffix, StringComparison comparison) => default;
                 public AndContinuation<StringAssertions> BeEmpty() => default;
                 public AndContinuation<StringAssertions> NotBeEmpty() => default;
             }
@@ -101,6 +105,10 @@ internal static class AxiomAssertionStubs
                     => default;
 
                 public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> NotBeEmpty<TCollection>(this Axiom.Assertions.ValueAssertions<TCollection> assertions)
+                    where TCollection : IEnumerable
+                    => default;
+
+                public static AndContinuation<Axiom.Assertions.ValueAssertions<TCollection>> HaveUniqueItems<TCollection>(this Axiom.Assertions.ValueAssertions<TCollection> assertions)
                     where TCollection : IEnumerable
                     => default;
 
