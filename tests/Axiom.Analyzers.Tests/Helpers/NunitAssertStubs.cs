@@ -35,6 +35,7 @@ internal static class NunitAssertStubs
                 public static TrueConstraint True => default!;
                 public static FalseConstraint False => default!;
                 public static EmptyConstraint Empty => default!;
+                public static UniqueConstraint Unique => default!;
                 public static EqualConstraint EqualTo(object? expected) => default!;
                 public static EqualConstraint EqualTo(string expected) => default!;
                 public static EqualConstraint EqualTo<T>(IEnumerable<T> expected) => default!;
@@ -62,7 +63,9 @@ internal static class NunitAssertStubs
 
             public static class Has
             {
+                public static ConstraintExpression No => default!;
                 public static CountConstraintExpression Count => default!;
+                public static MemberConstraint Member(object? expected) => default!;
             }
         }
 
@@ -77,6 +80,7 @@ internal static class NunitAssertStubs
                 public TrueConstraint True => default!;
                 public FalseConstraint False => default!;
                 public EmptyConstraint Empty => default!;
+                public UniqueConstraint Unique => default!;
                 public EqualConstraint EqualTo(object? expected) => default!;
                 public EqualConstraint EqualTo(string expected) => default!;
                 public SameAsConstraint SameAs(object? expected) => default!;
@@ -92,6 +96,7 @@ internal static class NunitAssertStubs
                 public AssignableToConstraint AssignableTo<TExpected>() => default!;
                 public AssignableToConstraint AssignableTo(Type expectedType) => default!;
                 public ContainsConstraint Contain(string expected) => default!;
+                public MemberConstraint Member(object? expected) => default!;
                 public StartsWithConstraint StartWith(string expected) => default!;
                 public EndsWithConstraint EndWith(string expected) => default!;
             }
@@ -106,6 +111,7 @@ internal static class NunitAssertStubs
             public sealed class TrueConstraint : ConstraintExpression { }
             public sealed class FalseConstraint : ConstraintExpression { }
             public sealed class EmptyConstraint : ConstraintExpression { }
+            public sealed class UniqueConstraint : ConstraintExpression { }
             public sealed class SameAsConstraint : ConstraintExpression { }
             public sealed class ComparableConstraint : ConstraintExpression
             {
@@ -122,6 +128,10 @@ internal static class NunitAssertStubs
             public sealed class ContainsConstraint : ConstraintExpression
             {
                 public ContainsConstraint IgnoreCase => this;
+            }
+            public sealed class MemberConstraint : ConstraintExpression
+            {
+                public MemberConstraint Using(object comparer) => this;
             }
             public sealed class StartsWithConstraint : ConstraintExpression { }
             public sealed class EndsWithConstraint : ConstraintExpression { }

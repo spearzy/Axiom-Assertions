@@ -243,8 +243,11 @@ Rules:
 - `AXM1065` for `Assert.That(actual, Is.Not.AssignableTo<TExpected>())`
 - `AXM1066` for `Assert.ThrowsAsync<TException>(...)` in async contexts, appending `.Thrown` when the returned exception is used
 - `AXM1067` for `Assert.CatchAsync<TException>(...)` in async contexts, appending `.Thrown` when the returned exception is used
+- `AXM1078` for `Assert.That(collection, Has.Member(expected))`
+- `AXM1079` for `Assert.That(collection, Has.No.Member(unexpected))`
+- `AXM1080` for `Assert.That(collection, Is.Unique)`
 
-The NUnit migration support is still intentionally narrow. It covers `Does.*`, `Has.Count.EqualTo(...)`, ordered value, range, reference identity, generic type constraints, and async exception assertions that map directly onto the current Axiom surface without guessing through richer constraint chains.
+The NUnit migration support is still intentionally narrow. It covers `Does.*`, direct `Has.*` collection constraints, ordered value, range, reference identity, generic type constraints, and async exception assertions that map directly onto the current Axiom surface without guessing through richer constraint chains.
 
 Before:
 
@@ -259,6 +262,9 @@ Assert.That(actual, Does.Not.Contain("archived"));
 Assert.That(actual, Does.StartWith("pre"));
 Assert.That(actual, Does.EndWith("suf"));
 Assert.That(values, Has.Count.EqualTo(2));
+Assert.That(values, Has.Member("active"));
+Assert.That(values, Has.No.Member("blocked"));
+Assert.That(values, Is.Unique);
 Assert.That(value, Is.SameAs(value));
 Assert.That(2, Is.GreaterThan(1));
 Assert.That(2, Is.InRange(1, 3));
@@ -280,6 +286,9 @@ actual.Should().NotContain("archived");
 actual.Should().StartWith("pre");
 actual.Should().EndWith("suf");
 values.Should().HaveCount(2);
+values.Should().Contain("active");
+values.Should().NotContain("blocked");
+values.Should().HaveUniqueItems();
 value.Should().BeSameAs(value);
 2.Should().BeGreaterThan(1);
 2.Should().BeInRange(1, 3);
@@ -288,7 +297,7 @@ value.Should().BeAssignableTo<object>();
 value.Should().NotBeAssignableTo<string>();
 ```
 
-These suggestions use semantic matching against NUnit's real APIs. They intentionally skip tolerance/comparer variations, message-bearing overloads, richer `Does.*` chains, `Has.*` chains beyond `Has.Count.EqualTo(int)`, runtime `Type` constraints, `Is.Not.TypeOf<T>()`, async exception assertions outside an async context, `AsyncTestDelegate` variable rewrites, and prefix/suffix constraints where the expected value is not an obvious non-null constant string.
+These suggestions use semantic matching against NUnit's real APIs. They intentionally skip tolerance/comparer variations, message-bearing overloads, richer `Does.*` chains, richer `Has.*` chains beyond direct count/member checks, runtime `Type` constraints, `Is.Not.TypeOf<T>()`, `Is.Not.Unique`, async exception assertions outside an async context, `AsyncTestDelegate` variable rewrites, and prefix/suffix constraints where the expected value is not an obvious non-null constant string.
 
 NUnit does not expose xUnit's `Assert.ThrowsAnyAsync<TException>(...)` or `Assert.ThrowsAsync<TException>(paramName, ...)` shapes. The NUnit derived-exception async assertion shape is `Assert.CatchAsync<TException>(...)`, which maps to Axiom's `ThrowAsync<TException>()`.
 

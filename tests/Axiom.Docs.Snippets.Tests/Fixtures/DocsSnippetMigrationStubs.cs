@@ -78,6 +78,7 @@ namespace NUnit.Framework
         public static TrueConstraint True => default!;
         public static FalseConstraint False => default!;
         public static EmptyConstraint Empty => default!;
+        public static UniqueConstraint Unique => default!;
         public static EqualConstraint EqualTo(object? expected) => default!;
         public static SameAsConstraint SameAs(object? expected) => default!;
         public static ComparableConstraint GreaterThan(object? expected) => default!;
@@ -100,7 +101,9 @@ namespace NUnit.Framework
 
     public static class Has
     {
+        public static ConstraintExpression No => default!;
         public static CountConstraintExpression Count => default!;
+        public static MemberConstraint Member(object? expected) => default!;
     }
 }
 
@@ -115,6 +118,7 @@ namespace NUnit.Framework.Constraints
         public TrueConstraint True => default!;
         public FalseConstraint False => default!;
         public EmptyConstraint Empty => default!;
+        public UniqueConstraint Unique => default!;
         public EqualConstraint EqualTo(object? expected) => default!;
         public SameAsConstraint SameAs(object? expected) => default!;
         public ComparableConstraint GreaterThan(object? expected) => default!;
@@ -126,6 +130,7 @@ namespace NUnit.Framework.Constraints
         public InstanceOfConstraint InstanceOf<TExpected>() => default!;
         public AssignableToConstraint AssignableTo<TExpected>() => default!;
         public ContainsConstraint Contain(string expected) => default!;
+        public MemberConstraint Member(object? expected) => default!;
         public StartsWithConstraint StartWith(string expected) => default!;
         public EndsWithConstraint EndWith(string expected) => default!;
     }
@@ -135,6 +140,7 @@ namespace NUnit.Framework.Constraints
     public sealed class TrueConstraint : ConstraintExpression { }
     public sealed class FalseConstraint : ConstraintExpression { }
     public sealed class EmptyConstraint : ConstraintExpression { }
+    public sealed class UniqueConstraint : ConstraintExpression { }
     public sealed class SameAsConstraint : ConstraintExpression { }
     public sealed class ComparableConstraint : ConstraintExpression { }
     public sealed class RangeConstraint : ConstraintExpression { }
@@ -142,6 +148,7 @@ namespace NUnit.Framework.Constraints
     public sealed class InstanceOfConstraint : ConstraintExpression { }
     public sealed class AssignableToConstraint : ConstraintExpression { }
     public sealed class ContainsConstraint : ConstraintExpression { }
+    public sealed class MemberConstraint : ConstraintExpression { }
     public sealed class StartsWithConstraint : ConstraintExpression { }
     public sealed class EndsWithConstraint : ConstraintExpression { }
     public sealed class CountConstraintExpression : ConstraintExpression
