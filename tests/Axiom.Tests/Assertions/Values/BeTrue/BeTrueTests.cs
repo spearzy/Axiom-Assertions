@@ -16,6 +16,16 @@ public sealed class BeTrueTests
     }
 
     [Fact]
+    public void BeTrue_DoesNotThrow_WhenNullableValueIsTrue()
+    {
+        bool? value = true;
+
+        var ex = Record.Exception(() => value.Should().BeTrue());
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
     public void BeTrue_Throws_WhenFalse()
     {
         const bool value = false;
@@ -23,6 +33,28 @@ public sealed class BeTrueTests
         var ex = Assert.Throws<InvalidOperationException>(() => value.Should().BeTrue());
 
         const string expected = "Expected value to be True, but found False.";
+        Assert.Equal(expected, ex.Message);
+    }
+
+    [Fact]
+    public void BeTrue_Throws_WhenNullableValueIsFalse()
+    {
+        bool? value = false;
+
+        var ex = Assert.Throws<InvalidOperationException>(() => value.Should().BeTrue());
+
+        const string expected = "Expected value to be True, but found False.";
+        Assert.Equal(expected, ex.Message);
+    }
+
+    [Fact]
+    public void BeTrue_Throws_WhenNullableValueIsNull()
+    {
+        bool? value = null;
+
+        var ex = Assert.Throws<InvalidOperationException>(() => value.Should().BeTrue());
+
+        const string expected = "Expected value to be True, but found <null>.";
         Assert.Equal(expected, ex.Message);
     }
 
