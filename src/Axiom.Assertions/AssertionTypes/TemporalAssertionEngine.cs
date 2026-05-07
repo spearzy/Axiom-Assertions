@@ -3,7 +3,7 @@ using Axiom.Core.Failures;
 
 namespace Axiom.Assertions.AssertionTypes;
 
-internal static class TemporalAssertionEngine
+internal static partial class TemporalAssertionEngine
 {
     public static void AssertBeBefore(
         DateTime subject, string? subjectExpression, DateTime expected, string? because,

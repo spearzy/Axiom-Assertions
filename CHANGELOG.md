@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 - Added nullable `BeApproximately(...)` overloads for `double?`, `float?`, and `decimal?` value assertions.
+- Added nullable temporal assertion overloads for `DateTime?`, `DateTimeOffset?`, `DateOnly?`, and `TimeOnly?`.
 
 ## [2.5.0] - 2026-05-05
 

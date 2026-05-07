@@ -810,9 +810,13 @@ lookup.Should().NotContainEntry(2, "failed", StringComparer.OrdinalIgnoreCase);
 Available on:
 
 - `ValueAssertions<DateTime>`
+- `ValueAssertions<DateTime?>`
 - `ValueAssertions<DateTimeOffset>`
+- `ValueAssertions<DateTimeOffset?>`
 - `ValueAssertions<DateOnly>`
+- `ValueAssertions<DateOnly?>`
 - `ValueAssertions<TimeOnly>`
+- `ValueAssertions<TimeOnly?>`
 
 ```csharp
 BeBefore(expected)

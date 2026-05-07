@@ -4,7 +4,7 @@ using Axiom.Assertions.Chaining;
 
 namespace Axiom.Assertions.Extensions;
 
-public static class TemporalValueAssertionExtensions
+public static partial class TemporalValueAssertionExtensions
 {
     #region DateTime
     public static AndContinuation<ValueAssertions<DateTime>> BeBefore(
