@@ -7,7 +7,15 @@ internal static class JsonAssertionBridge
 {
     public static void ValidatePath(string path) => _ = JsonPath.Parse(path);
 
+    public static string GetDisplayPath(string path) => JsonPath.Parse(path).DisplayPath;
+
     public static string FormatValue(object? value) => JsonAssertionSupport.FormatValue(value);
+
+    public static string FormatPropertyNames(IReadOnlyCollection<string> propertyNames)
+        => JsonContractAssertions.FormatPropertyNames(propertyNames);
+
+    public static string FormatAllowedValues(IReadOnlyCollection<string> allowedValues)
+        => JsonContractAssertions.FormatAllowedValues(allowedValues);
 
     public static string DescribeExpectedJson(string expectedJson, string argumentName)
     {
@@ -65,6 +73,19 @@ internal static class JsonAssertionBridge
             subjectLabel,
             JsonInput.FromElement(expectedJson),
             nameof(expectedJson),
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertBeValidJson(
+        string subjectJson,
+        string subjectLabel,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonAssertionEngine.AssertBeValidJson(
+            JsonInput.FromString(subjectJson),
+            subjectLabel,
             because,
             callerFilePath,
             callerLineNumber);
@@ -261,6 +282,42 @@ internal static class JsonAssertionBridge
             JsonInput.FromString(subjectJson),
             subjectLabel,
             path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertHavePropertiesAtPath(
+        string subjectJson,
+        string subjectLabel,
+        string path,
+        IReadOnlyCollection<string> propertyNames,
+        bool exact,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonAssertionEngine.AssertHaveJsonPropertiesAtPath(
+            JsonInput.FromString(subjectJson),
+            subjectLabel,
+            path,
+            propertyNames,
+            exact,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertHaveAllowedValueAtPath(
+        string subjectJson,
+        string subjectLabel,
+        string path,
+        IReadOnlyCollection<string> allowedValues,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonAssertionEngine.AssertHaveAllowedValueAtPath(
+            JsonInput.FromString(subjectJson),
+            subjectLabel,
+            path,
+            allowedValues,
             because,
             callerFilePath,
             callerLineNumber);

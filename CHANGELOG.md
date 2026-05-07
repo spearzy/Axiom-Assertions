@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 - Added focused `Axiom.Json` contract assertions for valid raw JSON, required and exact object properties, and string allowed-value checks at JSON paths.
+- Added matching `Axiom.Http` response-body JSON contract assertions for valid JSON, required and exact object properties, and string allowed-value checks at JSON paths.
 
 ## [2.6.0] - 2026-05-07
 

@@ -257,6 +257,12 @@ internal static class JsonContractAssertions
         return ValidateStringSet(allowedValues, nameof(allowedValues), allowEmpty: false);
     }
 
+    internal static string FormatPropertyNames(IReadOnlyCollection<string> propertyNames)
+        => FormatStringSet(ValidatePropertyNames(propertyNames));
+
+    internal static string FormatAllowedValues(IReadOnlyCollection<string> allowedValues)
+        => FormatStringSet(ValidateAllowedValues(allowedValues));
+
     private static string[] ValidateStringSet(IReadOnlyCollection<string> values, string argumentName, bool allowEmpty)
     {
         if (!allowEmpty && values.Count == 0)

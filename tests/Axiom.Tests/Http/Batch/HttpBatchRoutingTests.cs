@@ -52,4 +52,16 @@ public sealed class HttpBatchRoutingTests
         Assert.Null(callEx);
         Assert.Throws<InvalidOperationException>(() => batch.Dispose());
     }
+
+    [Fact]
+    public void HaveJsonProperties_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"id\": \"evt_123\" }", "application/json");
+        using var batch = new Axiom.Core.Batch();
+
+        var callEx = Record.Exception(() => response.Should().HaveJsonProperties("id", "status"));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
 }
