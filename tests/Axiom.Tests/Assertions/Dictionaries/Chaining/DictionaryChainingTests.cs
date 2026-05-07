@@ -20,6 +20,20 @@ public sealed class DictionaryChainingTests
     }
 
     [Fact]
+    public void ContainKey_Value_CanBeUsedToAssertExtractedValue()
+    {
+        Dictionary<string, int> values = new()
+        {
+            ["alpha"] = 1,
+            ["beta"] = 2,
+        };
+
+        var extracted = values.Should().ContainKey("alpha").Value;
+
+        Assert.Equal(1, extracted);
+    }
+
+    [Fact]
     public void DictionaryChain_CanBeComposed()
     {
         Dictionary<string, int> values = new()

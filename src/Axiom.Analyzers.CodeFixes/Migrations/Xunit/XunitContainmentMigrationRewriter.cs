@@ -14,9 +14,9 @@ internal static class XunitContainmentMigrationRewriter
             match.AdditionalArgumentExpression,
             match.TypeArgumentSyntax);
 
-        if (match.AppendWhoseValue)
+        if (match.AppendValue)
         {
-            rewrittenExpression = XunitAssertMigrationCodeFixProvider.AppendMemberAccess(rewrittenExpression, "WhoseValue");
+            rewrittenExpression = XunitAssertMigrationCodeFixProvider.AppendMemberAccess(rewrittenExpression, "Value");
         }
 
         return rewrittenExpression;
@@ -24,9 +24,9 @@ internal static class XunitContainmentMigrationRewriter
 
     public static string GetCodeFixTitle(XunitAssertMigrationMatch match)
     {
-        if (match.AppendWhoseValue && match.Spec.Kind is XunitAssertMigrationKind.ContainKey)
+        if (match.AppendValue && match.Spec.Kind is XunitAssertMigrationKind.ContainKey)
         {
-            return "Convert to 'dictionary.Should().ContainKey(key).WhoseValue'";
+            return "Convert to 'dictionary.Should().ContainKey(key).Value'";
         }
 
         return match.Spec.CodeFixTitle;

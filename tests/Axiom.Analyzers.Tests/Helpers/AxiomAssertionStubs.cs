@@ -207,6 +207,7 @@ internal static class AxiomAssertionStubs
             public readonly struct ContainKeyContinuation<TAssertions, TValue>
             {
                 public TAssertions And => throw null!;
+                public TValue Value => throw null!;
                 public TValue WhoseValue => throw null!;
             }
 

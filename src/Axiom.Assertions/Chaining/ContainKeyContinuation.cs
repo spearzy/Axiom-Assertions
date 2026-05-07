@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using Axiom.Core.Failures;
 
@@ -23,20 +24,22 @@ public readonly struct ContainKeyContinuation<TAssertions, TValue>
 
     public TAssertions And { get; }
 
-    public TValue WhoseValue
-    {
-        get
-        {
-            if (_hasValue)
-            {
-                return _value;
-            }
+    public TValue Value => GetValueOrThrow("Value");
 
-            var message = _containKeyFailureMessage is null
-                ? "WhoseValue is unavailable because ContainKey failed."
-                : $"WhoseValue is unavailable because ContainKey failed with error: {_containKeyFailureMessage}";
-            AssertionFailureDispatcher.Throw(message);
-            throw new UnreachableException();
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public TValue WhoseValue => GetValueOrThrow("WhoseValue");
+
+    private TValue GetValueOrThrow(string accessorName)
+    {
+        if (_hasValue)
+        {
+            return _value;
         }
+
+        var message = _containKeyFailureMessage is null
+            ? $"{accessorName} is unavailable because ContainKey failed."
+            : $"{accessorName} is unavailable because ContainKey failed with error: {_containKeyFailureMessage}";
+        AssertionFailureDispatcher.Throw(message);
+        throw new UnreachableException();
     }
 }

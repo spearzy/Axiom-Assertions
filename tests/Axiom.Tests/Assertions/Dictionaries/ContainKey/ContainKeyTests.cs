@@ -36,6 +36,20 @@ public sealed class ContainKeyTests
     }
 
     [Fact]
+    public void ContainKey_ExposesValue_WhenKeyExists()
+    {
+        Dictionary<string, int> values = new()
+        {
+            ["alpha"] = 1,
+            ["beta"] = 2,
+        };
+
+        var continuation = values.Should().ContainKey("alpha");
+
+        Assert.Equal(1, continuation.Value);
+    }
+
+    [Fact]
     public void ContainKey_IReadOnlyDictionary_ExposesWhoseValue_WhenKeyExists()
     {
         IReadOnlyDictionary<string, int> values = new Dictionary<string, int>
@@ -160,6 +174,25 @@ public sealed class ContainKeyTests
 
         const string failureMessage = "Expected values to contain key \"gamma\", but found keys were [\"alpha\"].";
         var expected = $"WhoseValue is unavailable because ContainKey failed with error: {failureMessage}";
+        Assert.Equal(expected, ex.Message);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
+    public void Value_ThrowsExplicitMessage_WhenContainKeyFailedInsideBatch()
+    {
+        Dictionary<string, int> values = new()
+        {
+            ["alpha"] = 1,
+        };
+
+        var batch = new Axiom.Core.Batch();
+        var continuation = values.Should().ContainKey("gamma");
+
+        var ex = Assert.Throws<InvalidOperationException>(() => _ = continuation.Value);
+
+        const string failureMessage = "Expected values to contain key \"gamma\", but found keys were [\"alpha\"].";
+        var expected = $"Value is unavailable because ContainKey failed with error: {failureMessage}";
         Assert.Equal(expected, ex.Message);
         Assert.Throws<InvalidOperationException>(() => batch.Dispose());
     }

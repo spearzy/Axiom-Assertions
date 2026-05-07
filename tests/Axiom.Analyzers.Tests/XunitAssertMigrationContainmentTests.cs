@@ -450,7 +450,7 @@ public sealed class XunitAssertMigrationContainmentTests
                 {
                     public string Check(Dictionary<int, string> values, int key)
                     {
-                        var value = values.Should().ContainKey(key).WhoseValue;
+                        var value = values.Should().ContainKey(key).Value;
                         return value;
                     }
                 }
@@ -502,7 +502,7 @@ public sealed class XunitAssertMigrationContainmentTests
                 {
                     public string Check(Lookup values, int key)
                     {
-                        return values.Should().ContainKey(key).WhoseValue;
+                        return values.Should().ContainKey(key).Value;
                     }
 
                     private sealed class Lookup : IReadOnlyDictionary<int, string>
@@ -553,7 +553,7 @@ public sealed class XunitAssertMigrationContainmentTests
                 {
                     public void Check(IDictionary<int, string> values, int key)
                     {
-                        Use(values.Should().ContainKey(key).WhoseValue);
+                        Use(values.Should().ContainKey(key).Value);
                     }
 
                     private static void Use(string value) { }
@@ -1496,7 +1496,7 @@ public sealed class XunitAssertMigrationContainmentTests
                     public void Check(Dictionary<int, string> values, int key)
                     {
                         values.Should().ContainKey(key);
-                        var value = values.Should().ContainKey(key).WhoseValue;
+                        var value = values.Should().ContainKey(key).Value;
                         values.Should().NotContainKey(key);
                     }
                 }

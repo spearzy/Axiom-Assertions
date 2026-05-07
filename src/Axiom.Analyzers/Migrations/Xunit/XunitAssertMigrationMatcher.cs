@@ -18,7 +18,7 @@ internal sealed class XunitAssertMigrationMatch
         TypeSyntax? typeArgumentSyntax,
         bool requiresAssertionsExtensionsNamespace,
         bool appendSingleItem,
-        bool appendWhoseValue,
+        bool appendValue,
         bool appendThrown)
     {
         Spec = spec;
@@ -30,7 +30,7 @@ internal sealed class XunitAssertMigrationMatch
         TypeArgumentSyntax = typeArgumentSyntax;
         RequiresAssertionsExtensionsNamespace = requiresAssertionsExtensionsNamespace;
         AppendSingleItem = appendSingleItem;
-        AppendWhoseValue = appendWhoseValue;
+        AppendValue = appendValue;
         AppendThrown = appendThrown;
     }
 
@@ -43,7 +43,7 @@ internal sealed class XunitAssertMigrationMatch
     public TypeSyntax? TypeArgumentSyntax { get; }
     public bool RequiresAssertionsExtensionsNamespace { get; }
     public bool AppendSingleItem { get; }
-    public bool AppendWhoseValue { get; }
+    public bool AppendValue { get; }
     public bool AppendThrown { get; }
 }
 
@@ -118,7 +118,7 @@ internal static class XunitAssertMigrationMatcher
                 typeArgumentSyntax,
                 RequiresAssertionsExtensionsNamespace(spec.Kind, GetSubjectType(spec.Kind, invocation.TargetMethod.Parameters)),
                 appendSingleItem: resultIsConsumed && spec.Kind is XunitAssertMigrationKind.ContainSingle or XunitAssertMigrationKind.ContainSingleMatching,
-                appendWhoseValue: resultIsConsumed && spec.Kind is XunitAssertMigrationKind.ContainKey,
+                appendValue: resultIsConsumed && spec.Kind is XunitAssertMigrationKind.ContainKey,
                 appendThrown: spec.Kind switch
                 {
                     XunitAssertMigrationKind.Throw => resultIsConsumed && expectedExpression is not null,
