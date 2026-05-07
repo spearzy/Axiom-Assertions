@@ -26,6 +26,18 @@ public sealed class BeApproximatelyBatchRoutingTests
     }
 
     [Fact]
+    public void BeApproximately_NullableDouble_InsideBatch_DoesNotThrowAtAssertionCallSite()
+    {
+        double? value = 10.3d;
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() => value.Should().BeApproximately(10d, 0.1d));
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
     public void Batch_Dispose_DoesNotThrow_WhenApproximateAssertionsPass()
     {
         var ex = Record.Exception(() =>

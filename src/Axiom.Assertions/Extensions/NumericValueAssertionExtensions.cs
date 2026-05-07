@@ -21,16 +21,29 @@ public static class NumericValueAssertionExtensions
 
         if (!AreApproximatelyEqual(assertions.Subject, expected, tolerance))
         {
-            var failure = new Failure(
-                SubjectLabel(assertions.SubjectExpression),
-                new Expectation($"to be within {tolerance.ToString(CultureInfo.InvariantCulture)} of", expected),
-                assertions.Subject,
-                because);
-
-            AssertionFailureDispatcher.Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+            FailApproximation(assertions, expected, FormatTolerance(tolerance), because, callerFilePath, callerLineNumber);
         }
 
         return new AndContinuation<ValueAssertions<double>>(assertions);
+    }
+
+    public static AndContinuation<ValueAssertions<double?>> BeApproximately(
+        this ValueAssertions<double?> assertions,
+        double expected,
+        double tolerance,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+        ValidateTolerance(tolerance);
+
+        if (!assertions.Subject.HasValue || !AreApproximatelyEqual(assertions.Subject.Value, expected, tolerance))
+        {
+            FailApproximation(assertions, expected, FormatTolerance(tolerance), because, callerFilePath, callerLineNumber);
+        }
+
+        return new AndContinuation<ValueAssertions<double?>>(assertions);
     }
 
     public static AndContinuation<ValueAssertions<float>> BeApproximately(
@@ -46,16 +59,29 @@ public static class NumericValueAssertionExtensions
 
         if (!AreApproximatelyEqual(assertions.Subject, expected, tolerance))
         {
-            var failure = new Failure(
-                SubjectLabel(assertions.SubjectExpression),
-                new Expectation($"to be within {tolerance.ToString(CultureInfo.InvariantCulture)} of", expected),
-                assertions.Subject,
-                because);
-
-            AssertionFailureDispatcher.Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+            FailApproximation(assertions, expected, FormatTolerance(tolerance), because, callerFilePath, callerLineNumber);
         }
 
         return new AndContinuation<ValueAssertions<float>>(assertions);
+    }
+
+    public static AndContinuation<ValueAssertions<float?>> BeApproximately(
+        this ValueAssertions<float?> assertions,
+        float expected,
+        float tolerance,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+        ValidateTolerance(tolerance);
+
+        if (!assertions.Subject.HasValue || !AreApproximatelyEqual(assertions.Subject.Value, expected, tolerance))
+        {
+            FailApproximation(assertions, expected, FormatTolerance(tolerance), because, callerFilePath, callerLineNumber);
+        }
+
+        return new AndContinuation<ValueAssertions<float?>>(assertions);
     }
 
     public static AndContinuation<ValueAssertions<decimal>> BeApproximately(
@@ -71,21 +97,60 @@ public static class NumericValueAssertionExtensions
 
         if (!AreApproximatelyEqual(assertions.Subject, expected, tolerance))
         {
-            var failure = new Failure(
-                SubjectLabel(assertions.SubjectExpression),
-                new Expectation($"to be within {tolerance.ToString(CultureInfo.InvariantCulture)} of", expected),
-                assertions.Subject,
-                because);
-
-            AssertionFailureDispatcher.Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
+            FailApproximation(assertions, expected, FormatTolerance(tolerance), because, callerFilePath, callerLineNumber);
         }
 
         return new AndContinuation<ValueAssertions<decimal>>(assertions);
     }
 
+    public static AndContinuation<ValueAssertions<decimal?>> BeApproximately(
+        this ValueAssertions<decimal?> assertions,
+        decimal expected,
+        decimal tolerance,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+        ValidateTolerance(tolerance);
+
+        if (!assertions.Subject.HasValue || !AreApproximatelyEqual(assertions.Subject.Value, expected, tolerance))
+        {
+            FailApproximation(assertions, expected, FormatTolerance(tolerance), because, callerFilePath, callerLineNumber);
+        }
+
+        return new AndContinuation<ValueAssertions<decimal?>>(assertions);
+    }
+
     private static string SubjectLabel(string? subjectExpression)
     {
         return string.IsNullOrWhiteSpace(subjectExpression) ? "<subject>" : subjectExpression;
+    }
+
+    private static string FormatTolerance(double tolerance)
+        => tolerance.ToString(CultureInfo.InvariantCulture);
+
+    private static string FormatTolerance(float tolerance)
+        => tolerance.ToString(CultureInfo.InvariantCulture);
+
+    private static string FormatTolerance(decimal tolerance)
+        => tolerance.ToString(CultureInfo.InvariantCulture);
+
+    private static void FailApproximation<TSubject, TExpected>(
+        ValueAssertions<TSubject> assertions,
+        TExpected expected,
+        string tolerance,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var failure = new Failure(
+            SubjectLabel(assertions.SubjectExpression),
+            new Expectation($"to be within {tolerance} of", expected),
+            assertions.Subject,
+            because);
+
+        AssertionFailureDispatcher.Fail(FailureMessageRenderer.Render(failure), callerFilePath, callerLineNumber);
     }
 
     private static bool AreApproximatelyEqual(double actual, double expected, double tolerance)
