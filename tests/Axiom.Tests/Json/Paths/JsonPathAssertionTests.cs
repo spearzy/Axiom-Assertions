@@ -73,10 +73,10 @@ public sealed class JsonPathAssertionTests
     public void HaveJsonStringAtPath_Passes_WhenValueMatches()
     {
         const string actual = """
-            { "user": { "name": "Ada" } }
+            { "user": { "name": "Bob" } }
             """;
 
-        var ex = Record.Exception(() => actual.Should().HaveJsonStringAtPath("$.user.name", "Ada"));
+        var ex = Record.Exception(() => actual.Should().HaveJsonStringAtPath("$.user.name", "Bob"));
 
         Assert.Null(ex);
     }
@@ -124,10 +124,10 @@ public sealed class JsonPathAssertionTests
             { "user": { "name": "Grace" } }
             """;
 
-        var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonStringAtPath("$.user.name", "Ada"));
+        var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonStringAtPath("$.user.name", "Bob"));
 
         Assert.Equal(
-            "Expected actual to have JSON string at path $.user.name equal to \"Ada\", but found JSON string \"Grace\" at $.user.name.",
+            "Expected actual to have JSON string at path $.user.name equal to \"Bob\", but found JSON string \"Grace\" at $.user.name.",
             ex.Message);
     }
 

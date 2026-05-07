@@ -2,6 +2,19 @@ namespace Axiom.Json;
 
 internal static class JsonAssertionEngine
 {
+    public static void AssertBeValidJson(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonContractAssertions.AssertBeValidJson(
+            subjectInput,
+            subjectExpression,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
     public static void AssertBeJsonEquivalentTo(
         JsonInput subjectInput,
         string? subjectExpression,
@@ -192,6 +205,42 @@ internal static class JsonAssertionEngine
             subjectInput,
             subjectExpression,
             path,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertHaveJsonPropertiesAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        IReadOnlyCollection<string> propertyNames,
+        bool exact,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonContractAssertions.AssertHavePropertiesAtPath(
+            subjectInput,
+            subjectExpression,
+            path,
+            propertyNames,
+            exact,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertHaveAllowedValueAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        IReadOnlyCollection<string> allowedValues,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonContractAssertions.AssertHaveAllowedValueAtPath(
+            subjectInput,
+            subjectExpression,
+            path,
+            allowedValues,
             because,
             callerFilePath,
             callerLineNumber);

@@ -10,8 +10,8 @@ internal static class BenchmarkDataFactory
             OrderId: "ORD-1024",
             Customer: new CustomerSnapshot(
                 Id: "CUS-001",
-                Name: "Ada Lovelace",
-                Email: "ada@example.test",
+                Name: "John Smith",
+                Email: "john@example.test",
                 Tier: "Gold",
                 Address: new AddressSnapshot(
                     Line1: "1 Analytical Engine Way",

@@ -7,6 +7,164 @@ namespace Axiom.Json;
 
 public static class StringJsonAssertionExtensions
 {
+    public static AndContinuation<StringAssertions> BeValidJson(
+        this StringAssertions assertions,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        JsonAssertionEngine.AssertBeValidJson(
+            JsonInput.FromString(assertions.Subject),
+            assertions.SubjectExpression,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<StringAssertions>(assertions);
+    }
+
+    public static AndContinuation<StringAssertions> HaveJsonProperties(
+        this StringAssertions assertions,
+        params string[] propertyNames)
+        => HaveJsonProperties(assertions, (IReadOnlyCollection<string>)propertyNames);
+
+    public static AndContinuation<StringAssertions> HaveJsonProperties(
+        this StringAssertions assertions,
+        IReadOnlyCollection<string> propertyNames,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        JsonAssertionEngine.AssertHaveJsonPropertiesAtPath(
+            JsonInput.FromString(assertions.Subject),
+            assertions.SubjectExpression,
+            JsonPath.RootDisplayPath,
+            propertyNames,
+            exact: false,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<StringAssertions>(assertions);
+    }
+
+    public static AndContinuation<StringAssertions> HaveJsonPropertiesAtPath(
+        this StringAssertions assertions,
+        string path,
+        params string[] propertyNames)
+        => HaveJsonPropertiesAtPath(assertions, path, (IReadOnlyCollection<string>)propertyNames);
+
+    public static AndContinuation<StringAssertions> HaveJsonPropertiesAtPath(
+        this StringAssertions assertions,
+        string path,
+        IReadOnlyCollection<string> propertyNames,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        JsonAssertionEngine.AssertHaveJsonPropertiesAtPath(
+            JsonInput.FromString(assertions.Subject),
+            assertions.SubjectExpression,
+            path,
+            propertyNames,
+            exact: false,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<StringAssertions>(assertions);
+    }
+
+    public static AndContinuation<StringAssertions> HaveOnlyJsonProperties(
+        this StringAssertions assertions,
+        params string[] propertyNames)
+        => HaveOnlyJsonProperties(assertions, (IReadOnlyCollection<string>)propertyNames);
+
+    public static AndContinuation<StringAssertions> HaveOnlyJsonProperties(
+        this StringAssertions assertions,
+        IReadOnlyCollection<string> propertyNames,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        JsonAssertionEngine.AssertHaveJsonPropertiesAtPath(
+            JsonInput.FromString(assertions.Subject),
+            assertions.SubjectExpression,
+            JsonPath.RootDisplayPath,
+            propertyNames,
+            exact: true,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<StringAssertions>(assertions);
+    }
+
+    public static AndContinuation<StringAssertions> HaveOnlyJsonPropertiesAtPath(
+        this StringAssertions assertions,
+        string path,
+        params string[] propertyNames)
+        => HaveOnlyJsonPropertiesAtPath(assertions, path, (IReadOnlyCollection<string>)propertyNames);
+
+    public static AndContinuation<StringAssertions> HaveOnlyJsonPropertiesAtPath(
+        this StringAssertions assertions,
+        string path,
+        IReadOnlyCollection<string> propertyNames,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        JsonAssertionEngine.AssertHaveJsonPropertiesAtPath(
+            JsonInput.FromString(assertions.Subject),
+            assertions.SubjectExpression,
+            path,
+            propertyNames,
+            exact: true,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<StringAssertions>(assertions);
+    }
+
+    public static AndContinuation<StringAssertions> HaveAllowedValueAtPath(
+        this StringAssertions assertions,
+        string path,
+        params string[] allowedValues)
+        => HaveAllowedValueAtPath(assertions, path, (IReadOnlyCollection<string>)allowedValues);
+
+    public static AndContinuation<StringAssertions> HaveAllowedValueAtPath(
+        this StringAssertions assertions,
+        string path,
+        IReadOnlyCollection<string> allowedValues,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        ArgumentNullException.ThrowIfNull(assertions);
+
+        JsonAssertionEngine.AssertHaveAllowedValueAtPath(
+            JsonInput.FromString(assertions.Subject),
+            assertions.SubjectExpression,
+            path,
+            allowedValues,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<StringAssertions>(assertions);
+    }
+
     public static AndContinuation<StringAssertions> BeJsonEquivalentTo(
         this StringAssertions assertions,
         string expectedJson,

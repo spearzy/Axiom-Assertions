@@ -12,12 +12,12 @@ public sealed class HttpJsonBodyAssertionTests
         using var response = HttpResponseFactory.Create(
             HttpStatusCode.OK,
             """
-            { "id": 1, "name": "Ada", "roles": ["admin", "author"] }
+            { "id": 1, "name": "Bob", "roles": ["admin", "author"] }
             """,
             "application/json");
 
         const string expected = """
-            { "roles": ["admin", "author"], "name": "Ada", "id": 1.0 }
+            { "roles": ["admin", "author"], "name": "Bob", "id": 1.0 }
             """;
 
         var ex = Record.Exception(() => response.Should().HaveJsonBodyEquivalentTo(expected));
@@ -31,14 +31,14 @@ public sealed class HttpJsonBodyAssertionTests
         using var response = HttpResponseFactory.Create(
             HttpStatusCode.OK,
             """
-            { "user": { "name": "Ada", "active": true, "score": 1e0, "deletedAt": null } }
+            { "user": { "name": "Bob", "active": true, "score": 1e0, "deletedAt": null } }
             """,
             "application/json");
 
         var ex = Record.Exception(() =>
         {
             response.Should().HaveJsonPath("$.user.name");
-            response.Should().HaveJsonStringAtPath("$.user.name", "Ada");
+            response.Should().HaveJsonStringAtPath("$.user.name", "Bob");
             response.Should().HaveJsonBooleanAtPath("$.user.active", true);
             response.Should().HaveJsonNumberAtPath("$.user.score", 1m);
             response.Should().HaveJsonNullAtPath("$.user.deletedAt");
@@ -55,7 +55,7 @@ public sealed class HttpJsonBodyAssertionTests
             """
             {
               "user": {
-                "name": "Ada",
+                "name": "Bob",
                 "roles": ["admin", "author"]
               }
             }
@@ -134,7 +134,7 @@ public sealed class HttpJsonBodyAssertionTests
     [Fact]
     public void HaveJsonPropertyCountAtPath_Throws_WhenPropertyCountDiffers()
     {
-        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"user\": { \"name\": \"Ada\" } }", "application/json");
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"user\": { \"name\": \"Bob\" } }", "application/json");
 
         var ex = Assert.Throws<InvalidOperationException>(() => response.Should().HaveJsonPropertyCountAtPath("$.user", 2));
 

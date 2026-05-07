@@ -11,7 +11,7 @@ public sealed class JsonContainerPathAssertionTests
         const string actual = """
             {
               "customer": {
-                "name": "Ada",
+                "name": "Bob",
                 "roles": ["admin", "author"]
               }
             }
@@ -101,7 +101,7 @@ public sealed class JsonContainerPathAssertionTests
     public void HaveJsonPropertyCountAtPath_Passes_WhenPropertyCountMatches()
     {
         const string actual = """
-            { "customer": { "id": 7, "name": "Ada" } }
+            { "customer": { "id": 7, "name": "Bob" } }
             """;
 
         var ex = Record.Exception(() => actual.Should().HaveJsonPropertyCountAtPath("$.customer", 2));
@@ -113,7 +113,7 @@ public sealed class JsonContainerPathAssertionTests
     public void HaveJsonPropertyCountAtPath_Throws_WhenPropertyCountDiffers()
     {
         const string actual = """
-            { "customer": { "id": 7, "name": "Ada" } }
+            { "customer": { "id": 7, "name": "Bob" } }
             """;
 
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonPropertyCountAtPath("$.customer", 1));
@@ -127,7 +127,7 @@ public sealed class JsonContainerPathAssertionTests
     public void HaveJsonPropertyCountAtPath_Throws_WhenResolvedValueIsNotObject()
     {
         const string actual = """
-            { "customer": ["Ada"] }
+            { "customer": ["Bob"] }
             """;
 
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().HaveJsonPropertyCountAtPath("$.customer", 1));
