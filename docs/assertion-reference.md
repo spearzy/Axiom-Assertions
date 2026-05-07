@@ -263,7 +263,7 @@ BeInRange(min, max, comparer)
 Additional extension assertions:
 
 ```csharp
-// ValueAssertions<bool>
+// ValueAssertions<bool> and ValueAssertions<bool?>
 BeTrue()
 BeFalse()
 

@@ -315,6 +315,22 @@ public sealed class ValueBatchRoutingTests
     }
 
     [Fact]
+    public void NullableBooleanAssertions_InsideBatch_DoNotThrowAtAssertionCallSite()
+    {
+        bool? value = null;
+
+        using var batch = new Axiom.Core.Batch();
+        var callEx = Record.Exception(() =>
+        {
+            value.Should().BeTrue();
+            value.Should().BeFalse();
+        });
+
+        Assert.Null(callEx);
+        Assert.Throws<InvalidOperationException>(() => batch.Dispose());
+    }
+
+    [Fact]
     public void Batch_Dispose_ThrowsCombinedFailures_FromBooleanAssertions()
     {
         const bool isEnabled = true;

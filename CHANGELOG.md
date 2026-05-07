@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [2.6.0] - 2026-05-07
 
 ### Added
+- Added nullable `BeTrue()` and `BeFalse()` overloads for `bool?` value assertions.
 - Added nullable `BeApproximately(...)` overloads for `double?`, `float?`, and `decimal?` value assertions.
 - Added nullable temporal assertion overloads for `DateTime?`, `DateTimeOffset?`, `DateOnly?`, and `TimeOnly?`.
 - Added `ContainKey(...).Value` as the preferred extracted dictionary value name while keeping `WhoseValue` as a compatibility alias.
