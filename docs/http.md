@@ -147,11 +147,45 @@ var expectedJson = """
     """;
 
 response.Should().HaveJsonBodyEquivalentTo(expectedJson);
+response.Should().BeValidJson();
+response.Should().HaveJsonProperties("id", "name", "roles");
 response.Should().HaveJsonPath("$.roles[1]");
 response.Should().HaveJsonArrayAtPath("$.roles");
 response.Should().HaveJsonArrayLengthAtPath("$.roles", 2);
 response.Should().HaveJsonStringAtPath("$.name", "Bob");
 response.Should().HaveJsonNumberAtPath("$.id", 1m);
+```
+
+Use contract assertions when the response body shape matters but JSON schema validation would be too much:
+
+```csharp
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using Axiom.Http;
+
+using var response = new HttpResponseMessage(HttpStatusCode.OK)
+{
+    Content = new StringContent(
+        """
+        {
+          "id": "evt_123",
+          "type": "order.created",
+          "status": "queued",
+          "customer": {
+            "id": "cus_123",
+            "name": "Bob"
+          }
+        }
+        """,
+        Encoding.UTF8,
+        "application/json")
+};
+
+response.Should().BeValidJson();
+response.Should().HaveOnlyJsonProperties("id", "type", "status", "customer");
+response.Should().HaveJsonPropertiesAtPath("$.customer", "id", "name");
+response.Should().HaveAllowedValueAtPath("$.status", "queued", "processing", "complete");
 ```
 
 If you want JSON assertions over raw JSON strings, `JsonDocument`, or `JsonElement` directly, use [JSON](json.md).

@@ -180,6 +180,17 @@ ContainBodyText(expectedSubstring)
 HaveJsonBodyEquivalentTo(string expectedJson)
 HaveJsonBodyEquivalentTo(JsonDocument expectedJson)
 HaveJsonBodyEquivalentTo(JsonElement expectedJson)
+BeValidJson()
+HaveJsonProperties(params string[] propertyNames)
+HaveJsonProperties(IReadOnlyCollection<string> propertyNames)
+HaveJsonPropertiesAtPath(path, params string[] propertyNames)
+HaveJsonPropertiesAtPath(path, IReadOnlyCollection<string> propertyNames)
+HaveOnlyJsonProperties(params string[] propertyNames)
+HaveOnlyJsonProperties(IReadOnlyCollection<string> propertyNames)
+HaveOnlyJsonPropertiesAtPath(path, params string[] propertyNames)
+HaveOnlyJsonPropertiesAtPath(path, IReadOnlyCollection<string> propertyNames)
+HaveAllowedValueAtPath(path, params string[] allowedValues)
+HaveAllowedValueAtPath(path, IReadOnlyCollection<string> allowedValues)
 HaveJsonPath(path)
 NotHaveJsonPath(path)
 HaveJsonObjectAtPath(path)
@@ -232,6 +243,8 @@ using var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
 
 response.Should().HaveStatusCode(HttpStatusCode.BadRequest);
 response.Should().HaveContentType("application/problem+json");
+response.Should().BeValidJson();
+response.Should().HaveJsonProperties("type", "title", "status");
 response.Should().HaveJsonPath("$.title");
 response.Should().HaveJsonPropertyCountAtPath("$", 4);
 response.Should().HaveProblemDetailsTitle("Validation failed");

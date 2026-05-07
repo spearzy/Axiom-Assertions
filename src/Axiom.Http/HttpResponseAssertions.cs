@@ -313,6 +313,141 @@ public sealed class HttpResponseAssertions
         return new AndContinuation<HttpResponseAssertions>(this);
     }
 
+    public AndContinuation<HttpResponseAssertions> BeValidJson(
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        HttpJsonAssertions.AssertBeValidJson(
+            Subject,
+            SubjectExpression,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveJsonProperties(
+        params string[] propertyNames)
+        => HaveJsonProperties((IReadOnlyCollection<string>)propertyNames);
+
+    public AndContinuation<HttpResponseAssertions> HaveJsonProperties(
+        IReadOnlyCollection<string> propertyNames,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        HttpJsonAssertions.AssertHaveJsonPropertiesAtPath(
+            Subject,
+            SubjectExpression,
+            "$",
+            propertyNames,
+            exact: false,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveJsonPropertiesAtPath(
+        string path,
+        params string[] propertyNames)
+        => HaveJsonPropertiesAtPath(path, (IReadOnlyCollection<string>)propertyNames);
+
+    public AndContinuation<HttpResponseAssertions> HaveJsonPropertiesAtPath(
+        string path,
+        IReadOnlyCollection<string> propertyNames,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        HttpJsonAssertions.AssertHaveJsonPropertiesAtPath(
+            Subject,
+            SubjectExpression,
+            path,
+            propertyNames,
+            exact: false,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveOnlyJsonProperties(
+        params string[] propertyNames)
+        => HaveOnlyJsonProperties((IReadOnlyCollection<string>)propertyNames);
+
+    public AndContinuation<HttpResponseAssertions> HaveOnlyJsonProperties(
+        IReadOnlyCollection<string> propertyNames,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        HttpJsonAssertions.AssertHaveJsonPropertiesAtPath(
+            Subject,
+            SubjectExpression,
+            "$",
+            propertyNames,
+            exact: true,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveOnlyJsonPropertiesAtPath(
+        string path,
+        params string[] propertyNames)
+        => HaveOnlyJsonPropertiesAtPath(path, (IReadOnlyCollection<string>)propertyNames);
+
+    public AndContinuation<HttpResponseAssertions> HaveOnlyJsonPropertiesAtPath(
+        string path,
+        IReadOnlyCollection<string> propertyNames,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        HttpJsonAssertions.AssertHaveJsonPropertiesAtPath(
+            Subject,
+            SubjectExpression,
+            path,
+            propertyNames,
+            exact: true,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveAllowedValueAtPath(
+        string path,
+        params string[] allowedValues)
+        => HaveAllowedValueAtPath(path, (IReadOnlyCollection<string>)allowedValues);
+
+    public AndContinuation<HttpResponseAssertions> HaveAllowedValueAtPath(
+        string path,
+        IReadOnlyCollection<string> allowedValues,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        HttpJsonAssertions.AssertHaveAllowedValueAtPath(
+            Subject,
+            SubjectExpression,
+            path,
+            allowedValues,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
     public AndContinuation<HttpResponseAssertions> HaveJsonPath(
         string path,
         string? because = null,
