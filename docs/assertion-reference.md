@@ -267,13 +267,13 @@ Additional extension assertions:
 BeTrue()
 BeFalse()
 
-// ValueAssertions<double>
+// ValueAssertions<double> and ValueAssertions<double?>
 BeApproximately(expected, tolerance)
 
-// ValueAssertions<float>
+// ValueAssertions<float> and ValueAssertions<float?>
 BeApproximately(expected, tolerance)
 
-// ValueAssertions<decimal>
+// ValueAssertions<decimal> and ValueAssertions<decimal?>
 BeApproximately(expected, tolerance)
 ```
 

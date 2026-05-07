@@ -128,4 +128,109 @@ public sealed class BeApproximatelyTests
 
         Assert.Null(ex);
     }
+
+    [Fact]
+    public void BeApproximately_ReturnsContinuation_WhenNullableDoubleIsWithinTolerance()
+    {
+        double? value = 10.05d;
+
+        var baseAssertions = value.Should();
+        var continuation = baseAssertions.BeApproximately(10d, 0.1d);
+
+        Assert.Same(baseAssertions, continuation.And);
+    }
+
+    [Fact]
+    public void BeApproximately_Throws_WhenNullableDoubleIsOutsideTolerance()
+    {
+        double? value = 10.25d;
+
+        var ex = Assert.Throws<InvalidOperationException>(() => value.Should().BeApproximately(10d, 0.1d));
+
+        Assert.Contains("Expected value to be within 0.1 of 10", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("but found 10.25", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BeApproximately_Throws_WhenNullableDoubleSubjectIsNull()
+    {
+        double? value = null;
+
+        var ex = Assert.Throws<InvalidOperationException>(() => value.Should().BeApproximately(10d, 0.1d));
+
+        Assert.Contains("Expected value to be within 0.1 of 10", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("found <null>", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BeApproximately_DoesNotThrow_WhenNullableFloatIsWithinTolerance()
+    {
+        float? value = 10.05f;
+
+        var ex = Record.Exception(() => value.Should().BeApproximately(10f, 0.1f));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void BeApproximately_Throws_WhenNullableFloatSubjectIsNull()
+    {
+        float? value = null;
+
+        var ex = Assert.Throws<InvalidOperationException>(() => value.Should().BeApproximately(10f, 0.1f));
+
+        Assert.Contains("Expected value to be within 0.1 of 10", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("found <null>", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BeApproximately_DoesNotThrow_WhenNullableDecimalIsWithinTolerance()
+    {
+        decimal? value = 10.05m;
+
+        var ex = Record.Exception(() => value.Should().BeApproximately(10m, 0.1m));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void BeApproximately_Throws_WhenNullableDecimalSubjectIsNull()
+    {
+        decimal? value = null;
+
+        var ex = Assert.Throws<InvalidOperationException>(() => value.Should().BeApproximately(10m, 0.1m));
+
+        Assert.Contains("Expected value to be within 0.1 of 10", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("found <null>", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BeApproximately_ThrowsArgumentOutOfRangeException_WhenNullableDoubleToleranceIsNegative()
+    {
+        double? value = 10d;
+
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => value.Should().BeApproximately(10d, -0.01d));
+
+        Assert.Equal("tolerance", ex.ParamName);
+    }
+
+    [Fact]
+    public void BeApproximately_ThrowsArgumentOutOfRangeException_WhenNullableFloatToleranceIsNaN()
+    {
+        float? value = 10f;
+
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => value.Should().BeApproximately(10f, float.NaN));
+
+        Assert.Equal("tolerance", ex.ParamName);
+    }
+
+    [Fact]
+    public void BeApproximately_ThrowsArgumentOutOfRangeException_WhenNullableDecimalToleranceIsNegative()
+    {
+        decimal? value = 10m;
+
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => value.Should().BeApproximately(10m, -0.1m));
+
+        Assert.Equal("tolerance", ex.ParamName);
+    }
 }
