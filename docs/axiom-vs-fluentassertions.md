@@ -40,7 +40,7 @@ These examples are intentionally small. They show style and shape, not every sup
 | Intent | Axiom | FluentAssertions |
 | --- | --- | --- |
 | Scalar equality | `actual.Should().Be(expected);` | `actual.Should().Be(expected);` |
-| String containment | `name.Should().Contain("Ada");` | `name.Should().Contain("Ada");` |
+| String containment | `name.Should().Contain("Bob");` | `name.Should().Contain("Bob");` |
 | Collection membership | `roles.Should().Contain("admin");` | `roles.Should().Contain("admin");` |
 | Exact unordered collection | `ids.Should().ContainExactlyInAnyOrder(expectedIds);` | `ids.Should().BeEquivalentTo(expectedIds);` with ordering rules chosen for that assertion |
 | Group related failures | `using var batch = Assert.Batch("profile");` then normal assertions | use an assertion scope around related assertions |

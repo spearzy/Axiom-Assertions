@@ -86,11 +86,11 @@ JSON:
 ```csharp
 using Axiom.Json;
 
-var actualJson = """{ "id": 1, "name": "Ada", "roles": ["admin", "author"] }""";
-var expectedJson = """{ "roles": ["admin", "author"], "name": "Ada", "id": 1.0 }""";
+var actualJson = """{ "id": 1, "name": "Bob", "roles": ["admin", "author"] }""";
+var expectedJson = """{ "roles": ["admin", "author"], "name": "Bob", "id": 1.0 }""";
 
 actualJson.Should().BeJsonEquivalentTo(expectedJson);
-actualJson.Should().HaveJsonStringAtPath("$.name", "Ada");
+actualJson.Should().HaveJsonStringAtPath("$.name", "Bob");
 ```
 
 HTTP and API responses:

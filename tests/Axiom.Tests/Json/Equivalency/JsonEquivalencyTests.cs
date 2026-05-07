@@ -9,10 +9,10 @@ public sealed class JsonEquivalencyTests
     public void BeJsonEquivalentTo_Passes_WhenObjectsAreEquivalentDespitePropertyOrder()
     {
         const string actual = """
-            { "name": "Ada", "id": 1, "roles": ["admin", "author"] }
+            { "name": "Bob", "id": 1, "roles": ["admin", "author"] }
             """;
         const string expected = """
-            { "roles": ["admin", "author"], "id": 1.0, "name": "Ada" }
+            { "roles": ["admin", "author"], "id": 1.0, "name": "Bob" }
             """;
 
         var ex = Record.Exception(() => actual.Should().BeJsonEquivalentTo(expected));
@@ -59,13 +59,13 @@ public sealed class JsonEquivalencyTests
             { "id": 1 }
             """;
         const string expected = """
-            { "id": 1, "name": "Ada" }
+            { "id": 1, "name": "Bob" }
             """;
 
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().BeJsonEquivalentTo(expected));
 
         Assert.Equal(
-            "Expected actual to be JSON equivalent to {\"id\":1,\"name\":\"Ada\"}, but found missing property $.name.",
+            "Expected actual to be JSON equivalent to {\"id\":1,\"name\":\"Bob\"}, but found missing property $.name.",
             ex.Message);
     }
 
@@ -73,7 +73,7 @@ public sealed class JsonEquivalencyTests
     public void BeJsonEquivalentTo_Throws_WhenPropertyIsExtra()
     {
         const string actual = """
-            { "id": 1, "name": "Ada" }
+            { "id": 1, "name": "Bob" }
             """;
         const string expected = """
             { "id": 1 }
@@ -171,16 +171,16 @@ public sealed class JsonEquivalencyTests
     public void NotBeJsonEquivalentTo_Throws_WhenDocumentsAreEquivalent()
     {
         const string actual = """
-            { "id": 1, "name": "Ada" }
+            { "id": 1, "name": "Bob" }
             """;
         const string unexpected = """
-            { "name": "Ada", "id": 1.0 }
+            { "name": "Bob", "id": 1.0 }
             """;
 
         var ex = Assert.Throws<InvalidOperationException>(() => actual.Should().NotBeJsonEquivalentTo(unexpected));
 
         Assert.Equal(
-            "Expected actual to not be JSON equivalent to {\"name\":\"Ada\",\"id\":1.0}, but found equivalent JSON {\"id\":1,\"name\":\"Ada\"}.",
+            "Expected actual to not be JSON equivalent to {\"name\":\"Bob\",\"id\":1.0}, but found equivalent JSON {\"id\":1,\"name\":\"Bob\"}.",
             ex.Message);
     }
 

@@ -35,7 +35,7 @@ If your team mainly values Shouldly's conversational style, Shouldly may remain 
 | Intent | Axiom | Shouldly |
 | --- | --- | --- |
 | Scalar equality | `actual.Should().Be(expected);` | `actual.ShouldBe(expected);` |
-| String containment | `name.Should().Contain("Ada");` | `name.ShouldContain("Ada");` |
+| String containment | `name.Should().Contain("Bob");` | `name.ShouldContain("Bob");` |
 | Collection membership | `roles.Should().Contain("admin");` | `roles.ShouldContain("admin");` |
 | Exception assertion | `new Action(() => work()).Should().Throw<InvalidOperationException>();` | `Should.Throw<InvalidOperationException>(() => work());` |
 | Group related failures | `using var batch = Assert.Batch("profile");` then normal assertions | usually keep assertions independent or use existing test-framework patterns |

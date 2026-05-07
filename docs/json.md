@@ -148,6 +148,43 @@ json.Should().HaveJsonNullAtPath("$.customer.deletedAt");
 
 Use `HaveJsonObjectAtPath(...)`, `HaveJsonArrayAtPath(...)`, and the count checks when the shape of the JSON at a path matters before checking scalar values inside it.
 
+## Contract Assertions
+
+Use contract assertions when the JSON shape matters but full schema validation would be too much. These checks stay method-based and use the same simple path syntax as the rest of `Axiom.Json`.
+
+```csharp
+using Axiom.Assertions;
+using Axiom.Json;
+
+var responseJson = """
+    {
+      "id": "evt_123",
+      "type": "order.created",
+      "status": "queued",
+      "customer": {
+        "id": "cus_123",
+        "name": "Bob"
+      }
+    }
+    """;
+
+responseJson.Should().BeValidJson();
+responseJson.Should().HaveOnlyJsonProperties("id", "type", "status", "customer");
+responseJson.Should().HaveJsonPropertiesAtPath("$.customer", "id", "name");
+responseJson.Should().HaveAllowedValueAtPath("$.status", "queued", "processing", "complete");
+```
+
+For shared allowed-value sets, pass a collection:
+
+```csharp
+using Axiom.Assertions;
+using Axiom.Json;
+
+var responseJson = """{ "status": "queued" }""";
+var allowedStatuses = new[] { "queued", "processing", "complete" };
+responseJson.Should().HaveAllowedValueAtPath("$.status", allowedStatuses);
+```
+
 ## Invalid JSON
 
 For raw JSON string subjects, invalid JSON fails clearly with an `invalid JSON` parse location in the failure message.

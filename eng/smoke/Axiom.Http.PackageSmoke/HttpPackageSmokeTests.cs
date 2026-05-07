@@ -14,7 +14,7 @@ public sealed class HttpPackageSmokeTests
         {
             Content = new StringContent(
                 """
-                { "id": 1, "name": "Ada", "roles": ["admin", "author"] }
+                { "id": 1, "name": "Bob", "roles": ["admin", "author"] }
                 """,
                 Encoding.UTF8,
                 "application/json")
@@ -31,9 +31,9 @@ public sealed class HttpPackageSmokeTests
         response.Should().HaveHeaderValues("X-Trace", ["a", "b"]);
         response.Should().HaveContentType("application/json");
         response.Should().HaveContentTypeWithCharset("application/json", "utf-8");
-        response.Should().HaveJsonBodyEquivalentTo("""{ "roles": ["admin", "author"], "name": "Ada", "id": 1.0 }""");
+        response.Should().HaveJsonBodyEquivalentTo("""{ "roles": ["admin", "author"], "name": "Bob", "id": 1.0 }""");
         response.Should().HaveJsonPath("$.roles[1]");
-        response.Should().HaveJsonStringAtPath("$.name", "Ada");
+        response.Should().HaveJsonStringAtPath("$.name", "Bob");
         response.Should().HaveJsonNumberAtPath("$.id", 1m);
     }
 

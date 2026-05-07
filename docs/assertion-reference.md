@@ -96,12 +96,25 @@ Raw JSON strings keep the normal `StringAssertions` receiver from `subject.Shoul
 `JsonDocument` and `JsonElement` use `JsonAssertions` from `subject.Should()` when `using Axiom.Json;` is in scope.
 
 ```csharp
+// Raw JSON string assertions only
+BeValidJson()
+
 BeJsonEquivalentTo(string expectedJson)
 BeJsonEquivalentTo(JsonDocument expectedJson)
 BeJsonEquivalentTo(JsonElement expectedJson)
 NotBeJsonEquivalentTo(string unexpectedJson)
 NotBeJsonEquivalentTo(JsonDocument unexpectedJson)
 NotBeJsonEquivalentTo(JsonElement unexpectedJson)
+HaveJsonProperties(params string[] propertyNames)
+HaveJsonProperties(IReadOnlyCollection<string> propertyNames)
+HaveJsonPropertiesAtPath(path, params string[] propertyNames)
+HaveJsonPropertiesAtPath(path, IReadOnlyCollection<string> propertyNames)
+HaveOnlyJsonProperties(params string[] propertyNames)
+HaveOnlyJsonProperties(IReadOnlyCollection<string> propertyNames)
+HaveOnlyJsonPropertiesAtPath(path, params string[] propertyNames)
+HaveOnlyJsonPropertiesAtPath(path, IReadOnlyCollection<string> propertyNames)
+HaveAllowedValueAtPath(path, params string[] allowedValues)
+HaveAllowedValueAtPath(path, IReadOnlyCollection<string> allowedValues)
 HaveJsonPath(path)
 NotHaveJsonPath(path)
 HaveJsonObjectAtPath(path)
@@ -131,6 +144,8 @@ var actualJson = """{ "id": 1, "name": "Bob", "roles": ["admin", "author"] }""";
 var expectedJson = """{ "roles": ["admin", "author"], "name": "Bob", "id": 1.0 }""";
 
 actualJson.Should().BeJsonEquivalentTo(expectedJson);
+actualJson.Should().BeValidJson();
+actualJson.Should().HaveOnlyJsonProperties("id", "name", "roles");
 actualJson.Should().HaveJsonStringAtPath("$.name", "Bob");
 actualJson.Should().HaveJsonPath("$.roles[1]");
 actualJson.Should().HaveJsonArrayLengthAtPath("$.roles", 2);
@@ -138,6 +153,7 @@ actualJson.Should().HaveJsonArrayLengthAtPath("$.roles", 2);
 using var document = JsonDocument.Parse(actualJson);
 document.Should().HaveJsonNumberAtPath("$.id", 1m);
 document.Should().HaveJsonPropertyCountAtPath("$", 3);
+document.Should().HaveAllowedValueAtPath("$.roles[0]", "admin", "author");
 document.RootElement.Should().NotHaveJsonPath("$.deletedAt");
 ```
 
