@@ -213,7 +213,7 @@ internal static class XunitAssertMigrationSpecs
             alternateArgumentCount: null,
             XunitAssertMigrationKind.ContainKey,
             "Migrate xUnit Assert.Contains dictionary overload to Axiom",
-            "xUnit Assert.Contains(key, dictionary) can be migrated to 'dictionary.Should().ContainKey(key)' and append '.WhoseValue' when the associated value is used",
+            "xUnit Assert.Contains(key, dictionary) can be migrated to 'dictionary.Should().ContainKey(key)' and append '.Value' when the associated value is used",
             "Convert to 'dictionary.Should().ContainKey(key)'"),
         new(
             AxiomAnalyzerIds.MigrateXunitAssertDoesNotContainKey,

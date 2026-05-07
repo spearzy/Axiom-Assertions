@@ -170,7 +170,7 @@ public sealed class XunitAssertMigrationDescriptorTests
                 Assert.Equal("Migration", rule.Category);
                 Assert.Equal(DiagnosticSeverity.Info, rule.DefaultSeverity);
                 Assert.Equal("Migrate xUnit Assert.Contains dictionary overload to Axiom", rule.Title.ToString());
-                Assert.Equal("xUnit Assert.Contains(key, dictionary) can be migrated to 'dictionary.Should().ContainKey(key)' and append '.WhoseValue' when the associated value is used", rule.MessageFormat.ToString());
+                Assert.Equal("xUnit Assert.Contains(key, dictionary) can be migrated to 'dictionary.Should().ContainKey(key)' and append '.Value' when the associated value is used", rule.MessageFormat.ToString());
             },
             rule =>
             {

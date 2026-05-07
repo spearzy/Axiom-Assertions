@@ -5,7 +5,7 @@ This page is the complete consumer-facing catalog of the shipped assertion surfa
 All fluent assertions either:
 
 - return `.And` so you can continue chaining on the same assertion object
-- return a specialized continuation that exposes an extracted value such as `Thrown`, `SingleItem`, `WhoseValue`, or `WhoseResult`
+- return a specialized continuation that exposes an extracted value such as `Thrown`, `SingleItem`, `Value`, or `WhoseResult`
 
 ## Entry Points
 
@@ -795,8 +795,10 @@ NotContainEntry(key, value, comparer)
 
 ```csharp
 And
-WhoseValue
+Value
 ```
+
+`WhoseValue` still exists as a compatibility alias for existing code, but `Value` is the preferred name going forward.
 
 ```csharp
 lookup.Should().ContainValue("queued", StringComparer.OrdinalIgnoreCase);

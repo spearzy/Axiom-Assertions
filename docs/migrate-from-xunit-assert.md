@@ -23,7 +23,7 @@ Examples include:
 
 - `Assert.Equal(expected, actual)` to `actual.Should().Be(expected)`
 - `Assert.Contains("sub", actual, StringComparison.OrdinalIgnoreCase)` to `actual.Should().Contain("sub", StringComparison.OrdinalIgnoreCase)`
-- `Assert.Contains(key, lookup)` to `lookup.Should().ContainKey(key)` and `.WhoseValue` when the old returned value was used
+- `Assert.Contains(key, lookup)` to `lookup.Should().ContainKey(key)` and `.Value` when the old returned value was used
 - `Assert.Single(values)` and `Assert.Single(values, predicate)` to `ContainSingle(...)` and `.SingleItem` when needed
 - `Assert.IsNotAssignableFrom<T>(value)` to `value.Should().NotBeAssignableTo<T>()`
 - `Assert.InRange(actual, low, high)` to `actual.Should().BeInRange(low, high)` for simple comparable values
@@ -90,7 +90,7 @@ After:
 <!-- axiom-context=migration-gallery -->
 ```csharp
 lookup.Should().ContainKey(key);
-var found = lookup.Should().ContainKey(key).WhoseValue;
+var found = lookup.Should().ContainKey(key).Value;
 var item = values.Should().ContainSingle().SingleItem;
 var match = values.Should().ContainSingle(IsPositive).SingleItem;
 ```

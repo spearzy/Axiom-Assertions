@@ -136,7 +136,7 @@ Rules:
 - `AXM1017` for `Assert.Contains(expectedSubstring, actualString)` and `StringComparison` overloads
 - `AXM1018` for `Assert.DoesNotContain(expectedSubstring, actualString)` and `StringComparison` overloads
 - `AXM1019` for `Assert.Single(collection, predicate)`, appending `.SingleItem` when the matched item is used
-- `AXM1020` for `Assert.Contains(key, dictionary)`, appending `.WhoseValue` when the associated value is used
+- `AXM1020` for `Assert.Contains(key, dictionary)`, appending `.Value` when the associated value is used
 - `AXM1021` for `Assert.DoesNotContain(key, dictionary)`
 - `AXM1022` for `Assert.StartsWith(expectedPrefix, actualString)` and `StringComparison` overloads when the prefix is an obvious non-null constant string
 - `AXM1023` for `Assert.EndsWith(expectedSuffix, actualString)` and `StringComparison` overloads when the suffix is an obvious non-null constant string
@@ -184,7 +184,7 @@ actual.Should().Contain("sub", StringComparison.OrdinalIgnoreCase);
 actual.Should().StartWith("pre", StringComparison.OrdinalIgnoreCase);
 actual.Should().EndWith("suf", StringComparison.OrdinalIgnoreCase);
 lookup.Should().ContainKey(key);
-var found = lookup.Should().ContainKey(key).WhoseValue;
+var found = lookup.Should().ContainKey(key).Value;
 var item = values.Should().ContainSingle().SingleItem;
 var match = values.Should().ContainSingle(value => value > 0).SingleItem;
 actualObject.Should().NotBeAssignableTo<IDisposable>();
