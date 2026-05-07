@@ -7,8 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [2.7.0] - 2026-05-07
 
 ### Added
-- Added focused `Axiom.Json` contract assertions for valid raw JSON, required and exact object properties, and string allowed-value checks at JSON paths.
+- Added focused `Axiom.Json` contract assertions for valid raw JSON, required and exact object properties, and string allowed-value checks at JSON paths, including collection overloads that preserve `because` and caller metadata.
 - Added matching `Axiom.Http` response-body JSON contract assertions for valid JSON, required and exact object properties, and string allowed-value checks at JSON paths.
+
+### Changed
+- Updated JSON and HTTP docs, package readmes, assertion reference entries, and examples to reflect the shipped contract assertion surface.
 
 ## [2.6.0] - 2026-05-07
 
