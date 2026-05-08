@@ -28,7 +28,7 @@ If your team is already productive with FluentAssertions and the current output,
 | API style | Explicit method-driven fluent assertions | Broad fluent assertion surface with many idioms and chains |
 | Failure output | Deterministic, structured output is a core design goal | Mature and expressive output across a wide surface |
 | Multiple failures | Explicit `Batch` aggregation | Uses FluentAssertions' assertion-scope model |
-| Migration help | Analyzer-backed migration from supported xUnit, NUnit, and MSTest shapes | Strong ecosystem familiarity; migration depends on where you are starting |
+| Migration help | Analyzer-backed migration from supported xUnit, NUnit, MSTest, and narrow direct FluentAssertions shapes | Strong ecosystem familiarity; migration depends on where you are starting |
 | Package shape | Main package plus opt-in JSON, HTTP, and vector/retrieval packages | Broad general-purpose assertion package |
 
 If licensing or procurement policy matters for your team, evaluate the current package terms directly. This guide focuses on technical fit and migration cost.
@@ -86,7 +86,7 @@ Migration cost usually depends on what your suite uses today:
 | Custom assertion helpers | Depends on how much helper code assumes FluentAssertions types and scopes |
 | Large established suite with little assertion pain | Often not worth moving yet |
 
-Axiom's migration analyzers currently focus on framework assertions, not automated FluentAssertions-to-Axiom rewrites. If you are moving from FluentAssertions, plan it as an intentional codebase migration rather than a broad one-click conversion.
+Axiom's migration analyzers include a narrow first pass for direct FluentAssertions chains such as equality, null, boolean, string, reference identity, and type checks. Richer FluentAssertions usage should still be planned as an intentional codebase migration rather than a broad one-click conversion.
 
 ## When Not To Switch
 
