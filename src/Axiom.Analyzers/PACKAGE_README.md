@@ -13,7 +13,7 @@ dotnet add package Axiom.Analyzers
 ## Use this package when you want
 
 - Axiom diagnostics and code fixes without the runtime assertion library
-- migration suggestions for supported xUnit, NUnit, and MSTest assertion shapes
+- migration suggestions for supported xUnit, NUnit, MSTest, and narrow direct FluentAssertions assertion shapes
 - checks for common Axiom assertion mistakes in the editor and build
 
 ## Install a different package when

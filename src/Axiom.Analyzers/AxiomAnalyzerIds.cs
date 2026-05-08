@@ -91,4 +91,20 @@ public static class AxiomAnalyzerIds
     public const string MigrateMstestAssertContains = "AXM1085";
     public const string MigrateMstestAssertDoesNotContain = "AXM1086";
     public const string MigrateMstestCollectionAssertAllItemsAreUnique = "AXM1087";
+    public const string MigrateFluentAssertionsBe = "AXM1088";
+    public const string MigrateFluentAssertionsNotBe = "AXM1089";
+    public const string MigrateFluentAssertionsBeNull = "AXM1090";
+    public const string MigrateFluentAssertionsNotBeNull = "AXM1091";
+    public const string MigrateFluentAssertionsBeTrue = "AXM1092";
+    public const string MigrateFluentAssertionsBeFalse = "AXM1093";
+    public const string MigrateFluentAssertionsBeEmpty = "AXM1094";
+    public const string MigrateFluentAssertionsNotBeEmpty = "AXM1095";
+    public const string MigrateFluentAssertionsContainSubstring = "AXM1096";
+    public const string MigrateFluentAssertionsNotContainSubstring = "AXM1097";
+    public const string MigrateFluentAssertionsStartWith = "AXM1098";
+    public const string MigrateFluentAssertionsEndWith = "AXM1099";
+    public const string MigrateFluentAssertionsBeSameAs = "AXM1100";
+    public const string MigrateFluentAssertionsNotBeSameAs = "AXM1101";
+    public const string MigrateFluentAssertionsBeOfType = "AXM1102";
+    public const string MigrateFluentAssertionsBeAssignableTo = "AXM1103";
 }

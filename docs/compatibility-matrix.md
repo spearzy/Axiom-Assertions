@@ -23,7 +23,7 @@ This page states the current shipped compatibility only.
 - For `Axiom.Assertions`, `Axiom.Json`, `Axiom.Http`, and `Axiom.Vectors`, xUnit, NUnit, and MSTest support means Axiom can run inside test projects using those frameworks.
 - `Axiom.Assertions` auto-detects xUnit, NUnit, and MSTest at runtime and uses the matching framework-native assertion exception type when one of those frameworks is present.
 - `Axiom.Core` is framework-agnostic infrastructure. It does not provide framework-specific assertion behavior by itself.
-- `Axiom.Analyzers` is not a runtime assertion package. It provides Axiom diagnostics and current migration/code-fix coverage for xUnit, NUnit, and MSTest assertion shapes.
+- `Axiom.Analyzers` is not a runtime assertion package. It provides Axiom diagnostics plus current migration/code-fix coverage for framework-native asserts and a narrow set of assertion-library chains.
 - `Axiom.Assertions` is the default install path for most users. Install `Axiom.Json`, `Axiom.Http`, or `Axiom.Vectors` only when the test suite needs those assertion areas.
 
 ## Starter Projects
@@ -40,15 +40,22 @@ Each starter uses the normal `Axiom.Assertions` install path and keeps the examp
 
 ## Analyzer Migration Coverage
 
-The current migration analyzers cover high-confidence rewrites for all three supported frameworks:
+The current migration analyzers split into two migration categories.
+
+Framework-assert migrations replace assertions from the test framework itself:
 
 - xUnit: scalar, string, dictionary-key, single-item, synchronous exception, and awaited async exception shapes.
 - NUnit: common `Is.*`, `Does.*`, `Has.Count.EqualTo(...)`, ordered/range/type, and async exception shapes.
 - MSTest: scalar, reference/type, string, collection containment, ordered/range, and awaited async exception shapes.
 
-Unsupported or lossy framework-specific overloads remain manual migrations.
+Assertion-library migrations replace another assertion library where the mapping is direct:
 
-For rollout guidance, use the [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), or [MSTest](migrate-from-mstest-assert.md) migration walkthrough.
+- FluentAssertions: direct, standalone equality, null, boolean, empty, string, reference identity, exact type, and assignable type chains.
+- Shouldly: mostly manual today.
+
+Unsupported or lossy framework-specific overloads and richer assertion-library chains remain manual migrations.
+
+For rollout guidance, start with [Migrating to Axiom](migrating-to-axiom.md), then use the framework walkthroughs or side-by-side library guides linked from there.
 
 ## Related Guides
 

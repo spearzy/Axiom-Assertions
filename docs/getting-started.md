@@ -169,9 +169,9 @@ response.Should().HaveProblemDetailsTitle("Validation failed");
 
 - Read the [Compatibility Matrix](compatibility-matrix.md) if you want the current package, target framework, and test framework support in one place
 - Browse the full [Assertion Reference](assertion-reference.md)
-- Read [Migrating to Axiom](migrating-to-axiom.md) for the migration planning hub
-- Use the [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), or [MSTest](migrate-from-mstest-assert.md) walkthrough when you are migrating from one framework
-- Compare the side-by-side guides for [Axiom vs FluentAssertions](axiom-vs-fluentassertions.md) or [Axiom vs Shouldly](axiom-vs-shouldly.md) if you are choosing a library
+- Read [Migrating to Axiom](migrating-to-axiom.md) for the migration planning hub across framework-native asserts and assertion libraries
+- Use the [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), or [MSTest](migrate-from-mstest-assert.md) walkthrough when you are replacing framework-native `Assert` usage
+- Compare the side-by-side guides for [Axiom vs FluentAssertions](axiom-vs-fluentassertions.md) or [Axiom vs Shouldly](axiom-vs-shouldly.md) if you are evaluating or migrating from another assertion library
 - Read [.NET assertion library](dotnet-assertion-library.md) for the broader category overview
 - Read the [Equivalency](equivalency.md) guide for object-graph configuration
 - Read [Custom Assertions](custom-assertions.md) when you want domain-specific extensions

@@ -36,13 +36,14 @@ The current rules focus on a few high-value areas:
 
 - ignored async Axiom assertion results
 - `Batch` instances created without `using`
-- high-confidence xUnit `Assert.*` migration suggestions
-- conservative NUnit `Assert.That(...)` migration suggestions
-- conservative MSTest `Assert.*` migration suggestions
+- high-confidence framework-assert migration suggestions for xUnit, NUnit, and MSTest
+- conservative assertion-library migration suggestions for direct FluentAssertions chains
 
 ## Migration Coverage At A Glance
 
 The migration analyzers are intentionally conservative. They only suggest rewrites when the target Axiom assertion preserves the old value flow and assertion semantics.
+
+### Framework Assert Migrations
 
 | Framework | Current migration coverage |
 | --- | --- |
@@ -50,7 +51,14 @@ The migration analyzers are intentionally conservative. They only suggest rewrit
 | NUnit | common `Is.*`, `Does.*`, and `Has.Count.EqualTo(...)` constraints, plus ordered/range/type constraints and async exception assertions in async contexts |
 | MSTest | scalar assertions, reference/type checks, direct string/collection containment, collection uniqueness, ordered/range checks, and awaited async exception assertions |
 
-For staged migration guidance, start with [Migrating to Axiom](migrating-to-axiom.md), then use the [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), or [MSTest](migrate-from-mstest-assert.md) walkthrough.
+### Assertion Library Migrations
+
+| Library | Current migration coverage |
+| --- | --- |
+| FluentAssertions | direct, unchained equality, null, boolean, empty, string containment/prefix/suffix, reference identity, exact type, and assignable type chains |
+| Shouldly | no broad analyzer-backed migration yet; keep these migrations manual unless a framework-native assertion rule also applies |
+
+For staged migration guidance, start with [Migrating to Axiom](migrating-to-axiom.md). Use the [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), or [MSTest](migrate-from-mstest-assert.md) walkthroughs for framework-native `Assert` migrations, and the comparison guides when evaluating a switch from FluentAssertions or Shouldly.
 
 ## Async Assertions Must Be Awaited
 
@@ -112,6 +120,28 @@ user.Name.Should().NotBeNull();
 `Batch` flushes aggregated failures when it is disposed. If it is created without `using`, failures may never be emitted at the end of the scope.
 
 The analyzer offers a code fix for the common local declaration case by converting `var batch = ...;` to `using var batch = ...;`.
+
+## FluentAssertions Migration Suggestions
+
+Rules:
+
+- `AXM1088` and `AXM1089` for direct `actual.Should().Be(expected)` / `actual.Should().NotBe(unexpected)` chains
+- `AXM1090` and `AXM1091` for direct `value.Should().BeNull()` / `value.Should().NotBeNull()` chains
+- `AXM1092` and `AXM1093` for direct `condition.Should().BeTrue()` / `condition.Should().BeFalse()` chains
+- `AXM1094` and `AXM1095` for direct `subject.Should().BeEmpty()` / `subject.Should().NotBeEmpty()` chains
+- `AXM1096` to `AXM1099` for direct string `Contain(...)`, `NotContain(...)`, `StartWith(...)`, and `EndWith(...)` chains
+- `AXM1100` and `AXM1101` for direct `BeSameAs(...)` / `NotBeSameAs(...)` reference-identity chains
+- `AXM1102` and `AXM1103` for direct `BeOfType<TExpected>()` / `BeAssignableTo<TExpected>()` chains
+
+This first FluentAssertions migration pass is deliberately small. It only targets standalone assertion statements such as `actual.Should().Be(expected);` when the generated Axiom call is the same direct assertion shape.
+
+It intentionally skips richer FluentAssertions usage, including:
+
+- equivalency chains such as `BeEquivalentTo(...)`
+- chained continuations such as `.And` or consumed `.Which` values
+- `because` / `becauseArgs` explanation overloads
+- comparer, tolerance, precision, async exception, assertion-scope, and execution-time helper chains
+- collection containment and structural collection chains where FluentAssertions semantics need more review
 
 ## xUnit Assert Migration Suggestions
 

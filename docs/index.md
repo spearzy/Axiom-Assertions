@@ -89,8 +89,9 @@ Install this when you want vector, embedding, and retrieval-focused assertions f
 - Need current package, framework, or prerequisite support details? Read the [Compatibility Matrix](compatibility-matrix.md)
 - Need a minimal test-project example? Use the repository starter projects for [xUnit](https://github.com/spearzy/Axiom-Assertions/tree/main/starters/Axiom.Assertions.Starter.Xunit), [NUnit](https://github.com/spearzy/Axiom-Assertions/tree/main/starters/Axiom.Assertions.Starter.NUnit), or [MSTest](https://github.com/spearzy/Axiom-Assertions/tree/main/starters/Axiom.Assertions.Starter.MSTest)
 - For the API catalog: go to [Assertion Reference](assertion-reference.md)
-- Migrating a test suite: start with [Migrating to Axiom](migrating-to-axiom.md), then use the [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), or [MSTest](migrate-from-mstest-assert.md) walkthrough
-- Evaluating trade-offs: read the side-by-side guides for [Axiom vs FluentAssertions](axiom-vs-fluentassertions.md) and [Axiom vs Shouldly](axiom-vs-shouldly.md), or the broader [.NET assertion library](dotnet-assertion-library.md) page
+- Migrating a test suite: start with [Migrating to Axiom](migrating-to-axiom.md), which separates framework-native `Assert` migrations from assertion-library migrations
+- Replacing framework-native asserts: use the [xUnit](migrate-from-xunit-assert.md), [NUnit](migrate-from-nunit-assert.md), or [MSTest](migrate-from-mstest-assert.md) walkthrough
+- Evaluating assertion-library trade-offs: read [Axiom vs FluentAssertions](axiom-vs-fluentassertions.md), [Axiom vs Shouldly](axiom-vs-shouldly.md), or the broader [.NET assertion library](dotnet-assertion-library.md) page
 - Working with structural comparison: go to [Equivalency](equivalency.md)
 - Working with JSON payloads or documents: go to [JSON](json.md)
 - Testing HTTP or API responses: go to [HTTP and API assertions](http.md)

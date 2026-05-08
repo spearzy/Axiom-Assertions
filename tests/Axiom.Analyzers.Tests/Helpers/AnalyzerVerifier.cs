@@ -24,6 +24,7 @@ internal static class AnalyzerVerifier
         test.TestState.Sources.Add(XunitAssertStubs.Source);
         test.TestState.Sources.Add(NunitAssertStubs.Source);
         test.TestState.Sources.Add(MstestAssertStubs.Source);
+        test.TestState.Sources.Add(FluentAssertionsStubs.Source);
         await test.RunAsync();
     }
 
@@ -41,10 +42,12 @@ internal static class AnalyzerVerifier
         test.TestState.Sources.Add(XunitAssertStubs.Source);
         test.TestState.Sources.Add(NunitAssertStubs.Source);
         test.TestState.Sources.Add(MstestAssertStubs.Source);
+        test.TestState.Sources.Add(FluentAssertionsStubs.Source);
         test.FixedState.Sources.Add(AxiomAssertionStubs.Source);
         test.FixedState.Sources.Add(XunitAssertStubs.Source);
         test.FixedState.Sources.Add(NunitAssertStubs.Source);
         test.FixedState.Sources.Add(MstestAssertStubs.Source);
+        test.FixedState.Sources.Add(FluentAssertionsStubs.Source);
         await test.RunAsync();
     }
 
@@ -75,6 +78,7 @@ internal static class AnalyzerVerifier
         solution = solution.AddDocument(DocumentId.CreateNewId(projectId), "XunitAssertStubs.cs", SourceText.From(XunitAssertStubs.Source));
         solution = solution.AddDocument(DocumentId.CreateNewId(projectId), "NunitAssertStubs.cs", SourceText.From(NunitAssertStubs.Source));
         solution = solution.AddDocument(DocumentId.CreateNewId(projectId), "MstestAssertStubs.cs", SourceText.From(MstestAssertStubs.Source));
+        solution = solution.AddDocument(DocumentId.CreateNewId(projectId), "FluentAssertionsStubs.cs", SourceText.From(FluentAssertionsStubs.Source));
 
         var project = solution.GetProject(projectId)!
             .WithCompilationOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
