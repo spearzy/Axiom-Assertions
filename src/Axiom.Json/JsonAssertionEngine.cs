@@ -244,4 +244,40 @@ internal static class JsonAssertionEngine
             because,
             callerFilePath,
             callerLineNumber);
+
+    public static void AssertHaveJsonObjectItemsWithPropertiesAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        IReadOnlyCollection<string> propertyNames,
+        bool exact,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonContractAssertions.AssertHaveObjectItemsWithPropertiesAtPath(
+            subjectInput,
+            subjectExpression,
+            path,
+            propertyNames,
+            exact,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertHaveAllowedValuesAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        IReadOnlyCollection<string> allowedValues,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonContractAssertions.AssertHaveAllowedValuesAtPath(
+            subjectInput,
+            subjectExpression,
+            path,
+            allowedValues,
+            because,
+            callerFilePath,
+            callerLineNumber);
 }

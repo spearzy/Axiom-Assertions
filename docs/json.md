@@ -164,14 +164,22 @@ var responseJson = """
       "customer": {
         "id": "cus_123",
         "name": "Bob"
-      }
+      },
+      "items": [
+        { "id": "ord_1", "status": "queued" },
+        { "id": "ord_2", "status": "processing" }
+      ],
+      "statuses": ["queued", "processing"]
     }
     """;
 
 responseJson.Should().BeValidJson();
-responseJson.Should().HaveOnlyJsonProperties("id", "type", "status", "customer");
+responseJson.Should().HaveJsonProperties("id", "type", "status", "customer", "items");
 responseJson.Should().HaveJsonPropertiesAtPath("$.customer", "id", "name");
 responseJson.Should().HaveAllowedValueAtPath("$.status", "queued", "processing", "complete");
+responseJson.Should().HaveJsonObjectItemsWithPropertiesAtPath("$.items", "id", "status");
+responseJson.Should().HaveJsonObjectItemsWithOnlyPropertiesAtPath("$.items", "id", "status");
+responseJson.Should().HaveAllowedValuesAtPath("$.statuses", "queued", "processing", "complete");
 ```
 
 For shared allowed-value sets, pass a collection:
@@ -199,6 +207,7 @@ Invalid expected JSON passed as a raw string is treated as an invalid assertion 
 - no direct `Newtonsoft.Json` support
 - no HTTP or API-response helpers in this package; use `Axiom.Http` for `HttpResponseMessage`
 - no full JSONPath language
+- no wildcard selection; array-wide checks operate on paths that resolve to arrays, such as `$.items`
 - array order is significant
 
 For the full method list, see the [Assertion Reference](assertion-reference.md).

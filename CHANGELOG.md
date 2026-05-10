@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 - Added conservative FluentAssertions migration analyzers and code fixes for direct equality, null, boolean, empty, string, reference identity, exact type, and assignable type assertion chains.
+- Added array-focused JSON contract assertions in `Axiom.Json` and matching response-body assertions in `Axiom.Http` for object-item property checks and allowed string values across JSON arrays.
 
 ## [2.7.0] - 2026-05-07
 
