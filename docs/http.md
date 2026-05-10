@@ -175,7 +175,12 @@ using var response = new HttpResponseMessage(HttpStatusCode.OK)
           "customer": {
             "id": "cus_123",
             "name": "Bob"
-          }
+          },
+          "items": [
+            { "id": "ord_1", "status": "queued" },
+            { "id": "ord_2", "status": "processing" }
+          ],
+          "statuses": ["queued", "processing"]
         }
         """,
         Encoding.UTF8,
@@ -183,10 +188,15 @@ using var response = new HttpResponseMessage(HttpStatusCode.OK)
 };
 
 response.Should().BeValidJson();
-response.Should().HaveOnlyJsonProperties("id", "type", "status", "customer");
+response.Should().HaveJsonProperties("id", "type", "status", "customer", "items");
 response.Should().HaveJsonPropertiesAtPath("$.customer", "id", "name");
 response.Should().HaveAllowedValueAtPath("$.status", "queued", "processing", "complete");
+response.Should().HaveJsonObjectItemsWithPropertiesAtPath("$.items", "id", "status");
+response.Should().HaveJsonObjectItemsWithOnlyPropertiesAtPath("$.items", "id", "status");
+response.Should().HaveAllowedValuesAtPath("$.statuses", "queued", "processing", "complete");
 ```
+
+Array-wide contract checks use the same simple path model as `Axiom.Json`: the path must resolve to an array, and wildcard selection is not part of the current path syntax.
 
 If you want JSON assertions over raw JSON strings, `JsonDocument`, or `JsonElement` directly, use [JSON](json.md).
 

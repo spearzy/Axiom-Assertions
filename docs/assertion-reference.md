@@ -115,6 +115,12 @@ HaveOnlyJsonPropertiesAtPath(path, params string[] propertyNames)
 HaveOnlyJsonPropertiesAtPath(path, IReadOnlyCollection<string> propertyNames)
 HaveAllowedValueAtPath(path, params string[] allowedValues)
 HaveAllowedValueAtPath(path, IReadOnlyCollection<string> allowedValues)
+HaveJsonObjectItemsWithPropertiesAtPath(path, params string[] propertyNames)
+HaveJsonObjectItemsWithPropertiesAtPath(path, IReadOnlyCollection<string> propertyNames)
+HaveJsonObjectItemsWithOnlyPropertiesAtPath(path, params string[] propertyNames)
+HaveJsonObjectItemsWithOnlyPropertiesAtPath(path, IReadOnlyCollection<string> propertyNames)
+HaveAllowedValuesAtPath(path, params string[] allowedValues)
+HaveAllowedValuesAtPath(path, IReadOnlyCollection<string> allowedValues)
 HaveJsonPath(path)
 NotHaveJsonPath(path)
 HaveJsonObjectAtPath(path)
@@ -134,6 +140,7 @@ Current JSON semantics:
 - array order does matter
 - numbers are compared by normalized JSON numeric value, so `1`, `1.0`, and `1e0` are equivalent
 - path traversal supports object members plus `[index]` array access only
+- array contract checks operate on paths that resolve to arrays; wildcard selection is not part of the current path syntax
 
 ```csharp
 using System.Text.Json;
@@ -155,6 +162,10 @@ document.Should().HaveJsonNumberAtPath("$.id", 1m);
 document.Should().HaveJsonPropertyCountAtPath("$", 3);
 document.Should().HaveAllowedValueAtPath("$.roles[0]", "admin", "author");
 document.RootElement.Should().NotHaveJsonPath("$.deletedAt");
+
+var resultsJson = """{ "items": [{ "id": "ord_1", "status": "queued" }], "statuses": ["queued"] }""";
+resultsJson.Should().HaveJsonObjectItemsWithPropertiesAtPath("$.items", "id", "status");
+resultsJson.Should().HaveAllowedValuesAtPath("$.statuses", "queued", "complete");
 ```
 
 ## HTTP Assertions
@@ -191,6 +202,12 @@ HaveOnlyJsonPropertiesAtPath(path, params string[] propertyNames)
 HaveOnlyJsonPropertiesAtPath(path, IReadOnlyCollection<string> propertyNames)
 HaveAllowedValueAtPath(path, params string[] allowedValues)
 HaveAllowedValueAtPath(path, IReadOnlyCollection<string> allowedValues)
+HaveJsonObjectItemsWithPropertiesAtPath(path, params string[] propertyNames)
+HaveJsonObjectItemsWithPropertiesAtPath(path, IReadOnlyCollection<string> propertyNames)
+HaveJsonObjectItemsWithOnlyPropertiesAtPath(path, params string[] propertyNames)
+HaveJsonObjectItemsWithOnlyPropertiesAtPath(path, IReadOnlyCollection<string> propertyNames)
+HaveAllowedValuesAtPath(path, params string[] allowedValues)
+HaveAllowedValuesAtPath(path, IReadOnlyCollection<string> allowedValues)
 HaveJsonPath(path)
 NotHaveJsonPath(path)
 HaveJsonObjectAtPath(path)
@@ -218,6 +235,7 @@ Current HTTP semantics:
 - `HaveHeaderValues(...)` requires exact value count and exact order
 - body-text assertions reuse Axiom string assertion semantics
 - JSON body assertions reuse `Axiom.Json` comparison and path semantics
+- array contract checks operate on JSON body paths that resolve to arrays; wildcard selection is not part of the current path syntax
 - ProblemDetails assertions require `application/problem+json`
 
 ```csharp
@@ -234,7 +252,8 @@ using var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
           "type": "https://example.test/problems/validation",
           "title": "Validation failed",
           "status": 400,
-          "detail": "Name is required."
+          "detail": "Name is required.",
+          "errors": ["name"]
         }
         """,
         Encoding.UTF8,
@@ -246,7 +265,8 @@ response.Should().HaveContentType("application/problem+json");
 response.Should().BeValidJson();
 response.Should().HaveJsonProperties("type", "title", "status");
 response.Should().HaveJsonPath("$.title");
-response.Should().HaveJsonPropertyCountAtPath("$", 4);
+response.Should().HaveJsonPropertyCountAtPath("$", 5);
+response.Should().HaveAllowedValuesAtPath("$.errors", "name", "email");
 response.Should().HaveProblemDetailsTitle("Validation failed");
 response.Should().HaveProblemDetailsStatus(400);
 ```

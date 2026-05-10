@@ -312,6 +312,311 @@ public sealed class HttpJsonContractAssertionTests
         Assert.Contains(ex, strategy.Failures);
     }
 
+    [Fact]
+    public void HaveJsonObjectItemsWithPropertiesAtPath_Passes_WhenEveryArrayItemContainsProperties()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            """
+            {
+              "items": [
+                { "id": "ord_1", "status": "queued", "extra": true },
+                { "id": "ord_2", "status": "complete" }
+              ]
+            }
+            """,
+            "application/json");
+
+        var ex = Record.Exception(() => response.Should().HaveJsonObjectItemsWithPropertiesAtPath("$.items", "id", "status"));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void HaveJsonObjectItemsWithPropertiesAtPath_Throws_WhenAnItemIsMissingProperties()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            """
+            {
+              "items": [
+                { "id": "ord_1", "status": "queued" },
+                { "id": "ord_2" }
+              ]
+            }
+            """,
+            "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveJsonObjectItemsWithPropertiesAtPath("$.items", "id", "status"));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON object items with properties [\"id\", \"status\"] at path $.items, but found JSON object at $.items[1] missing properties [\"status\"].",
+            ex.Message);
+    }
+
+    [Fact]
+    public void HaveJsonObjectItemsWithOnlyPropertiesAtPath_Passes_WhenEveryArrayItemHasExactlyThoseProperties()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            """
+            {
+              "items": [
+                { "status": "queued", "id": "ord_1" },
+                { "id": "ord_2", "status": "complete" }
+              ]
+            }
+            """,
+            "application/json");
+
+        var ex = Record.Exception(() => response.Should().HaveJsonObjectItemsWithOnlyPropertiesAtPath("$.items", "id", "status"));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void HaveJsonObjectItemsWithOnlyPropertiesAtPath_Throws_WhenAnItemHasExtraProperties()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            """
+            {
+              "items": [
+                { "id": "ord_1", "status": "queued" },
+                { "id": "ord_2", "status": "complete", "debug": true }
+              ]
+            }
+            """,
+            "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveJsonObjectItemsWithOnlyPropertiesAtPath("$.items", "id", "status"));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON object items with only properties [\"id\", \"status\"] at path $.items, but found JSON object properties mismatch at $.items[1]: missing []; extra [\"debug\"].",
+            ex.Message);
+    }
+
+    [Fact]
+    public void HaveAllowedValuesAtPath_Passes_WhenEveryArrayStringIsAllowed()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            "{ \"statuses\": [\"queued\", \"processing\", \"complete\"] }",
+            "application/json");
+
+        var ex = Record.Exception(() => response.Should().HaveAllowedValuesAtPath("$.statuses", "queued", "processing", "complete"));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void HaveAllowedValuesAtPath_Passes_WithAllowedValueCollection()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            "{ \"statuses\": [\"queued\", \"complete\"] }",
+            "application/json");
+        IReadOnlyCollection<string> allowedStatuses = ["queued", "processing", "complete"];
+
+        var ex = Record.Exception(() => response.Should().HaveAllowedValuesAtPath("$.statuses", allowedStatuses));
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void HaveAllowedValuesAtPath_Throws_WhenAnArrayStringIsNotAllowed()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            "{ \"statuses\": [\"queued\", \"failed\"] }",
+            "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveAllowedValuesAtPath("$.statuses", "queued", "complete"));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON string values at path $.statuses equal to one of [\"queued\", \"complete\"], but found JSON string \"failed\" at $.statuses[1]; allowed values [\"queued\", \"complete\"].",
+            ex.Message);
+    }
+
+    [Fact]
+    public void ArrayObjectContractAssertions_Throw_WhenArrayItemIsWrongKind()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            "{ \"items\": [{ \"id\": \"ord_1\" }, \"oops\"] }",
+            "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveJsonObjectItemsWithPropertiesAtPath("$.items", "id"));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON object items with properties [\"id\"] at path $.items, but found JSON string \"oops\" at $.items[1]; expected object.",
+            ex.Message);
+    }
+
+    [Fact]
+    public void HaveAllowedValuesAtPath_Throws_WhenArrayItemIsWrongKind()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            "{ \"statuses\": [\"queued\", 1] }",
+            "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveAllowedValuesAtPath("$.statuses", "queued"));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON string values at path $.statuses equal to one of [\"queued\"], but found JSON number 1 at $.statuses[1]; expected string.",
+            ex.Message);
+    }
+
+    [Fact]
+    public void ArrayContractAssertions_Throw_WhenResolvedValueIsNotArray()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            "{ \"items\": { \"id\": \"ord_1\" } }",
+            "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveJsonObjectItemsWithPropertiesAtPath("$.items", "id"));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON object items with properties [\"id\"] at path $.items, but found JSON object at $.items; expected array.",
+            ex.Message);
+    }
+
+    [Fact]
+    public void ArrayContractAssertions_Throw_WhenPathDoesNotExist()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"data\": [] }", "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveJsonObjectItemsWithOnlyPropertiesAtPath("$.items", "id"));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON object items with only properties [\"id\"] at path $.items, but found missing JSON path $.items.",
+            ex.Message);
+    }
+
+    [Fact]
+    public void ArrayContractAssertions_ThrowArgumentException_WhenPathSyntaxIsInvalid()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"items\": [] }", "application/json");
+
+        var ex = Assert.Throws<ArgumentException>(() =>
+            response.Should().HaveJsonObjectItemsWithPropertiesAtPath("$.items[", "id"));
+
+        Assert.Equal("path", ex.ParamName);
+        Assert.Contains("invalid array index segment", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ArrayContractAssertions_Throw_WhenResponseJsonIsInvalid()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"items\": ", "application/json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveJsonObjectItemsWithPropertiesAtPath("$.items", "id"));
+
+        Assert.Equal(
+            "Expected response JSON body to have JSON object items with properties [\"id\"] at path $.items, but found invalid JSON in response JSON body (line 0, byte 11).",
+            ex.Message);
+    }
+
+    [Fact]
+    public void ArrayContractAssertions_Throw_WhenResponseHasNoContent()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK);
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveAllowedValuesAtPath("$.statuses", "queued"));
+
+        Assert.Equal(
+            "Expected response to have JSON string values at path $.statuses equal to one of [\"queued\"], but found missing response body content.",
+            ex.Message);
+    }
+
+    [Fact]
+    public void HaveAllowedValuesAtPath_ThrowsArgumentException_WhenAllowedValuesAreEmpty()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"statuses\": [\"queued\"] }", "application/json");
+        IReadOnlyCollection<string> allowedValues = [];
+
+        var ex = Assert.Throws<ArgumentException>(() => response.Should().HaveAllowedValuesAtPath("$.statuses", allowedValues));
+
+        Assert.Equal("allowedValues", ex.ParamName);
+    }
+
+    [Fact]
+    public void HaveAllowedValuesAtPath_ThrowsArgumentNullException_WhenAllowedValuesAreNull()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"statuses\": [\"queued\"] }", "application/json");
+        IReadOnlyCollection<string>? allowedValues = null;
+
+        var ex = Assert.Throws<ArgumentNullException>(() => response.Should().HaveAllowedValuesAtPath("$.statuses", allowedValues!));
+
+        Assert.Equal("allowedValues", ex.ParamName);
+    }
+
+    [Fact]
+    public void HaveAllowedValuesAtPath_ThrowsArgumentException_WhenAllowedValuesContainNull()
+    {
+        using var response = HttpResponseFactory.Create(HttpStatusCode.OK, "{ \"statuses\": [\"queued\"] }", "application/json");
+        IReadOnlyCollection<string> allowedValues = ["queued", null!];
+
+        var ex = Assert.Throws<ArgumentException>(() => response.Should().HaveAllowedValuesAtPath("$.statuses", allowedValues));
+
+        Assert.Equal("allowedValues", ex.ParamName);
+    }
+
+    [Fact]
+    public void HaveJsonObjectItemsWithPropertiesAtPath_CollectionOverload_IncludesBecauseInFailure()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            "{ \"items\": [{ \"id\": \"ord_1\" }] }",
+            "application/json");
+        IReadOnlyCollection<string> requiredProperties = ["id", "status"];
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveJsonObjectItemsWithPropertiesAtPath(
+                "$.items",
+                requiredProperties,
+                "because item contracts should stay stable"));
+
+        Assert.Contains("because item contracts should stay stable", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void HaveJsonObjectItemsWithPropertiesAtPath_CollectionOverload_PropagatesCallerMetadataToFailureStrategy()
+    {
+        var strategy = new CapturingFailureStrategy();
+        AxiomServices.Configure(c => c.FailureStrategy = strategy);
+        const string callerFilePath = "/tests/http-json-array-contracts.cs";
+        const int callerLineNumber = 144;
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.OK,
+            "{ \"items\": [{ \"id\": \"ord_1\" }] }",
+            "application/json");
+        IReadOnlyCollection<string> requiredProperties = ["id", "status"];
+
+        var ex = Assert.Throws<CapturedFailureException>(() =>
+            response.Should().HaveJsonObjectItemsWithPropertiesAtPath(
+                "$.items",
+                requiredProperties,
+                "because item contracts should stay stable",
+                callerFilePath,
+                callerLineNumber));
+
+        Assert.Equal(callerFilePath, ex.CallerFilePath);
+        Assert.Equal(callerLineNumber, ex.CallerLineNumber);
+        Assert.Contains(ex, strategy.Failures);
+    }
+
     private sealed class CapturingFailureStrategy : IFailureStrategy
     {
         public List<CapturedFailureException> Failures { get; } = new();

@@ -322,6 +322,42 @@ internal static class JsonAssertionBridge
             callerFilePath,
             callerLineNumber);
 
+    public static void AssertHaveObjectItemsWithPropertiesAtPath(
+        string subjectJson,
+        string subjectLabel,
+        string path,
+        IReadOnlyCollection<string> propertyNames,
+        bool exact,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonAssertionEngine.AssertHaveJsonObjectItemsWithPropertiesAtPath(
+            JsonInput.FromString(subjectJson),
+            subjectLabel,
+            path,
+            propertyNames,
+            exact,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+    public static void AssertHaveAllowedValuesAtPath(
+        string subjectJson,
+        string subjectLabel,
+        string path,
+        IReadOnlyCollection<string> allowedValues,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+        => JsonAssertionEngine.AssertHaveAllowedValuesAtPath(
+            JsonInput.FromString(subjectJson),
+            subjectLabel,
+            path,
+            allowedValues,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
     public static string? GetValueKindFailureDetailAtPath(
         string subjectJson,
         string subjectLabel,

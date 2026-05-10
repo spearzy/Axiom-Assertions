@@ -135,6 +135,80 @@ public sealed class JsonAssertions
         return new AndContinuation<JsonAssertions>(this);
     }
 
+    public AndContinuation<JsonAssertions> HaveJsonObjectItemsWithPropertiesAtPath(
+        string path,
+        params string[] propertyNames)
+        => HaveJsonObjectItemsWithPropertiesAtPath(path, (IReadOnlyCollection<string>)propertyNames);
+
+    public AndContinuation<JsonAssertions> HaveJsonObjectItemsWithPropertiesAtPath(
+        string path,
+        IReadOnlyCollection<string> propertyNames,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        JsonAssertionEngine.AssertHaveJsonObjectItemsWithPropertiesAtPath(
+            SubjectInput,
+            SubjectExpression,
+            path,
+            propertyNames,
+            exact: false,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<JsonAssertions>(this);
+    }
+
+    public AndContinuation<JsonAssertions> HaveJsonObjectItemsWithOnlyPropertiesAtPath(
+        string path,
+        params string[] propertyNames)
+        => HaveJsonObjectItemsWithOnlyPropertiesAtPath(path, (IReadOnlyCollection<string>)propertyNames);
+
+    public AndContinuation<JsonAssertions> HaveJsonObjectItemsWithOnlyPropertiesAtPath(
+        string path,
+        IReadOnlyCollection<string> propertyNames,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        JsonAssertionEngine.AssertHaveJsonObjectItemsWithPropertiesAtPath(
+            SubjectInput,
+            SubjectExpression,
+            path,
+            propertyNames,
+            exact: true,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<JsonAssertions>(this);
+    }
+
+    public AndContinuation<JsonAssertions> HaveAllowedValuesAtPath(
+        string path,
+        params string[] allowedValues)
+        => HaveAllowedValuesAtPath(path, (IReadOnlyCollection<string>)allowedValues);
+
+    public AndContinuation<JsonAssertions> HaveAllowedValuesAtPath(
+        string path,
+        IReadOnlyCollection<string> allowedValues,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        JsonAssertionEngine.AssertHaveAllowedValuesAtPath(
+            SubjectInput,
+            SubjectExpression,
+            path,
+            allowedValues,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<JsonAssertions>(this);
+    }
+
     public AndContinuation<JsonAssertions> BeJsonEquivalentTo(
         string expectedJson,
         string? because = null,

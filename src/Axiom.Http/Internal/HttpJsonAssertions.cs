@@ -119,6 +119,69 @@ internal static class HttpJsonAssertions
             callerLineNumber);
     }
 
+    public static void AssertHaveJsonObjectItemsWithPropertiesAtPath(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string path,
+        IReadOnlyCollection<string> propertyNames,
+        bool exact,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var expectedSet = JsonAssertionBridge.FormatPropertyNames(propertyNames);
+        var displayPath = JsonAssertionBridge.GetDisplayPath(path);
+        var expectationText = exact
+            ? $"to have JSON object items with only properties {expectedSet} at path {displayPath}"
+            : $"to have JSON object items with properties {expectedSet} at path {displayPath}";
+        var expectation = new Expectation(expectationText, IncludeExpectedValue: false);
+
+        if (!TryGetBodyText(subject, subjectExpression, expectation, because, callerFilePath, callerLineNumber, out var bodyText))
+        {
+            return;
+        }
+
+        JsonAssertionBridge.AssertHaveObjectItemsWithPropertiesAtPath(
+            bodyText,
+            HttpAssertionSupport.JsonBodySubjectLabel(subjectExpression),
+            path,
+            propertyNames,
+            exact,
+            because,
+            callerFilePath,
+            callerLineNumber);
+    }
+
+    public static void AssertHaveAllowedValuesAtPath(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string path,
+        IReadOnlyCollection<string> allowedValues,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var allowedSet = JsonAssertionBridge.FormatAllowedValues(allowedValues);
+        var displayPath = JsonAssertionBridge.GetDisplayPath(path);
+        var expectation = new Expectation(
+            $"to have JSON string values at path {displayPath} equal to one of {allowedSet}",
+            IncludeExpectedValue: false);
+
+        if (!TryGetBodyText(subject, subjectExpression, expectation, because, callerFilePath, callerLineNumber, out var bodyText))
+        {
+            return;
+        }
+
+        JsonAssertionBridge.AssertHaveAllowedValuesAtPath(
+            bodyText,
+            HttpAssertionSupport.JsonBodySubjectLabel(subjectExpression),
+            path,
+            allowedValues,
+            because,
+            callerFilePath,
+            callerLineNumber);
+    }
+
     public static void AssertHaveJsonPath(
         HttpResponseMessage? subject,
         string? subjectExpression,

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using Axiom.Core.Failures;
 
@@ -141,6 +142,59 @@ internal static class JsonContractAssertions
             callerLineNumber);
     }
 
+    public static void AssertHaveObjectItemsWithPropertiesAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        IReadOnlyCollection<string> propertyNames,
+        bool exact,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var properties = ValidatePropertyNames(propertyNames);
+        var parsedPath = JsonPath.Parse(path);
+        var expectedSet = FormatStringSet(properties);
+        var expectationText = exact
+            ? $"to have JSON object items with only properties {expectedSet} at path {parsedPath.DisplayPath}"
+            : $"to have JSON object items with properties {expectedSet} at path {parsedPath.DisplayPath}";
+
+        AssertArrayContractAtPath(
+            subjectInput,
+            subjectExpression,
+            parsedPath,
+            expectationText,
+            because,
+            callerFilePath,
+            callerLineNumber,
+            element => CheckObjectItemsProperties(element, parsedPath.DisplayPath, properties, exact));
+    }
+
+    public static void AssertHaveAllowedValuesAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        string path,
+        IReadOnlyCollection<string> allowedValues,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var allowed = ValidateAllowedValues(allowedValues);
+        var parsedPath = JsonPath.Parse(path);
+        var allowedSet = FormatStringSet(allowed);
+        var expectationText = $"to have JSON string values at path {parsedPath.DisplayPath} equal to one of {allowedSet}";
+
+        AssertArrayContractAtPath(
+            subjectInput,
+            subjectExpression,
+            parsedPath,
+            expectationText,
+            because,
+            callerFilePath,
+            callerLineNumber,
+            element => CheckAllowedStringItems(element, parsedPath.DisplayPath, allowed, allowedSet));
+    }
+
     private static void AssertObjectContractAtPath(
         JsonInput subjectInput,
         string? subjectExpression,
@@ -213,6 +267,78 @@ internal static class JsonContractAssertions
             callerLineNumber);
     }
 
+    private static void AssertArrayContractAtPath(
+        JsonInput subjectInput,
+        string? subjectExpression,
+        JsonPath parsedPath,
+        string expectationText,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber,
+        Func<JsonElement, string?> failureFactory)
+    {
+        using var subject = JsonParsedValue.ParseSubject(subjectInput);
+        var subjectLabel = JsonAssertionSupport.SubjectLabel(subjectExpression);
+        var expectation = new Expectation(expectationText, IncludeExpectedValue: false);
+
+        if (!subject.HasValue)
+        {
+            JsonAssertionSupport.Fail(subjectLabel, expectation, null, because, callerFilePath, callerLineNumber);
+            return;
+        }
+
+        if (!subject.IsValid)
+        {
+            JsonAssertionSupport.Fail(
+                subjectLabel,
+                expectation,
+                new JsonDisplay(JsonAssertionSupport.DescribeInvalidSubjectJson(subjectLabel, subject.InvalidDetail!)),
+                because,
+                callerFilePath,
+                callerLineNumber);
+            return;
+        }
+
+        var resolution = JsonPathResolver.ResolvePath(subject.Root, parsedPath);
+        if (!resolution.Success)
+        {
+            JsonAssertionSupport.Fail(
+                subjectLabel,
+                expectation,
+                new JsonDisplay(resolution.FailureDetail!),
+                because,
+                callerFilePath,
+                callerLineNumber);
+            return;
+        }
+
+        if (resolution.Value.ValueKind != JsonValueKind.Array)
+        {
+            JsonAssertionSupport.Fail(
+                subjectLabel,
+                expectation,
+                new JsonDisplay(JsonAssertionSupport.DescribeWrongValueKind(resolution.Value, parsedPath.DisplayPath, "Array")),
+                because,
+                callerFilePath,
+                callerLineNumber);
+            return;
+        }
+
+        var failure = failureFactory(resolution.Value);
+        if (failure is null)
+        {
+            return;
+        }
+
+        JsonAssertionSupport.Fail(
+            subjectLabel,
+            expectation,
+            new JsonDisplay(failure),
+            because,
+            callerFilePath,
+            callerLineNumber);
+    }
+
     private static string? CheckProperties(JsonElement element, string path, string[] expectedProperties, bool exact)
     {
         var actual = new HashSet<string>(StringComparer.Ordinal);
@@ -243,6 +369,56 @@ internal static class JsonContractAssertions
         }
 
         return $"JSON object properties mismatch at {path}: missing {FormatStringSet(missing)}; extra {FormatStringSet(extra)}";
+    }
+
+    private static string? CheckObjectItemsProperties(JsonElement arrayElement, string path, string[] expectedProperties, bool exact)
+    {
+        var index = 0;
+        foreach (var item in arrayElement.EnumerateArray())
+        {
+            var itemPath = path + "[" + index.ToString(CultureInfo.InvariantCulture) + "]";
+            if (item.ValueKind != JsonValueKind.Object)
+            {
+                return JsonAssertionSupport.DescribeWrongValueKind(item, itemPath, "Object");
+            }
+
+            var failure = CheckProperties(item, itemPath, expectedProperties, exact);
+            if (failure is not null)
+            {
+                return failure;
+            }
+
+            index++;
+        }
+
+        return null;
+    }
+
+    private static string? CheckAllowedStringItems(
+        JsonElement arrayElement,
+        string path,
+        string[] allowedValues,
+        string allowedSet)
+    {
+        var index = 0;
+        foreach (var item in arrayElement.EnumerateArray())
+        {
+            var itemPath = path + "[" + index.ToString(CultureInfo.InvariantCulture) + "]";
+            if (item.ValueKind != JsonValueKind.String)
+            {
+                return JsonAssertionSupport.DescribeWrongValueKind(item, itemPath, "String");
+            }
+
+            var actual = item.GetString();
+            if (actual is null || !allowedValues.Contains(actual, StringComparer.Ordinal))
+            {
+                return $"JSON string {JsonAssertionSupport.FormatValue(actual)} at {itemPath}; allowed values {allowedSet}";
+            }
+
+            index++;
+        }
+
+        return null;
     }
 
     private static string[] ValidatePropertyNames(IReadOnlyCollection<string> propertyNames)
