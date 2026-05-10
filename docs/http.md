@@ -238,6 +238,39 @@ response.Should().HaveJsonStringAtPath("$.instance", "/orders/123");
 
 For additional ProblemDetails members and extension members, use the JSON-at-path assertions rather than dedicated ProblemDetails methods.
 
+Validation-error assertions target the common ASP.NET Core-style validation response shape: standard ProblemDetails members plus a root `errors` object where exact keys map to arrays of messages.
+
+```csharp
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using Axiom.Http;
+
+using var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+{
+    Content = new StringContent(
+        """
+        {
+          "title": "Validation failed",
+          "status": 400,
+          "errors": {
+            "Name": ["Name is required."],
+            "Items[0].Sku": ["SKU is required."]
+          }
+        }
+        """,
+        Encoding.UTF8,
+        "application/problem+json")
+};
+
+response.Should().HaveValidationErrors();
+response.Should().HaveValidationErrorFor("Name");
+response.Should().HaveValidationErrorMessageFor("Name", "Name is required.");
+response.Should().HaveValidationErrorMessagesFor("Items[0].Sku", "SKU is required.");
+```
+
+Validation keys are looked up as exact `errors` object keys. They are not converted into JSON paths, so keys such as `Address.Postcode`, `Items[0].Name`, and `""` are valid keys.
+
 ## Current Limits
 
 `Axiom.Http` is intentionally narrow:
