@@ -743,43 +743,53 @@ public sealed class HttpResponseAssertions
         return new AndContinuation<HttpResponseAssertions>(this);
     }
 
-    public AndContinuation<HttpResponseAssertions> HaveValidationErrors()
+    public AndContinuation<HttpResponseAssertions> HaveValidationErrors(
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
     {
         HttpJsonAssertions.AssertHaveValidationErrors(
             Subject,
             SubjectExpression,
-            because: null,
-            callerFilePath: null,
-            callerLineNumber: 0);
+            because,
+            callerFilePath,
+            callerLineNumber);
 
         return new AndContinuation<HttpResponseAssertions>(this);
     }
 
-    public AndContinuation<HttpResponseAssertions> HaveValidationErrorFor(string key)
+    public AndContinuation<HttpResponseAssertions> HaveValidationErrorFor(
+        string key,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
     {
         HttpJsonAssertions.AssertHaveValidationErrorFor(
             Subject,
             SubjectExpression,
             key,
-            because: null,
-            callerFilePath: null,
-            callerLineNumber: 0);
+            because,
+            callerFilePath,
+            callerLineNumber);
 
         return new AndContinuation<HttpResponseAssertions>(this);
     }
 
     public AndContinuation<HttpResponseAssertions> HaveValidationErrorMessageFor(
         string key,
-        string expectedMessage)
+        string expectedMessage,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
     {
         HttpJsonAssertions.AssertHaveValidationErrorMessageFor(
             Subject,
             SubjectExpression,
             key,
             expectedMessage,
-            because: null,
-            callerFilePath: null,
-            callerLineNumber: 0);
+            because,
+            callerFilePath,
+            callerLineNumber);
 
         return new AndContinuation<HttpResponseAssertions>(this);
     }
