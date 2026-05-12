@@ -16,6 +16,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 - Updated analyzer, migration, compatibility, JSON, HTTP, package, and assertion-reference docs to reflect the `2.8.0` migration and contract assertion surface.
 
+### Fixed
+- Aligned new `Axiom.Http` validation-error assertions with the surrounding HTTP assertion overloads so reason text and caller metadata are preserved consistently.
+
 ## [2.7.0] - 2026-05-07
 
 ### Added

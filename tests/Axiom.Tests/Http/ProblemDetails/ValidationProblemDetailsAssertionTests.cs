@@ -425,6 +425,76 @@ public sealed class ValidationProblemDetailsAssertionTests
     }
 
     [Fact]
+    public void HaveValidationErrors_IncludesBecauseInFailure()
+    {
+        using var response = HttpResponseFactory.Create(
+            HttpStatusCode.BadRequest,
+            """{ "title": "Validation failed", "status": 400 }""",
+            "application/problem+json");
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveValidationErrors("because APIs should return field-level validation details"));
+
+        Assert.Contains("because APIs should return field-level validation details", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void HaveValidationErrorFor_IncludesBecauseInFailure()
+    {
+        using var response = CreateValidationResponse(
+            """
+            "Name": ["Name is required."]
+            """);
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveValidationErrorFor("Email", "because email is required by the contract"));
+
+        Assert.Contains("because email is required by the contract", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void HaveValidationErrorMessageFor_IncludesBecauseInFailure()
+    {
+        using var response = CreateValidationResponse(
+            """
+            "Name": ["Name must not be empty."]
+            """);
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            response.Should().HaveValidationErrorMessageFor(
+                "Name",
+                "Name is required.",
+                "because clients depend on stable validation copy"));
+
+        Assert.Contains("because clients depend on stable validation copy", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void HaveValidationErrorMessageFor_PropagatesCallerMetadataToFailureStrategy()
+    {
+        var strategy = new CapturingFailureStrategy();
+        AxiomServices.Configure(c => c.FailureStrategy = strategy);
+        const string callerFilePath = "/tests/validation-error-message.cs";
+        const int callerLineNumber = 117;
+        using var response = CreateValidationResponse(
+            """
+            "Name": ["Name must not be empty."]
+            """);
+
+        var ex = Assert.Throws<CapturedFailureException>(() =>
+            response.Should().HaveValidationErrorMessageFor(
+                "Name",
+                "Name is required.",
+                "because clients depend on stable validation copy",
+                callerFilePath,
+                callerLineNumber));
+
+        Assert.Equal(callerFilePath, ex.CallerFilePath);
+        Assert.Equal(callerLineNumber, ex.CallerLineNumber);
+        Assert.Contains(ex, strategy.Failures);
+    }
+
+    [Fact]
     public void HaveValidationErrorMessagesFor_CollectionOverload_PropagatesCallerMetadataToFailureStrategy()
     {
         var strategy = new CapturingFailureStrategy();
