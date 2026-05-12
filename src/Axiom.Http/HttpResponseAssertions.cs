@@ -743,6 +743,71 @@ public sealed class HttpResponseAssertions
         return new AndContinuation<HttpResponseAssertions>(this);
     }
 
+    public AndContinuation<HttpResponseAssertions> HaveValidationErrors()
+    {
+        HttpJsonAssertions.AssertHaveValidationErrors(
+            Subject,
+            SubjectExpression,
+            because: null,
+            callerFilePath: null,
+            callerLineNumber: 0);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveValidationErrorFor(string key)
+    {
+        HttpJsonAssertions.AssertHaveValidationErrorFor(
+            Subject,
+            SubjectExpression,
+            key,
+            because: null,
+            callerFilePath: null,
+            callerLineNumber: 0);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveValidationErrorMessageFor(
+        string key,
+        string expectedMessage)
+    {
+        HttpJsonAssertions.AssertHaveValidationErrorMessageFor(
+            Subject,
+            SubjectExpression,
+            key,
+            expectedMessage,
+            because: null,
+            callerFilePath: null,
+            callerLineNumber: 0);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
+    public AndContinuation<HttpResponseAssertions> HaveValidationErrorMessagesFor(
+        string key,
+        params string[] expectedMessages)
+        => HaveValidationErrorMessagesFor(key, (IReadOnlyCollection<string>)expectedMessages);
+
+    public AndContinuation<HttpResponseAssertions> HaveValidationErrorMessagesFor(
+        string key,
+        IReadOnlyCollection<string> expectedMessages,
+        string? because = null,
+        [CallerFilePath] string? callerFilePath = null,
+        [CallerLineNumber] int callerLineNumber = 0)
+    {
+        HttpJsonAssertions.AssertHaveValidationErrorMessagesFor(
+            Subject,
+            SubjectExpression,
+            key,
+            expectedMessages,
+            because,
+            callerFilePath,
+            callerLineNumber);
+
+        return new AndContinuation<HttpResponseAssertions>(this);
+    }
+
     public AndContinuation<HttpResponseAssertions> HaveProblemDetailsTitle(
         string expectedTitle,
         string? because = null,

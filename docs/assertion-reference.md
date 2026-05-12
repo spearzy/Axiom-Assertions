@@ -224,6 +224,11 @@ HaveProblemDetailsTitle(expectedTitle)
 HaveProblemDetailsStatus(expectedStatus)
 HaveProblemDetailsType(expectedType)
 HaveProblemDetailsDetail(expectedDetail)
+HaveValidationErrors()
+HaveValidationErrorFor(key)
+HaveValidationErrorMessageFor(key, expectedMessage)
+HaveValidationErrorMessagesFor(key, params string[] expectedMessages)
+HaveValidationErrorMessagesFor(key, IReadOnlyCollection<string> expectedMessages)
 ```
 
 Current HTTP semantics:
@@ -237,6 +242,7 @@ Current HTTP semantics:
 - JSON body assertions reuse `Axiom.Json` comparison and path semantics
 - array contract checks operate on JSON body paths that resolve to arrays; wildcard selection is not part of the current path syntax
 - ProblemDetails assertions require `application/problem+json`
+- validation-error assertions expect standard ProblemDetails members plus a root `errors` object whose exact keys map to arrays of messages
 
 ```csharp
 using System.Net;
@@ -253,7 +259,9 @@ using var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
           "title": "Validation failed",
           "status": 400,
           "detail": "Name is required.",
-          "errors": ["name"]
+          "errors": {
+            "Name": ["Name is required."]
+          }
         }
         """,
         Encoding.UTF8,
@@ -266,9 +274,9 @@ response.Should().BeValidJson();
 response.Should().HaveJsonProperties("type", "title", "status");
 response.Should().HaveJsonPath("$.title");
 response.Should().HaveJsonPropertyCountAtPath("$", 5);
-response.Should().HaveAllowedValuesAtPath("$.errors", "name", "email");
 response.Should().HaveProblemDetailsTitle("Validation failed");
 response.Should().HaveProblemDetailsStatus(400);
+response.Should().HaveValidationErrorMessageFor("Name", "Name is required.");
 ```
 
 ## Value Assertions

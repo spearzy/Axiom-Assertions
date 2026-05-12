@@ -18,7 +18,7 @@ This package is designed to be used with `Axiom.Assertions` and reuses `Axiom.Js
 - practical header and content-type assertions for API tests
 - body-text assertions for non-JSON response checks
 - JSON body and contract assertions, including array-focused contract checks, without rebuilding JSON comparison logic
-- focused ProblemDetails assertions for common error-response tests
+- focused ProblemDetails and validation-error assertions for common error-response tests
 
 ## Install a different package when
 

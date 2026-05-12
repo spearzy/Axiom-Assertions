@@ -539,6 +539,153 @@ internal static class HttpJsonAssertions
         }
     }
 
+    public static void AssertHaveValidationErrors(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        var expectation = new Expectation("to have validation errors", IncludeExpectedValue: false);
+        if (!TryGetValidationErrors(
+            subject,
+            subjectExpression,
+            expectation,
+            because,
+            callerFilePath,
+            callerLineNumber,
+            out var document,
+            out _))
+        {
+            return;
+        }
+
+        document!.Dispose();
+    }
+
+    public static void AssertHaveValidationErrorFor(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string key,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+
+        var displayKey = JsonAssertionBridge.FormatValue(key);
+        var expectation = new Expectation($"to have validation error for {displayKey}", IncludeExpectedValue: false);
+        if (!TryGetValidationMessagesForKey(
+            subject,
+            subjectExpression,
+            expectation,
+            key,
+            requireNonEmpty: true,
+            because,
+            callerFilePath,
+            callerLineNumber,
+            out var document,
+            out _))
+        {
+            return;
+        }
+
+        document!.Dispose();
+    }
+
+    public static void AssertHaveValidationErrorMessageFor(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string key,
+        string expectedMessage,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(expectedMessage);
+
+        var displayKey = JsonAssertionBridge.FormatValue(key);
+        var expected = JsonAssertionBridge.FormatValue(expectedMessage);
+        var expectation = new Expectation($"to have validation error message for {displayKey} equal to {expected}", IncludeExpectedValue: false);
+        if (!TryGetValidationMessagesForKey(
+            subject,
+            subjectExpression,
+            expectation,
+            key,
+            requireNonEmpty: false,
+            because,
+            callerFilePath,
+            callerLineNumber,
+            out var document,
+            out var messages))
+        {
+            return;
+        }
+
+        using var parsedDocument = document!;
+        if (messages.Contains(expectedMessage, StringComparer.Ordinal))
+        {
+            return;
+        }
+
+        HttpAssertionSupport.Fail(
+            HttpAssertionSupport.SubjectLabel(subjectExpression),
+            expectation,
+            new HttpDisplay(FormatStringSet(messages)),
+            because,
+            callerFilePath,
+            callerLineNumber);
+    }
+
+    public static void AssertHaveValidationErrorMessagesFor(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        string key,
+        IReadOnlyCollection<string> expectedMessages,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        var expected = ValidateExpectedValidationMessages(expectedMessages);
+
+        var displayKey = JsonAssertionBridge.FormatValue(key);
+        var expectedSet = FormatStringSet(expected);
+        var expectation = new Expectation($"to have validation error messages for {displayKey} including {expectedSet}", IncludeExpectedValue: false);
+        if (!TryGetValidationMessagesForKey(
+            subject,
+            subjectExpression,
+            expectation,
+            key,
+            requireNonEmpty: false,
+            because,
+            callerFilePath,
+            callerLineNumber,
+            out var document,
+            out var actualMessages))
+        {
+            return;
+        }
+
+        using var parsedDocument = document!;
+        var missing = expected
+            .Where(message => !actualMessages.Contains(message, StringComparer.Ordinal))
+            .ToArray();
+        if (missing.Length == 0)
+        {
+            return;
+        }
+
+        HttpAssertionSupport.Fail(
+            HttpAssertionSupport.SubjectLabel(subjectExpression),
+            expectation,
+            new HttpDisplay(FormatStringSet(actualMessages)),
+            because,
+            callerFilePath,
+            callerLineNumber);
+    }
+
     public static void AssertHaveProblemDetailsTitle(
         HttpResponseMessage? subject,
         string? subjectExpression,
@@ -685,6 +832,274 @@ internal static class HttpJsonAssertions
             because,
             callerFilePath,
             callerLineNumber);
+    }
+
+    private static bool TryGetValidationMessagesForKey(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        Expectation expectation,
+        string key,
+        bool requireNonEmpty,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber,
+        out JsonDocument? document,
+        out string[] messages)
+    {
+        messages = [];
+        if (!TryGetValidationErrors(
+            subject,
+            subjectExpression,
+            expectation,
+            because,
+            callerFilePath,
+            callerLineNumber,
+            out document,
+            out var errors))
+        {
+            return false;
+        }
+
+        var subjectLabel = HttpAssertionSupport.SubjectLabel(subjectExpression);
+        var displayKey = JsonAssertionBridge.FormatValue(key);
+        if (!errors.TryGetProperty(key, out var errorValue))
+        {
+            return FailAndDispose(
+                document,
+                subjectLabel,
+                expectation,
+                new HttpDisplay($"missing validation error key {displayKey}"),
+                because,
+                callerFilePath,
+                callerLineNumber);
+        }
+
+        if (errorValue.ValueKind != JsonValueKind.Array)
+        {
+            return FailAndDispose(
+                document,
+                subjectLabel,
+                expectation,
+                new HttpDisplay($"validation error key {displayKey} must be an array, but found {DescribeJsonElement(errorValue)}"),
+                because,
+                callerFilePath,
+                callerLineNumber);
+        }
+
+        var collected = new List<string>();
+        var index = 0;
+        foreach (var item in errorValue.EnumerateArray())
+        {
+            if (item.ValueKind != JsonValueKind.String)
+            {
+                return FailAndDispose(
+                    document,
+                    subjectLabel,
+                    expectation,
+                    new HttpDisplay($"validation error key {displayKey} message at index {index} must be string, but found {DescribeJsonElement(item)}"),
+                    because,
+                    callerFilePath,
+                    callerLineNumber);
+            }
+
+            collected.Add(item.GetString()!);
+            index++;
+        }
+
+        messages = [.. collected];
+        if (requireNonEmpty && messages.Length == 0)
+        {
+            return FailAndDispose(
+                document,
+                subjectLabel,
+                expectation,
+                new HttpDisplay($"validation error key {displayKey} contains no messages"),
+                because,
+                callerFilePath,
+                callerLineNumber);
+        }
+
+        return true;
+    }
+
+    private static bool TryGetValidationErrors(
+        HttpResponseMessage? subject,
+        string? subjectExpression,
+        Expectation expectation,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber,
+        out JsonDocument? document,
+        out JsonElement errors)
+    {
+        document = null;
+        errors = default;
+
+        if (!TryGetProblemDetailsBody(subject, subjectExpression, expectation, because, callerFilePath, callerLineNumber, out var bodyText))
+        {
+            return false;
+        }
+
+        var subjectLabel = HttpAssertionSupport.SubjectLabel(subjectExpression);
+        try
+        {
+            document = JsonDocument.Parse(bodyText);
+        }
+        catch (JsonException ex)
+        {
+            HttpAssertionSupport.Fail(
+                subjectLabel,
+                expectation,
+                new HttpDisplay($"invalid JSON in {HttpAssertionSupport.ProblemDetailsSubjectLabel(subjectExpression)} ({BuildInvalidJsonDetail(ex)})"),
+                because,
+                callerFilePath,
+                callerLineNumber);
+            return false;
+        }
+
+        var root = document.RootElement;
+        if (root.ValueKind != JsonValueKind.Object)
+        {
+            return FailAndDispose(
+                document,
+                subjectLabel,
+                expectation,
+                new HttpDisplay($"ProblemDetails body must be object, but found {DescribeJsonElement(root)}"),
+                because,
+                callerFilePath,
+                callerLineNumber);
+        }
+
+        if (!TryValidateProblemDetailsMember(root, "$.title", JsonValueKind.String, "string", out var memberFailure) ||
+            !TryValidateProblemDetailsMember(root, "$.status", JsonValueKind.Number, "number", out memberFailure))
+        {
+            return FailAndDispose(
+                document,
+                subjectLabel,
+                expectation,
+                memberFailure,
+                because,
+                callerFilePath,
+                callerLineNumber);
+        }
+
+        if (!root.TryGetProperty("errors", out errors))
+        {
+            return FailAndDispose(
+                document,
+                subjectLabel,
+                expectation,
+                new HttpDisplay("missing JSON property $.errors"),
+                because,
+                callerFilePath,
+                callerLineNumber);
+        }
+
+        if (errors.ValueKind != JsonValueKind.Object)
+        {
+            return FailAndDispose(
+                document,
+                subjectLabel,
+                expectation,
+                new HttpDisplay($"JSON property $.errors must be object, but found {DescribeJsonElement(errors)}"),
+                because,
+                callerFilePath,
+                callerLineNumber);
+        }
+
+        return true;
+    }
+
+    private static bool TryValidateProblemDetailsMember(
+        JsonElement root,
+        string path,
+        JsonValueKind expectedKind,
+        string expectedKindText,
+        out HttpDisplay failure)
+    {
+        failure = default;
+        var propertyName = path["$.".Length..];
+        if (!root.TryGetProperty(propertyName, out var member))
+        {
+            failure = new HttpDisplay($"missing required ProblemDetails member {path}");
+            return false;
+        }
+
+        if (member.ValueKind != expectedKind)
+        {
+            failure = new HttpDisplay($"ProblemDetails member {path} must be {expectedKindText}, but found {DescribeJsonElement(member)}");
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool FailAndDispose(
+        JsonDocument? document,
+        string subjectLabel,
+        Expectation expectation,
+        HttpDisplay actual,
+        string? because,
+        string? callerFilePath,
+        int callerLineNumber)
+    {
+        try
+        {
+            HttpAssertionSupport.Fail(subjectLabel, expectation, actual, because, callerFilePath, callerLineNumber);
+        }
+        finally
+        {
+            document?.Dispose();
+        }
+
+        return false;
+    }
+
+    private static string[] ValidateExpectedValidationMessages(IReadOnlyCollection<string> expectedMessages)
+    {
+        ArgumentNullException.ThrowIfNull(expectedMessages);
+        if (expectedMessages.Count == 0)
+        {
+            throw new ArgumentException("expectedMessages must contain at least one value.", nameof(expectedMessages));
+        }
+
+        var validated = new string[expectedMessages.Count];
+        var index = 0;
+        foreach (var message in expectedMessages)
+        {
+            if (message is null)
+            {
+                throw new ArgumentException("expectedMessages must not contain null values.", nameof(expectedMessages));
+            }
+
+            validated[index++] = message;
+        }
+
+        return validated;
+    }
+
+    private static string FormatStringSet(IEnumerable<string> values)
+        => "[" + string.Join(", ", values.Select(JsonAssertionBridge.FormatValue)) + "]";
+
+    private static string DescribeJsonElement(JsonElement element)
+    {
+        return element.ValueKind switch
+        {
+            JsonValueKind.String => $"JSON string {element.GetRawText()}",
+            JsonValueKind.Number => $"JSON number {element.GetRawText()}",
+            JsonValueKind.True or JsonValueKind.False => $"JSON boolean {element.GetRawText()}",
+            JsonValueKind.Null => "JSON null",
+            JsonValueKind.Object => "JSON object",
+            JsonValueKind.Array => "JSON array",
+            _ => $"JSON {element.ValueKind.ToString().ToLowerInvariant()}"
+        };
+    }
+
+    private static string BuildInvalidJsonDetail(JsonException exception)
+    {
+        var line = exception.LineNumber ?? 0;
+        var bytePosition = exception.BytePositionInLine ?? 0;
+        return $"line {line}, byte {bytePosition}";
     }
 
     private static bool TryGetBodyText(
